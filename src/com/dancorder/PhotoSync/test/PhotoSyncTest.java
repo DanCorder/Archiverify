@@ -1,7 +1,5 @@
 package com.dancorder.PhotoSync.test;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 import com.dancorder.PhotoSync.PhotoSync;
