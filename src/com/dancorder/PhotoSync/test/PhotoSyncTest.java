@@ -8,8 +8,13 @@ import com.dancorder.PhotoSync.UsageException;
 public class PhotoSyncTest {
 
 	@Test(expected = UsageException.class)
-	public void testNoParameters() throws UsageException {
+	public void testNullParameters() throws UsageException {
 		PhotoSync.main(null);
+	}
+	
+	@Test(expected = UsageException.class)
+	public void testNoParameters() throws UsageException {
+		PhotoSync.main(new String[0]);
 	}
 
 }

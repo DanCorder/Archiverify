@@ -14,7 +14,7 @@ public class PhotoSync {
 	 * @throws UsageException 
 	 */
 	public static void main(String[] args) throws UsageException {
-		throw new UsageException("qq");
+		Parameters params = new Parameters(args);
 
 	}
 
