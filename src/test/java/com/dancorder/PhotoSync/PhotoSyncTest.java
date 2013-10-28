@@ -1,4 +1,4 @@
-package com.dancorder.PhotoSync.test;
+package com.dancorder.PhotoSync;
 
 import org.junit.Test;
 
