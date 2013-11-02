@@ -16,6 +16,16 @@ public class ParallelFileTreeWalker {
 	private final IParallelFileTreeVisitor visitor;
 
 	public ParallelFileTreeWalker(Path path1, Path path2, IParallelFileTreeVisitor visitor) {
+		if (!Files.exists(path1)) {
+			throw new IllegalArgumentException("Directory doesn't exist: " + path1.toString());
+		}
+		if (!Files.exists(path2)) {
+			throw new IllegalArgumentException("Directory doesn't exist: " + path2.toString());
+		}
+		if (visitor == null) {
+			throw new IllegalArgumentException("Visitor can't be null");
+		}
+		
 		root1 = path1;
 		root2 = path2;
 		this.visitor = visitor;

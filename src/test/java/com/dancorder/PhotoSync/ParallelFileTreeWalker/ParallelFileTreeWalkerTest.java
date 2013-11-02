@@ -17,6 +17,85 @@ import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeWalker;
 
 public class ParallelFileTreeWalkerTest {
 	
+	@Test(expected = IllegalArgumentException.class)
+	public void missingPath1() throws IOException {
+		Path tempRootPath1 = null;
+		Path tempRootPath2 = null;
+		
+		try {
+			tempRootPath1 = createRootDirectory();
+			cleanUpDirectory(tempRootPath1);
+			tempRootPath2 = createRootDirectory();
+			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
+				
+			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
+			pftw.walk();
+		}
+		finally {
+			cleanUpDirectory(tempRootPath1);
+			cleanUpDirectory(tempRootPath2);
+		}
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void missingPath2() throws IOException {
+		Path tempRootPath1 = null;
+		Path tempRootPath2 = null;
+		
+		try {
+			tempRootPath1 = createRootDirectory();
+			tempRootPath2 = createRootDirectory();
+			cleanUpDirectory(tempRootPath2);
+			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
+				
+			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
+			pftw.walk();
+		}
+		finally {
+			cleanUpDirectory(tempRootPath1);
+			cleanUpDirectory(tempRootPath2);
+		}
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void missingBothPaths() throws IOException {
+		Path tempRootPath1 = null;
+		Path tempRootPath2 = null;
+		
+		try {
+			tempRootPath1 = createRootDirectory();
+			cleanUpDirectory(tempRootPath1);
+			tempRootPath2 = createRootDirectory();
+			cleanUpDirectory(tempRootPath2);
+			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
+				
+			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
+			pftw.walk();
+		}
+		finally {
+			cleanUpDirectory(tempRootPath1);
+			cleanUpDirectory(tempRootPath2);
+		}
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void nullVisitor() throws IOException {
+		Path tempRootPath1 = null;
+		Path tempRootPath2 = null;
+		
+		try {
+			tempRootPath1 = createRootDirectory();
+			tempRootPath2 = createRootDirectory();
+				
+			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, null);
+			pftw.walk();
+		}
+		finally {
+			cleanUpDirectory(tempRootPath1);
+			cleanUpDirectory(tempRootPath2);
+		}
+	}
+	
 	@Test
 	public void testEmptyTree() throws IOException {
 		Path tempRootPath1 = null;
@@ -132,7 +211,8 @@ public class ParallelFileTreeWalkerTest {
 	}
 	
 	private boolean deleteRecursive(File path) throws FileNotFoundException{
-        if (!path.exists()) throw new FileNotFoundException(path.getAbsolutePath());
+        if (!path.exists()) return true;
+        
         boolean ret = true;
         if (path.isDirectory()) {
             for (File f : path.listFiles()) {
