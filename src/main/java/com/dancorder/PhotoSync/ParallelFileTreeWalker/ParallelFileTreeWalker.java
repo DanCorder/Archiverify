@@ -24,31 +24,71 @@ public class ParallelFileTreeWalker {
 	public void walk() throws IOException {
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths);
 		
-		List<Path> path1Files = getSortedFiles(root1);
-		List<Path> path2Files = getSortedFiles(root2);
+		List<Path> path1Files = getSortedRelativeFilePaths(root1);
+		List<Path> path2Files = getSortedRelativeFilePaths(root2);
 		
+		int path1FileIndex = 0;
+		int path2FileIndex = 0;
 		
-		if (path1Files.size() > 0 || path2Files.size() > 0) {
+		int path1NumberOfFiles = path1Files.size();
+		int path2NumberOfFiles = path2Files.size();
 		
-			Path relativeFilePath1 = root1.relativize(path1Files.get(0));
-			Path relativeFilePath2 = root2.relativize(path2Files.get(0));
-			
-			if (relativeFilePath1.equals(relativeFilePath2)) {
-				visitor.visitFile(relativeFilePath1, FileExistence.BothPaths);
+		Path currentPath1File = path1NumberOfFiles > path1FileIndex ? path1Files.get(path1FileIndex) : null;
+		Path currentPath2File = path2NumberOfFiles > path2FileIndex ? path2Files.get(path2FileIndex) : null;
+		
+		while (currentPath1File != null || currentPath2File != null) {
+			if (currentPath1File == null) {
+				visitor.visitFile(currentPath2File, FileExistence.Path2Only);
+				
+				path2FileIndex++;
+				
+				currentPath2File = path2NumberOfFiles > path2FileIndex ? path2Files.get(path2FileIndex) : null;
 			}
+			else if (currentPath2File == null) {
+				visitor.visitFile(currentPath1File, FileExistence.Path1Only);
+				
+				path1FileIndex++;
+				
+				currentPath1File = path1NumberOfFiles > path1FileIndex ? path1Files.get(path1FileIndex) : null;
+			}
+			else if (currentPath1File.equals(currentPath2File)) {
+				visitor.visitFile(currentPath1File, FileExistence.BothPaths);
+				
+				path1FileIndex++;
+				path2FileIndex++;
+				
+				currentPath1File = path1NumberOfFiles > path1FileIndex ? path1Files.get(0) : null;
+				currentPath2File = path2NumberOfFiles > path2FileIndex ? path2Files.get(0) : null;
+			}
+			else break;
 		}
 	}
 	
-	private List<Path> getSortedFiles(Path directory) throws IOException {
-		List<Path> ret = new ArrayList<Path>();
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(directory)) {
-			for (Path p : ds) {
-				ret.add(p); 
-			}
-		}
+	private List<Path> getSortedRelativeFilePaths(Path directory) throws IOException {
+		List<Path> ret = getContainedFilesRelativePaths(directory);
 		
 		Collections.sort(ret);
 		
 		return ret;
+	}
+	
+	private List<Path> getContainedFilesRelativePaths(Path directory) throws IOException {
+	    
+	    List<Path> ret = new ArrayList<Path>();
+	    
+	    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory, new fileOnlyFilter())) {
+			for (Path path : directoryStream) {
+				ret.add(directory.relativize(path)); 
+			}
+		}
+	    
+	    return ret;
+	}
+	
+	private class fileOnlyFilter implements DirectoryStream.Filter<Path> {
+		@Override
+		public boolean accept(Path file) throws IOException {
+			return (!Files.isDirectory(file));
+		}
 	}
 }
