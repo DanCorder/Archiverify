@@ -34,46 +34,46 @@ public class ParallelFileTreeWalker {
 	public void walk() throws IOException {
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths);
 		
-		List<Path> path1Files = getSortedRelativeFilePaths(root1);
-		List<Path> path2Files = getSortedRelativeFilePaths(root2);
+		visitFiles(root1, root2);
+	}
+	
+	private void visitFiles(Path path1, Path path2) throws IOException {
+		List<Path> path1Files = getSortedRelativeFilePaths(path1);
+		List<Path> path2Files = getSortedRelativeFilePaths(path2);
 		
 		int path1FileIndex = 0;
 		int path2FileIndex = 0;
 		
-		int path1NumberOfFiles = path1Files.size();
-		int path2NumberOfFiles = path2Files.size();
-		
-		Path currentPath1File = path1NumberOfFiles > path1FileIndex ? path1Files.get(path1FileIndex) : null;
-		Path currentPath2File = path2NumberOfFiles > path2FileIndex ? path2Files.get(path2FileIndex) : null;
+		Path currentPath1File = path1Files.size() > path1FileIndex ? path1Files.get(path1FileIndex) : null;
+		Path currentPath2File = path2Files.size() > path2FileIndex ? path2Files.get(path2FileIndex) : null;
 		
 		while (currentPath1File != null || currentPath2File != null) {
-			if (currentPath1File == null) {
-				visitor.visitFile(currentPath2File, FileExistence.Path2Only);
-				
-				path2FileIndex++;
-				
-				currentPath2File = path2NumberOfFiles > path2FileIndex ? path2Files.get(path2FileIndex) : null;
-			}
-			else if (currentPath2File == null) {
+			if (visitOnlyThisFile(currentPath1File, currentPath2File)) {
 				visitor.visitFile(currentPath1File, FileExistence.Path1Only);
-				
-				path1FileIndex++;
-				
-				currentPath1File = path1NumberOfFiles > path1FileIndex ? path1Files.get(path1FileIndex) : null;
+				currentPath1File = getNextFile(path1Files, ++path1FileIndex);
 			}
-			else if (currentPath1File.equals(currentPath2File)) {
+			else if (visitOnlyThisFile(currentPath2File, currentPath1File)) {
+				visitor.visitFile(currentPath2File, FileExistence.Path2Only);
+				currentPath2File = getNextFile(path2Files, ++path2FileIndex);
+			}
+			
+			else {
 				visitor.visitFile(currentPath1File, FileExistence.BothPaths);
-				
-				path1FileIndex++;
-				path2FileIndex++;
-				
-				currentPath1File = path1NumberOfFiles > path1FileIndex ? path1Files.get(path1FileIndex) : null;
-				currentPath2File = path2NumberOfFiles > path2FileIndex ? path2Files.get(path2FileIndex) : null;
+				currentPath1File = getNextFile(path1Files, ++path1FileIndex);
+				currentPath2File = getNextFile(path2Files, ++path2FileIndex);
 			}
-			else break;
 		}
 	}
 	
+	private boolean visitOnlyThisFile(Path thisFile, Path otherFile) {
+		return otherFile == null ||
+			(thisFile != null && thisFile.compareTo(otherFile) < 0);
+	}
+	
+	private Path getNextFile(List<Path> files, int fileIndex) {
+		return files.size() > fileIndex ? files.get(fileIndex) : null;
+	}
+
 	private List<Path> getSortedRelativeFilePaths(Path directory) throws IOException {
 		List<Path> ret = getContainedFilesRelativePaths(directory);
 		

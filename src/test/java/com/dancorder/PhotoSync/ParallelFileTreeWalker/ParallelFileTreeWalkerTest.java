@@ -123,7 +123,7 @@ public class ParallelFileTreeWalkerTest {
 		
 		List<MethodCall> expected = new ArrayList<MethodCall>();
 		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
-		expected.add(new MethodCallVisitFile(filePath.getFileName(), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(filePath, FileExistence.BothPaths));
 		
 		this.runTest(builder, expected);
 	}
@@ -140,7 +140,7 @@ public class ParallelFileTreeWalkerTest {
 		
 		List<MethodCall> expected = new ArrayList<MethodCall>();
 		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
-		expected.add(new MethodCallVisitFile(filePath.getFileName(), FileExistence.Path1Only));
+		expected.add(new MethodCallVisitFile(filePath, FileExistence.Path1Only));
 		
 		this.runTest(builder, expected);
 	}
@@ -157,7 +157,7 @@ public class ParallelFileTreeWalkerTest {
 		
 		List<MethodCall> expected = new ArrayList<MethodCall>();
 		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
-		expected.add(new MethodCallVisitFile(filePath.getFileName(), FileExistence.Path2Only));
+		expected.add(new MethodCallVisitFile(filePath, FileExistence.Path2Only));
 		
 		this.runTest(builder, expected);
 	}
@@ -179,8 +179,37 @@ public class ParallelFileTreeWalkerTest {
 		
 		List<MethodCall> expected = new ArrayList<MethodCall>();
 		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
-		expected.add(new MethodCallVisitFile(file1Path.getFileName(), FileExistence.BothPaths));
-		expected.add(new MethodCallVisitFile(file2Path.getFileName(), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(file1Path, FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(file2Path, FileExistence.BothPaths));
+		
+		this.runTest(builder, expected);
+	}
+	
+	@Test
+	public void testVariousFilesInRoot() throws IOException {
+		
+		final Path file1Path = Paths.get("testFile1");
+		final Path file2Path = Paths.get("testFile2");
+		final Path file3Path = Paths.get("testFile3");
+		final Path file4Path = Paths.get("testFile4");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createFile(path1Root, file1Path);
+				createFile(path2Root, file1Path);
+				createFile(path1Root, file2Path);
+				createFile(path1Root, file3Path);
+				createFile(path2Root, file3Path);
+				createFile(path2Root, file4Path);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(file1Path, FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(file2Path, FileExistence.Path1Only));
+		expected.add(new MethodCallVisitFile(file3Path, FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(file4Path, FileExistence.Path2Only));
 		
 		this.runTest(builder, expected);
 	}
