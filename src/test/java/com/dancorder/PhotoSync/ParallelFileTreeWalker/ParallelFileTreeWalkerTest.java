@@ -98,72 +98,108 @@ public class ParallelFileTreeWalkerTest {
 	
 	@Test
 	public void testEmptyTree() throws IOException {
-		Path tempRootPath1 = null;
-		Path tempRootPath2 = null;
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				// Do nothing
+			}
+		};
 		
-		try {
-			tempRootPath1 = createRootDirectory();
-			tempRootPath2 = createRootDirectory();
-			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
-				
-			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
-			pftw.walk();
-			
-			List<MethodCall> expected = new ArrayList<MethodCall>();
-			expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
-			assertEquals(expected, tpftv.getCalls());
-			
-		}
-		finally {
-			cleanUpDirectory(tempRootPath1);
-			cleanUpDirectory(tempRootPath2);
-		}
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		
+		this.runTest(builder, expected);
 	}
 	
 	@Test
 	public void testSingleFileBothPathsRoot() throws IOException {
-		Path tempRootPath1 = null;
-		Path tempRootPath2 = null;
+		final Path filePath = Paths.get("testFile");
+
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createFile(path1Root, filePath);
+				createFile(path2Root, filePath);
+			}
+		};
 		
-		try {
-			tempRootPath1 = createRootDirectory();
-			tempRootPath2 = createRootDirectory();
-			Path filePath1 = createFile(tempRootPath1, "testFile");
-			createFile(tempRootPath2, filePath1.getFileName().toString());
-			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
-			
-			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
-			pftw.walk();
-			
-			List<MethodCall> expected = new ArrayList<MethodCall>();
-			expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
-			expected.add(new MethodCallVisitFile(filePath1.getFileName(), FileExistence.BothPaths));
-			assertEquals(expected, tpftv.getCalls());
-		}
-		finally {
-			cleanUpDirectory(tempRootPath1);
-			cleanUpDirectory(tempRootPath2);
-		}
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(filePath.getFileName(), FileExistence.BothPaths));
+		
+		this.runTest(builder, expected);
 	}
 	
 	@Test
 	public void testSingleFilePath1Root() throws IOException {
+		final Path filePath = Paths.get("testFile");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createFile(path1Root, filePath);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(filePath.getFileName(), FileExistence.Path1Only));
+		
+		this.runTest(builder, expected);
+	}
+	
+	@Test
+	public void testSingleFilePath2Root() throws IOException {
+		final Path filePath = Paths.get("testFile");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createFile(path2Root, filePath);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(filePath.getFileName(), FileExistence.Path2Only));
+		
+		this.runTest(builder, expected);
+	}
+	
+	@Test
+	public void testTwoFilesBothPathsRoot() throws IOException {
+		
+		final Path file1Path = Paths.get("testFile1");
+		final Path file2Path = Paths.get("testFile2");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createFile(path1Root, file1Path);
+				createFile(path1Root, file2Path);
+				createFile(path2Root, file1Path);
+				createFile(path2Root, file2Path);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(file1Path.getFileName(), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(file2Path.getFileName(), FileExistence.BothPaths));
+		
+		this.runTest(builder, expected);
+	}
+	
+	private void runTest(FileTreeBuilder fileTreeBuilder, List<MethodCall> expectedResult) throws IOException {
 		Path tempRootPath1 = null;
 		Path tempRootPath2 = null;
 		
 		try {
 			tempRootPath1 = createRootDirectory();
 			tempRootPath2 = createRootDirectory();
-			Path filePath = createFile(tempRootPath1, "testFile");
+			fileTreeBuilder.build(tempRootPath1, tempRootPath2);
+			
 			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
 			
 			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
 			pftw.walk();
-			
-			List<MethodCall> expected = new ArrayList<MethodCall>();
-			expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
-			expected.add(new MethodCallVisitFile(filePath.getFileName(), FileExistence.Path1Only));
-			assertEquals(expected, tpftv.getCalls());
+
+			assertEquals(expectedResult, tpftv.getCalls());
 		}
 		finally {
 			cleanUpDirectory(tempRootPath1);
@@ -171,36 +207,15 @@ public class ParallelFileTreeWalkerTest {
 		}
 	}
 	
-	@Test
-	public void testSingleFilePath2Root() throws IOException {
-		Path tempRootPath1 = null;
-		Path tempRootPath2 = null;
-		
-		try {
-			tempRootPath1 = createRootDirectory();
-			tempRootPath2 = createRootDirectory();
-			Path filePath = createFile(tempRootPath2, "testFile");
-			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
-			
-			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
-			pftw.walk();
-			
-			List<MethodCall> expected = new ArrayList<MethodCall>();
-			expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
-			expected.add(new MethodCallVisitFile(filePath.getFileName(), FileExistence.Path2Only));
-			assertEquals(expected, tpftv.getCalls());
-		}
-		finally {
-			cleanUpDirectory(tempRootPath1);
-			cleanUpDirectory(tempRootPath2);
-		}
+	private interface FileTreeBuilder {
+		void build(Path path1Root, Path path2Root) throws IOException;
 	}
 	
 	private Path createRootDirectory() throws IOException {
 		return Files.createTempDirectory(null);
 	}
 	
-	private Path createFile(Path directory, String fileName) throws IOException {
+	private Path createFile(Path directory, Path fileName) throws IOException {
 		return Files.createFile(directory.resolve(fileName));
 	}
 	
@@ -211,14 +226,14 @@ public class ParallelFileTreeWalkerTest {
 	}
 	
 	private boolean deleteRecursive(File path) throws FileNotFoundException{
-        if (!path.exists()) return true;
-        
-        boolean ret = true;
-        if (path.isDirectory()) {
-            for (File f : path.listFiles()) {
-                ret = ret && deleteRecursive(f);
-            }
-        }
-        return ret && path.delete();
-    }
+		if (!path.exists()) return true;
+		
+		boolean ret = true;
+		if (path.isDirectory()) {
+			for (File f : path.listFiles()) {
+				ret = ret && deleteRecursive(f);
+			}
+		}
+		return ret && path.delete();
+	}
 }

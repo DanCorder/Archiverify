@@ -67,8 +67,8 @@ public class ParallelFileTreeWalker {
 				path1FileIndex++;
 				path2FileIndex++;
 				
-				currentPath1File = path1NumberOfFiles > path1FileIndex ? path1Files.get(0) : null;
-				currentPath2File = path2NumberOfFiles > path2FileIndex ? path2Files.get(0) : null;
+				currentPath1File = path1NumberOfFiles > path1FileIndex ? path1Files.get(path1FileIndex) : null;
+				currentPath2File = path2NumberOfFiles > path2FileIndex ? path2Files.get(path2FileIndex) : null;
 			}
 			else break;
 		}
