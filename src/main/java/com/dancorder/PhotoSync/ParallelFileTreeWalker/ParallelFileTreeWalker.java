@@ -32,35 +32,43 @@ public class ParallelFileTreeWalker {
 	}
 	
 	public void walk() throws IOException {
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths);
-		
-		visitFiles(root1, root2);
+		Path emptyPath = Paths.get("");
+		visitor.preVisitDirectory(emptyPath, FileExistence.BothPaths);
+		walkRecursive(emptyPath, emptyPath);
 	}
 	
-	private void visitFiles(Path path1, Path path2) throws IOException {
-		List<Path> path1Files = getSortedRelativeFilePaths(path1);
-		List<Path> path2Files = getSortedRelativeFilePaths(path2);
+	public void walkRecursive(Path relativeDirectory1, Path relativeDirectory2) throws IOException {
 		
-		int path1FileIndex = 0;
-		int path2FileIndex = 0;
+		Path absoluteDirectoryPath1 = root1.resolve(relativeDirectory1);
+		Path absoluteDirectoryPath2 = root2.resolve(relativeDirectory2);
 		
-		Path currentPath1File = path1Files.size() > path1FileIndex ? path1Files.get(path1FileIndex) : null;
-		Path currentPath2File = path2Files.size() > path2FileIndex ? path2Files.get(path2FileIndex) : null;
+		visitPath(getSortedRelativeFilePaths(absoluteDirectoryPath1), getSortedRelativeFilePaths(absoluteDirectoryPath2), new FileProcessor()); 		
+		visitPath(getSortedRelativeDirectories(absoluteDirectoryPath1), getSortedRelativeDirectories(absoluteDirectoryPath2), new DirectoryProcessor());
+	}
+	
+	
+	private void visitPath(List<Path> root1Paths, List<Path> root2Paths, PathProcessor processor) throws IOException {
 		
-		while (currentPath1File != null || currentPath2File != null) {
-			if (visitOnlyThisFile(currentPath1File, currentPath2File)) {
-				visitor.visitFile(currentPath1File, FileExistence.Path1Only);
-				currentPath1File = getNextFile(path1Files, ++path1FileIndex);
+		int root1PathIndex = 0;
+		int root2PathIndex = 0;
+		
+		Path currentRoot1Path = getNextFile(root1Paths, root1PathIndex);
+		Path currentRoot2Path = getNextFile(root2Paths, root2PathIndex);
+		
+		while (currentRoot1Path != null || currentRoot2Path != null) {
+			if (visitOnlyThisFile(currentRoot1Path, currentRoot2Path)) {
+				processor.process(currentRoot1Path, null);
+				currentRoot1Path = getNextFile(root1Paths, ++root1PathIndex);
 			}
-			else if (visitOnlyThisFile(currentPath2File, currentPath1File)) {
-				visitor.visitFile(currentPath2File, FileExistence.Path2Only);
-				currentPath2File = getNextFile(path2Files, ++path2FileIndex);
+			else if (visitOnlyThisFile(currentRoot2Path, currentRoot1Path)) {
+				processor.process(null, currentRoot2Path);
+				currentRoot2Path = getNextFile(root2Paths, ++root2PathIndex);
 			}
 			
 			else {
-				visitor.visitFile(currentPath1File, FileExistence.BothPaths);
-				currentPath1File = getNextFile(path1Files, ++path1FileIndex);
-				currentPath2File = getNextFile(path2Files, ++path2FileIndex);
+				processor.process(currentRoot1Path, currentRoot2Path);
+				currentRoot1Path = getNextFile(root1Paths, ++root1PathIndex);
+				currentRoot2Path = getNextFile(root2Paths, ++root2PathIndex);
 			}
 		}
 	}
@@ -95,10 +103,73 @@ public class ParallelFileTreeWalker {
 	    return ret;
 	}
 	
+	private List<Path> getSortedRelativeDirectories(Path directory) throws IOException {
+		List<Path> ret = getSubDirectoryRelativePaths(directory);
+		
+		Collections.sort(ret);
+		
+		return ret;
+	}
+	
+	private List<Path> getSubDirectoryRelativePaths(Path directory) throws IOException {
+	    
+	    List<Path> ret = new ArrayList<Path>();
+	    
+	    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory, new directoryOnlyFilter())) {
+			for (Path path : directoryStream) {
+				ret.add(directory.relativize(path)); 
+			}
+		}
+	    
+	    return ret;
+	}
+	
+	private abstract class PathProcessor {
+		public abstract void process(Path relativePath1, Path relativePath2) throws IOException;
+		
+		protected Path getPath(Path relativePath1, Path relativePath2) {
+			return relativePath1 != null ? relativePath1 : relativePath2;
+		}
+		
+		protected FileExistence getExistence(Path relativePath1, Path relativePath2) {
+			FileExistence ret = FileExistence.Path1Only;
+			if (relativePath1 == null) {
+				ret = FileExistence.Path2Only;
+			}
+			else if (relativePath2 != null) {
+				ret = FileExistence.BothPaths;
+			}
+			return ret;
+		}
+	}
+	
+	private class FileProcessor extends PathProcessor {
+		@Override
+		public void process(Path relativePath1, Path relativePath2) {
+			visitor.visitFile(getPath(relativePath1, relativePath2), getExistence(relativePath1, relativePath2));
+		}
+		
+	};
+	
+	private class DirectoryProcessor extends PathProcessor {
+		@Override
+		public void process(Path relativePath1, Path relativePath2) throws IOException {
+			visitor.preVisitDirectory(getPath(relativePath1, relativePath2), getExistence(relativePath1, relativePath2));
+			walkRecursive(relativePath1, relativePath2);
+		}
+	};
+	
 	private class fileOnlyFilter implements DirectoryStream.Filter<Path> {
 		@Override
 		public boolean accept(Path file) throws IOException {
 			return (!Files.isDirectory(file));
+		}
+	}
+	
+	private class directoryOnlyFilter implements DirectoryStream.Filter<Path> {
+		@Override
+		public boolean accept(Path file) throws IOException {
+			return (Files.isDirectory(file));
 		}
 	}
 }

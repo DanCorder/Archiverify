@@ -18,7 +18,7 @@ import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeWalker;
 public class ParallelFileTreeWalkerTest {
 	
 	@Test(expected = IllegalArgumentException.class)
-	public void missingPath1() throws IOException {
+	public void testMissingPath1() throws IOException {
 		Path tempRootPath1 = null;
 		Path tempRootPath2 = null;
 		
@@ -38,7 +38,7 @@ public class ParallelFileTreeWalkerTest {
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
-	public void missingPath2() throws IOException {
+	public void testMissingPath2() throws IOException {
 		Path tempRootPath1 = null;
 		Path tempRootPath2 = null;
 		
@@ -58,7 +58,7 @@ public class ParallelFileTreeWalkerTest {
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
-	public void missingBothPaths() throws IOException {
+	public void testMissingBothPaths() throws IOException {
 		Path tempRootPath1 = null;
 		Path tempRootPath2 = null;
 		
@@ -79,7 +79,7 @@ public class ParallelFileTreeWalkerTest {
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
-	public void nullVisitor() throws IOException {
+	public void testNullVisitor() throws IOException {
 		Path tempRootPath1 = null;
 		Path tempRootPath2 = null;
 		
@@ -214,6 +214,24 @@ public class ParallelFileTreeWalkerTest {
 		this.runTest(builder, expected);
 	}
 	
+	@Test
+	public void testSubdirectoryBothPaths() throws IOException {
+		final Path directoryPath = Paths.get("subDirectory1");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createDirectory(path1Root, directoryPath);
+				createDirectory(path2Root, directoryPath);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallPreVisitDirectory(directoryPath, FileExistence.BothPaths));
+		
+		this.runTest(builder, expected);
+	}
+	
 	private void runTest(FileTreeBuilder fileTreeBuilder, List<MethodCall> expectedResult) throws IOException {
 		Path tempRootPath1 = null;
 		Path tempRootPath2 = null;
@@ -246,6 +264,10 @@ public class ParallelFileTreeWalkerTest {
 	
 	private Path createFile(Path directory, Path fileName) throws IOException {
 		return Files.createFile(directory.resolve(fileName));
+	}
+	
+	private Path createDirectory(Path directory, Path subDirectoryName) throws IOException {
+		return Files.createDirectory(directory.resolve(subDirectoryName));
 	}
 	
 	private void cleanUpDirectory(Path directory) throws IOException {
