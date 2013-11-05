@@ -374,6 +374,88 @@ public class ParallelFileTreeWalkerTest {
 		this.runTest(builder, expected);
 	}
 	
+	@Test
+	public void testNestedFilePath1() throws IOException {
+		final Path level1Path = Paths.get("subDirectory1");
+		final Path level2Path = level1Path.resolve("subDirectory2");
+		final Path level3Path = level2Path.resolve("subDirectory3");
+		final Path filePath = level3Path.resolve("testFile");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createDirectory(path1Root, level1Path);
+				createDirectory(path1Root, level2Path);
+				createDirectory(path1Root, level3Path);
+				createFile(path1Root, filePath);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallPreVisitDirectory(level1Path, FileExistence.Path1Only));
+		expected.add(new MethodCallPreVisitDirectory(level2Path, FileExistence.Path1Only));
+		expected.add(new MethodCallPreVisitDirectory(level3Path, FileExistence.Path1Only));
+		expected.add(new MethodCallVisitFile(filePath, FileExistence.Path1Only));
+		
+		this.runTest(builder, expected);
+	}
+	
+	@Test
+	public void testNestedFilePath2() throws IOException {
+		final Path level1Path = Paths.get("subDirectory1");
+		final Path level2Path = level1Path.resolve("subDirectory2");
+		final Path level3Path = level2Path.resolve("subDirectory3");
+		final Path filePath = level3Path.resolve("testFile");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createDirectory(path2Root, level1Path);
+				createDirectory(path2Root, level2Path);
+				createDirectory(path2Root, level3Path);
+				createFile(path2Root, filePath);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallPreVisitDirectory(level1Path, FileExistence.Path2Only));
+		expected.add(new MethodCallPreVisitDirectory(level2Path, FileExistence.Path2Only));
+		expected.add(new MethodCallPreVisitDirectory(level3Path, FileExistence.Path2Only));
+		expected.add(new MethodCallVisitFile(filePath, FileExistence.Path2Only));
+		
+		this.runTest(builder, expected);
+	}
+	
+	@Test
+	public void testNestedFileBothPaths() throws IOException {
+		final Path level1Path = Paths.get("subDirectory1");
+		final Path level2Path = level1Path.resolve("subDirectory2");
+		final Path level3Path = level2Path.resolve("subDirectory3");
+		final Path filePath = level3Path.resolve("testFile");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createDirectory(path1Root, level1Path);
+				createDirectory(path1Root, level2Path);
+				createDirectory(path1Root, level3Path);
+				createFile(path1Root, filePath);
+				createDirectory(path2Root, level1Path);
+				createDirectory(path2Root, level2Path);
+				createDirectory(path2Root, level3Path);
+				createFile(path2Root, filePath);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallPreVisitDirectory(level1Path, FileExistence.BothPaths));
+		expected.add(new MethodCallPreVisitDirectory(level2Path, FileExistence.BothPaths));
+		expected.add(new MethodCallPreVisitDirectory(level3Path, FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(filePath, FileExistence.BothPaths));
+		
+		this.runTest(builder, expected);
+	}
+	
 	private void runTest(FileTreeBuilder fileTreeBuilder, List<MethodCall> expectedResult) throws IOException {
 		Path tempRootPath1 = null;
 		Path tempRootPath2 = null;
