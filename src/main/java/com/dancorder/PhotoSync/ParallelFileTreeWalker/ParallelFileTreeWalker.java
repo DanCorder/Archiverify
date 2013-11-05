@@ -39,13 +39,12 @@ public class ParallelFileTreeWalker {
 	
 	public void walkRecursive(Path relativeDirectory1, Path relativeDirectory2) throws IOException {
 		
-		Path absoluteDirectoryPath1 = root1.resolve(relativeDirectory1);
-		Path absoluteDirectoryPath2 = root2.resolve(relativeDirectory2);
+		Path absoluteDirectoryPath1 = getAbsolutePath(root1, relativeDirectory1);
+		Path absoluteDirectoryPath2 = getAbsolutePath(root2, relativeDirectory2);
 		
 		visitPath(getSortedRelativeFilePaths(absoluteDirectoryPath1), getSortedRelativeFilePaths(absoluteDirectoryPath2), new FileProcessor()); 		
 		visitPath(getSortedRelativeDirectories(absoluteDirectoryPath1), getSortedRelativeDirectories(absoluteDirectoryPath2), new DirectoryProcessor());
 	}
-	
 	
 	private void visitPath(List<Path> root1Paths, List<Path> root2Paths, PathProcessor processor) throws IOException {
 		
@@ -73,6 +72,10 @@ public class ParallelFileTreeWalker {
 		}
 	}
 	
+	private Path getAbsolutePath(Path root, Path relativePath) {
+		return relativePath == null ? null : root.resolve(relativePath);
+	}
+	
 	private boolean visitOnlyThisFile(Path thisFile, Path otherFile) {
 		return otherFile == null ||
 			(thisFile != null && thisFile.compareTo(otherFile) < 0);
@@ -83,6 +86,8 @@ public class ParallelFileTreeWalker {
 	}
 
 	private List<Path> getSortedRelativeFilePaths(Path directory) throws IOException {
+		if (directory == null) return new ArrayList<Path>();
+		
 		List<Path> ret = getContainedFilesRelativePaths(directory);
 		
 		Collections.sort(ret);
@@ -91,7 +96,6 @@ public class ParallelFileTreeWalker {
 	}
 	
 	private List<Path> getContainedFilesRelativePaths(Path directory) throws IOException {
-	    
 	    List<Path> ret = new ArrayList<Path>();
 	    
 	    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory, new fileOnlyFilter())) {
@@ -104,6 +108,8 @@ public class ParallelFileTreeWalker {
 	}
 	
 	private List<Path> getSortedRelativeDirectories(Path directory) throws IOException {
+		if (directory == null) return new ArrayList<Path>();
+		
 		List<Path> ret = getSubDirectoryRelativePaths(directory);
 		
 		Collections.sort(ret);
@@ -112,7 +118,6 @@ public class ParallelFileTreeWalker {
 	}
 	
 	private List<Path> getSubDirectoryRelativePaths(Path directory) throws IOException {
-	    
 	    List<Path> ret = new ArrayList<Path>();
 	    
 	    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directory, new directoryOnlyFilter())) {

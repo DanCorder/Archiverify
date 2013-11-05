@@ -215,6 +215,32 @@ public class ParallelFileTreeWalkerTest {
 	}
 	
 	@Test
+	public void testFilesProcessedBeforeDirectories() throws IOException {
+		final Path directoryPath1 = Paths.get("aaaa");
+		final Path directoryPath2 = Paths.get("bbbb");
+		final Path filePath1 = Paths.get("cccc");
+		final Path directoryPath3 = Paths.get("dddd");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createDirectory(path1Root, directoryPath1);
+				createFile(path1Root, filePath1);
+				createDirectory(path1Root, directoryPath2);
+				createDirectory(path1Root, directoryPath3);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallVisitFile(filePath1, FileExistence.Path1Only));
+		expected.add(new MethodCallPreVisitDirectory(directoryPath1, FileExistence.Path1Only));
+		expected.add(new MethodCallPreVisitDirectory(directoryPath2, FileExistence.Path1Only));
+		expected.add(new MethodCallPreVisitDirectory(directoryPath3, FileExistence.Path1Only));
+		
+		this.runTest(builder, expected);
+	}
+	
+	@Test
 	public void testSubdirectoryBothPaths() throws IOException {
 		final Path directoryPath = Paths.get("subDirectory1");
 		
@@ -228,6 +254,40 @@ public class ParallelFileTreeWalkerTest {
 		List<MethodCall> expected = new ArrayList<MethodCall>();
 		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
 		expected.add(new MethodCallPreVisitDirectory(directoryPath, FileExistence.BothPaths));
+		
+		this.runTest(builder, expected);
+	}
+	
+	@Test
+	public void testSubdirectoryPath1() throws IOException {
+		final Path directoryPath = Paths.get("subDirectory1");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createDirectory(path1Root, directoryPath);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallPreVisitDirectory(directoryPath, FileExistence.Path1Only));
+		
+		this.runTest(builder, expected);
+	}
+	
+	@Test
+	public void testSubdirectoryPath2() throws IOException {
+		final Path directoryPath = Paths.get("subDirectory1");
+		
+		FileTreeBuilder builder = new FileTreeBuilder() {
+			public void build(Path path1Root, Path path2Root) throws IOException {
+				createDirectory(path2Root, directoryPath);
+			}
+		};
+		
+		List<MethodCall> expected = new ArrayList<MethodCall>();
+		expected.add(new MethodCallPreVisitDirectory(Paths.get(""), FileExistence.BothPaths));
+		expected.add(new MethodCallPreVisitDirectory(directoryPath, FileExistence.Path2Only));
 		
 		this.runTest(builder, expected);
 	}
