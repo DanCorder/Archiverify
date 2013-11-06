@@ -26,7 +26,7 @@ public class ParallelFileTreeWalkerTest {
 			tempRootPath1 = createRootDirectory();
 			cleanUpDirectory(tempRootPath1);
 			tempRootPath2 = createRootDirectory();
-			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
+			MockParallelFileTreeVisitor tpftv = new MockParallelFileTreeVisitor();
 				
 			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
 			pftw.walk();
@@ -46,7 +46,7 @@ public class ParallelFileTreeWalkerTest {
 			tempRootPath1 = createRootDirectory();
 			tempRootPath2 = createRootDirectory();
 			cleanUpDirectory(tempRootPath2);
-			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
+			MockParallelFileTreeVisitor tpftv = new MockParallelFileTreeVisitor();
 				
 			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
 			pftw.walk();
@@ -67,7 +67,7 @@ public class ParallelFileTreeWalkerTest {
 			cleanUpDirectory(tempRootPath1);
 			tempRootPath2 = createRootDirectory();
 			cleanUpDirectory(tempRootPath2);
-			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
+			MockParallelFileTreeVisitor tpftv = new MockParallelFileTreeVisitor();
 				
 			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
 			pftw.walk();
@@ -641,7 +641,7 @@ public class ParallelFileTreeWalkerTest {
 			tempRootPath2 = createRootDirectory();
 			fileTreeBuilder.build(tempRootPath1, tempRootPath2);
 			
-			TestParallelFileTreeVisitor tpftv = new TestParallelFileTreeVisitor();
+			MockParallelFileTreeVisitor tpftv = new MockParallelFileTreeVisitor();
 			
 			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
 			pftw.walk();

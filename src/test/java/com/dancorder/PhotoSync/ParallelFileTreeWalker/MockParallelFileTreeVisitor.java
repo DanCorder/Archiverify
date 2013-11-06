@@ -4,11 +4,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestParallelFileTreeVisitor implements IParallelFileTreeVisitor {
+public class MockParallelFileTreeVisitor implements ParallelFileTreeVisitor {
 
 	private List<MethodCall> methodCalls = new ArrayList<MethodCall>();
 	
-	public TestParallelFileTreeVisitor() {
+	public MockParallelFileTreeVisitor() {
 	}
 
 	@Override

@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence;
-import com.dancorder.PhotoSync.ParallelFileTreeWalker.IParallelFileTreeVisitor;
+import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeVisitor;
 
-public class SynchingVisitor implements IParallelFileTreeVisitor {
+public class SynchingVisitor implements ParallelFileTreeVisitor {
 
 	private final Path root1;
 	private final Path root2;
