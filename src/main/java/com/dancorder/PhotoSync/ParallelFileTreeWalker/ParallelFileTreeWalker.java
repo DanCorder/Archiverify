@@ -37,44 +37,43 @@ public class ParallelFileTreeWalker {
 		walkRecursive(emptyPath, emptyPath);
 	}
 	
-	public void walkRecursive(Path relativeDirectory1, Path relativeDirectory2) throws IOException {
+	private void walkRecursive(Path relativeDirectory1, Path relativeDirectory2) throws IOException {
 		
 		Path absoluteDirectoryPath1 = getAbsolutePath(root1, relativeDirectory1);
 		Path absoluteDirectoryPath2 = getAbsolutePath(root2, relativeDirectory2);
 		
-		visitPath(
+		visitPaths(
 			getSortedRelativePaths(absoluteDirectoryPath1, root1, new fileOnlyFilter()),
 			getSortedRelativePaths(absoluteDirectoryPath2, root2, new fileOnlyFilter()),
 			new FileProcessor());
 
-		visitPath(
+		visitPaths(
 			getSortedRelativePaths(absoluteDirectoryPath1, root1, new directoryOnlyFilter()),
 			getSortedRelativePaths(absoluteDirectoryPath2, root2, new directoryOnlyFilter()),
 			new DirectoryProcessor());
 	}
 	
-	private void visitPath(List<Path> root1Paths, List<Path> root2Paths, PathProcessor processor) throws IOException {
+	private void visitPaths(List<Path> root1Paths, List<Path> root2Paths, PathProcessor processor) throws IOException {
 		
 		int root1PathIndex = 0;
 		int root2PathIndex = 0;
 		
-		Path currentRoot1Path = getNextFile(root1Paths, root1PathIndex);
-		Path currentRoot2Path = getNextFile(root2Paths, root2PathIndex);
+		Path currentRoot1Path = getNextPath(root1Paths, root1PathIndex);
+		Path currentRoot2Path = getNextPath(root2Paths, root2PathIndex);
 		
 		while (currentRoot1Path != null || currentRoot2Path != null) {
-			if (visitOnlyThisFile(currentRoot1Path, currentRoot2Path)) {
+			if (visitOnlyThisPath(currentRoot1Path, currentRoot2Path)) {
 				processor.process(currentRoot1Path, null);
-				currentRoot1Path = getNextFile(root1Paths, ++root1PathIndex);
+				currentRoot1Path = getNextPath(root1Paths, ++root1PathIndex);
 			}
-			else if (visitOnlyThisFile(currentRoot2Path, currentRoot1Path)) {
+			else if (visitOnlyThisPath(currentRoot2Path, currentRoot1Path)) {
 				processor.process(null, currentRoot2Path);
-				currentRoot2Path = getNextFile(root2Paths, ++root2PathIndex);
+				currentRoot2Path = getNextPath(root2Paths, ++root2PathIndex);
 			}
-			
 			else {
 				processor.process(currentRoot1Path, currentRoot2Path);
-				currentRoot1Path = getNextFile(root1Paths, ++root1PathIndex);
-				currentRoot2Path = getNextFile(root2Paths, ++root2PathIndex);
+				currentRoot1Path = getNextPath(root1Paths, ++root1PathIndex);
+				currentRoot2Path = getNextPath(root2Paths, ++root2PathIndex);
 			}
 		}
 	}
@@ -83,12 +82,12 @@ public class ParallelFileTreeWalker {
 		return relativePath == null ? null : root.resolve(relativePath);
 	}
 	
-	private boolean visitOnlyThisFile(Path thisFile, Path otherFile) {
+	private boolean visitOnlyThisPath(Path thisFile, Path otherFile) {
 		return otherFile == null ||
 			(thisFile != null && thisFile.compareTo(otherFile) < 0);
 	}
 	
-	private Path getNextFile(List<Path> files, int fileIndex) {
+	private Path getNextPath(List<Path> files, int fileIndex) {
 		return files.size() > fileIndex ? files.get(fileIndex) : null;
 	}
 	
