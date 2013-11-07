@@ -11,6 +11,12 @@ public class FileCopyAction implements Action {
 		this.from = from;
 		this.to = to;
 	}
+	
+	@Override
+	public void doAction() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public int hashCode() {

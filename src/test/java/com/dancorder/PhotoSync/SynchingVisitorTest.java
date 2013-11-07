@@ -12,8 +12,9 @@ import org.junit.Test;
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence;
 
 public class SynchingVisitorTest {
-	private final Path root1 = Paths.get("testRoot1");
-	private final Path root2 = Paths.get("testRoot2");
+	private final Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
+	private final Path root1 = tempDir.resolve("testRoot1");
+	private final Path root2 = tempDir.resolve("testRoot2");
 
 	@Test
 	public void testNoVisits() {
@@ -86,13 +87,13 @@ public class SynchingVisitorTest {
 	}
 
 	@Test
-	public void testFilePresentDirectory1() {
+	public void testDirectoryPresentPath1() {
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2);
 		
 		Path directoryPath = Paths.get("testDirectory");
 		
 		visitor.preVisitDirectory(directoryPath, FileExistence.Path1Only);
-		
+
 		List<Action> expectedResult = new ArrayList<Action>();
 		expectedResult.add(new CreateDirectoryAction(root2.resolve(directoryPath)));
 		
@@ -100,7 +101,7 @@ public class SynchingVisitorTest {
 	}
 	
 	@Test
-	public void testFilePresentDirectory2() {
+	public void testDirectoryPresentPath2() {
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2);
 		
 		Path directoryPath = Paths.get("testDirectory");
