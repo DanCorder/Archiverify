@@ -1,6 +1,9 @@
 package com.dancorder.PhotoSync;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.InvalidParameterException;
 
 public class FileCopyAction implements Action {
 
@@ -8,14 +11,31 @@ public class FileCopyAction implements Action {
 	private final Path to;
 	
 	public FileCopyAction(Path from, Path to) {
+		if (from == null) {
+			throw new InvalidParameterException("From path must not be null");
+		}
+		if (to == null) {
+			throw new InvalidParameterException("To path must not be null");
+		}
+		if (!from.isAbsolute()) {
+			throw new InvalidParameterException("From path must be absolute: " + from.toString());
+		}
+		if (!to.isAbsolute()) {
+			throw new InvalidParameterException("To path must be absolute: " + to.toString());
+		}
+		
 		this.from = from;
 		this.to = to;
 	}
 	
 	@Override
-	public void doAction() {
-		// TODO Auto-generated method stub
-		
+	public void doAction() throws IOException {
+		Files.copy(from, to);
+	}
+	
+	@Override
+	public String toString() {
+		return "Copy " + from.toString() + " to " + to.toString();
 	}
 
 	@Override
