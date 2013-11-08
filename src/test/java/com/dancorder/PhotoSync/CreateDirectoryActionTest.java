@@ -3,6 +3,7 @@ package com.dancorder.PhotoSync;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidParameterException;
@@ -44,7 +45,7 @@ public class CreateDirectoryActionTest {
 		try {
 			cda.doAction();
 			
-			assertTrue(directoryPath.toFile().exists());
+			assertTrue(Files.exists(directoryPath));
 		}
 		finally {
 			if (directoryPath.toFile().exists()) {
