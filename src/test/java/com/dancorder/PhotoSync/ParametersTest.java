@@ -7,7 +7,8 @@ import java.io.File;
 import org.junit.Test;
 
 public class ParametersTest {
-
+	private final String rootPath = File.listRoots()[0].getAbsolutePath();
+	
 	@Test (expected = UsageException.class)
 	public void testNullParameters() throws UsageException {
 		new Parameters(null);
@@ -30,25 +31,19 @@ public class ParametersTest {
 	
 	@Test (expected = UsageException.class)
 	public void testInvalidFirstParameter() throws UsageException {
-		String rootPath = File.listRoots()[0].getAbsolutePath();
-		
 		new Parameters(new String[] { "invalid1", rootPath });
 	}
 	
 	@Test (expected = UsageException.class)
 	public void testInvalidSecondParameter() throws UsageException {
-		String rootPath = File.listRoots()[0].getAbsolutePath();
-		
 		new Parameters(new String[] { rootPath, "invalid2" });
 	}
 	
 	@Test
 	public void testValidParameters() throws UsageException {
-		String rootPath = File.listRoots()[0].getAbsolutePath();
-		
 		Parameters params = new Parameters(new String[] { rootPath, rootPath });
 		
-		assertEquals(rootPath, params.getPath1().getAbsolutePath());
-		assertEquals(rootPath, params.getPath2().getAbsolutePath());
+		assertEquals(rootPath, params.getPath1().toString());
+		assertEquals(rootPath, params.getPath2().toString());
 	}
 }

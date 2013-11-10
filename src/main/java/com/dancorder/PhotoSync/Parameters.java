@@ -1,11 +1,12 @@
 package com.dancorder.PhotoSync;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 class Parameters {
 
-	private final File path1;
-	private final File path2;
+	private final Path path1;
+	private final Path path2;
 	
 	public Parameters(String[] args) throws UsageException {
 		
@@ -14,24 +15,24 @@ class Parameters {
 			throw new UsageException("Usage: PhotoSync <path1> <path2>");
 		}
 		
-		path1 = new File(args[0]);
-		path2 = new File(args[1]);
+		path1 = Paths.get(args[0]);
+		path2 = Paths.get(args[1]);
 		
 		validatePath(path1);
 		validatePath(path2);
 	}
 	
-	private void validatePath(File path) throws UsageException {
-		if (!path.exists() || !path.isDirectory()) {
+	private void validatePath(Path path) throws UsageException {
+		if (!path.toFile().exists() || !path.toFile().isDirectory()) {
 			throw new UsageException("Path must be an existing directory: " + path);
 		}		
 	}
 
-	public File getPath1() {
+	public Path getPath1() {
 		return path1;
 	}
 	
-	public File getPath2() {
+	public Path getPath2() {
 		return path2;
 	}
 
