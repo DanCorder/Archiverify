@@ -15,18 +15,21 @@ import spock.lang.*
 
 class SynchingVisitorTest extends spock.lang.Specification{
 
-	private final Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
-	private final Path root1 = tempDir.resolve("testRoot1");
-	private final Path root2 = tempDir.resolve("testRoot2");
+	private final Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
+	private final Path root1 = tempDir.resolve("testRoot1")
+	private final Path root2 = tempDir.resolve("testRoot2")
+	
+	private final Path testFilePath = Paths.get("testFile")
+	private final Path testDirectoryPath = Paths.get("testDirectory")
 	
 	def "no visits"() {
 		setup:
 		List<Action> expectedResult = new ArrayList<Action>()
 		
-		when:
+		when: "A new visitor is created"
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2)		
 
-		then:
+		then: "No actions are created"
 		expectedResult.equals(visitor.getActions())
 	}
 	
@@ -35,10 +38,10 @@ class SynchingVisitorTest extends spock.lang.Specification{
 		List<Action> expectedResult = new ArrayList<Action>();
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2)
 		
-		when:
+		when: "It visits the root directory"
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths);
 
-		then:
+		then: "No actions are created"
 		expectedResult.equals(visitor.getActions())
 	}
 	
@@ -47,38 +50,36 @@ class SynchingVisitorTest extends spock.lang.Specification{
 		List<Action> expectedResult = new ArrayList<Action>();
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2)
 		
-		when:
-		visitor.visitFile(Paths.get("testFile"), FileExistence.BothPaths);
+		when: "A file exists in both roots"
+		visitor.visitFile(testFilePath, FileExistence.BothPaths);
 
-		then:
+		then: "No actions are created"
 		expectedResult.equals(visitor.getActions())
 	}
 	
 	def "file present path 1"() {
 		setup:
-		Path filePath = Paths.get("testFile");
 		List<Action> expectedResult = new ArrayList<Action>();
-		expectedResult.add(new FileCopyAction(root1.resolve(filePath), root2.resolve(filePath)));
+		expectedResult.add(new FileCopyAction(root1.resolve(testFilePath), root2.resolve(testFilePath)));
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2)
 		
-		when:
-		visitor.visitFile(filePath, FileExistence.Path1Only);
+		when: "A file exists only in root 1"
+		visitor.visitFile(testFilePath, FileExistence.Path1Only);
 
-		then:
+		then: "An action is created to copy from root 1 to root 2"
 		expectedResult.equals(visitor.getActions())
 	}
 	
 	def "file present path 2"() {
 		setup:
-		Path filePath = Paths.get("testFile");
 		List<Action> expectedResult = new ArrayList<Action>();
-		expectedResult.add(new FileCopyAction(root2.resolve(filePath), root1.resolve(filePath)));
+		expectedResult.add(new FileCopyAction(root2.resolve(testFilePath), root1.resolve(testFilePath)));
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2)
 		
-		when:
-		visitor.visitFile(filePath, FileExistence.Path2Only);
+		when: "A file exists only in root 2"
+		visitor.visitFile(testFilePath, FileExistence.Path2Only);
 
-		then:
+		then: "An action is created to copy from root 2 to root 1"
 		expectedResult.equals(visitor.getActions())
 	}
 	
@@ -87,41 +88,39 @@ class SynchingVisitorTest extends spock.lang.Specification{
 		List<Action> expectedResult = new ArrayList<Action>();
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2)
 		
-		when:
-		visitor.preVisitDirectory(Paths.get("testDirectory"), FileExistence.BothPaths);
+		when: "A directory exists in both roots"
+		visitor.preVisitDirectory(testDirectoryPath, FileExistence.BothPaths);
 
-		then:
+		then: "No actions are created"
 		expectedResult.equals(visitor.getActions())
 	}
 	
 	def "directory present path 1"() {
 		setup:
-		Path directoryPath = Paths.get("testDirectory");
 		List<Action> expectedResult = new ArrayList<Action>();
-		expectedResult.add(new CreateDirectoryAction(root2.resolve(directoryPath)));
+		expectedResult.add(new CreateDirectoryAction(root2.resolve(testDirectoryPath)));
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2)
 		
-		when:
-		visitor.preVisitDirectory(directoryPath, FileExistence.Path1Only);
+		when: "A directory exists only in root 1"
+		visitor.preVisitDirectory(testDirectoryPath, FileExistence.Path1Only);
 
-		then:
+		then: "An action is created to create directory under root 2"
 		expectedResult.equals(visitor.getActions())
 	}
 	
 	def "directory present path 2"() {
 		setup:
-		Path directoryPath = Paths.get("testDirectory");
 		List<Action> expectedResult = new ArrayList<Action>();
-		expectedResult.add(new CreateDirectoryAction(root1.resolve(directoryPath)));
+		expectedResult.add(new CreateDirectoryAction(root1.resolve(testDirectoryPath)));
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2)
 		
-		when:
-		visitor.preVisitDirectory(directoryPath, FileExistence.Path2Only);
+		when: "A directory exists only in root 2"
+		visitor.preVisitDirectory(testDirectoryPath, FileExistence.Path2Only);
 
-		then:
+		then: "An action is created to create directory under root 1"
 		expectedResult.equals(visitor.getActions())
 	}
-	
+		
 	def "files and directories together"() {
 		setup:
 		Path rootPath = Paths.get("");
@@ -136,8 +135,9 @@ class SynchingVisitorTest extends spock.lang.Specification{
 		expectedResult.add(new CreateDirectoryAction(root1.resolve(directory1Path)));
 		expectedResult.add(new FileCopyAction(root2.resolve(file2Path), root1.resolve(file2Path)));
 		
-		when:
 		SynchingVisitor visitor = new SynchingVisitor(root1, root2);
+		
+		when: "It visits a number of files and directories"
 		visitor.preVisitDirectory(rootPath, FileExistence.BothPaths);
 		visitor.visitFile(file1Path, FileExistence.Path1Only);
 		visitor.preVisitDirectory(directory1Path, FileExistence.Path2Only);
@@ -145,7 +145,7 @@ class SynchingVisitorTest extends spock.lang.Specification{
 		visitor.preVisitDirectory(directory1Path, FileExistence.BothPaths);
 		visitor.visitFile(file3Path, FileExistence.BothPaths);
 		
-		then:
+		then: "The correct actions are created in the correct order"
 		expectedResult.equals(visitor.getActions())
 	}
 	
