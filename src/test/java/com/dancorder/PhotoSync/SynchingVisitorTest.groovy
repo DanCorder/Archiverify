@@ -1,19 +1,13 @@
 package com.dancorder.PhotoSync
 
-import static org.junit.Assert.assertEquals;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.Test;
-
-import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence;
+import java.nio.file.Path
+import java.nio.file.Paths
 
 import spock.lang.*
 
-class SynchingVisitorTest extends spock.lang.Specification{
+import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence
+
+class SynchingVisitorTest extends spock.lang.Specification {
 
 	private final Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private final Path root1 = tempDir.resolve("testRoot1")
@@ -56,6 +50,25 @@ class SynchingVisitorTest extends spock.lang.Specification{
 		then: "No actions are created"
 		expectedResult.equals(visitor.getActions())
 	}
+	
+	// TODO: Make this test compile
+	// TODO: worry about character encoding somewhere
+//	def "hash mismatch in path 2"() {
+//		setup: "A file exists in both roots but the hash doesn't match in path 1"
+//		List<Action> expectedResult = new ArrayList<Action>()
+//		def hashCollection = Mock(fileHashStore)
+//		// Mock when hashExists => true
+//		// Mock hashMatches(root1.resolve(testFilePath)) => true
+//		// Mock hashMatches(root2.resolve(testFilePath)) => false
+//		expectedResult.add(new FixHashMismatchAction(root1.resolve(testFilePath), "goodHash", root2.resolve(testFilePath), "badHash"))
+//		SynchingVisitor visitor = new SynchingVisitor(root1, root2, hashCollection)
+//		
+//		when: "it visits the file"
+//		visitor.visitFile(testFilePath, FileExistence.BothPaths);
+//
+//		then: "a hash mismatch action is created"
+//		expectedResult.equals(visitor.getActions())
+//	}
 	
 	def "file present path 1"() {
 		setup:
