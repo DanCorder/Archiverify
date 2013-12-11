@@ -1,46 +1,47 @@
 package com.dancorder.PhotoSync;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Scanner;
 
 public class FileHashStore {
 	
 	private final Dictionary<Path, String> store = new Hashtable<Path, String>();
 	
-	public FileHashStore(Reader path1Data, Reader path2Data) throws IOException {
+	public FileHashStore(List<String> path1Data, List<String> path2Data) throws IOException {
 		parseData(path1Data);
 		parseData(path2Data);
 	}
 
-	private void parseData(Reader data) {
-		try (Scanner scanner = new Scanner(data)) {
-			while (scanner.hasNextLine()) {
-				String line = scanner.nextLine();
-				parseLine(line);
-			}
+	private void parseData(List<String> data) {
+		for (String line : data) {
+			parseLine(line);
 		}
 	}
 
-	public void write(Writer target) throws IOException {
-		PrintWriter writer = new PrintWriter(target);
+	public List<String> getData() throws IOException {
+		ArrayList<String> lines = new ArrayList<String>();
 		List<Path> paths = Collections.list(store.keys());
 		Collections.sort(paths);
 		for (Path path : paths) {
-			writer.println(createLine(path));
+			lines.add(createLine(path));
 		}
+		
+		return lines;
 	}
 
 	private void parseLine(String line) {
 		String[] strings = line.split("\t");
+		
+		if (strings.length != 2) {
+			return;
+		}
+		
 		Path path = Paths.get(strings[1]);
 		String hash = strings[0];
 		

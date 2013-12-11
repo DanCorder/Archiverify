@@ -21,45 +21,44 @@ class FileHashStoreTest extends spock.lang.Specification {
 	
 	def "no data"() {
 		setup:
-		StringReader fileData1 = new StringReader("")
-		StringReader fileData2 = new StringReader("")
 		Path testFile = Paths.get(testFilename1)
 		
 		when: "it is created with no data"
-		def store = new FileHashStore(fileData1, fileData2)
+		def store = new FileHashStore(data1, data2)
 		
 		then: "no hash exists"
 		!store.hashExists(testFile)
 		store.getHash(testFile) == null
+		
+		where:
+		data1 | data2
+		[]    | []
+		[""]  | [""]
 	}
 	
 	def "single file hash exists"() {
 		setup:
-		StringReader fileData1 = new StringReader(data1)
-		StringReader fileData2 = new StringReader(data2)
 		Path testFile = Paths.get(testFilename1)
 		
 		when: "it is created"
-		def store = new FileHashStore(fileData1, fileData2)
+		def store = new FileHashStore(data1, data2)
 		
 		then: "a hash exists for the test file"
 		store.hashExists(testFile)
 		store.getHash(testFile) == testHash1
 		
 		where:
-		data1 | data2
-		line1 | ""
-		""    | line1
+		data1   | data2
+		[line1] | []
+		[]      | [line1]
 	}
 	
 	def "same file appears in both paths"() {
 		setup:
-		StringReader fileData1 = new StringReader(line1)
-		StringReader fileData2 = new StringReader(line1)
 		Path testFile = Paths.get(testFilename1)
 		
 		when: "it is created"
-		def store = new FileHashStore(fileData1, fileData2)
+		def store = new FileHashStore([line1], [line1])
 		
 		then: "a hash exists for the test file"
 		store.hashExists(testFile)
@@ -67,121 +66,66 @@ class FileHashStoreTest extends spock.lang.Specification {
 	}
 
 	def "same file appears multiple times with different hashes"() {
-		setup:
-		StringReader fileData1 = new StringReader(data1)
-		StringReader fileData2 = new StringReader(data2)
-		
 		when: "it is created"
-		def store = new FileHashStore(fileData1, fileData2)
+		def store = new FileHashStore(data1, data2)
 		
 		then: "a hash exists for the test file"
 		thrown IllegalArgumentException
 		
 		where:
-		data1                   | data2
-		line1 + "\n" + line1Bad | ""
-		line1                   | line1Bad
-		line1Bad                | line1
-		""                      | line1 + "\n" + line1Bad
+		data1             | data2
+		[line1, line1Bad] | []
+		[line1]           | [line1Bad]
+		[line1Bad]        | [line1]
+		[]                | [line1, line1Bad]
 	}
-	
-	def "Check different line endings between lines"() {
+
+	def "empty store creates empty list"() {
 		setup:
-		StringReader fileData1 = new StringReader(data1)
-		StringReader fileData2 = new StringReader(data2)
-		Path testFile1 = Paths.get(testFilename1)
-		Path testFile2 = Paths.get(testFilename2)
-		
-		when: "it is created"
-		def store = new FileHashStore(fileData1, fileData2)
-		
-		then: "a hash exists for each test file"
-		store.hashExists(testFile1)
-		store.getHash(testFile1) == testHash1
-		store.hashExists(testFile2)
-		store.getHash(testFile2) == testHash2
-		
-		where:
-		data1                  | data2
-		line1 + "\r" + line2   | ""
-		line1 + "\n" + line2   | ""
-		line1 + "\r\n" + line2 | ""
-		""                     | line1 + "\r" + line2
-		""                     | line1 + "\n" + line2
-		""                     | line1 + "\r\n" + line2
-	}
-	
-	def "Check different line endings at end of file"() {
-		setup:
-		StringReader fileData1 = new StringReader(data1)
-		StringReader fileData2 = new StringReader(data2)
-		Path testFile1 = Paths.get(testFilename1)
-		
-		when: "it is created"
-		def store = new FileHashStore(fileData1, fileData2)
-		
-		then: "a hash exists for each test file"
-		store.hashExists(testFile1)
-		store.getHash(testFile1) == testHash1
-		
-		where:
-		data1                  | data2
-		line1          | ""
-		line1 + "\r"   | ""
-		line1 + "\n"   | ""
-		line1 + "\r\n" | ""
-		""             | line1
-		""             | line1 + "\r"
-		""             | line1 + "\n"
-		""             | line1 + "\r\n"
-	}
-	
-	def "empty store writes empty string"() {
-		setup:
-		def store = new FileHashStore(new StringReader(""), new StringReader(""))
-		def writer = new StringWriter()
+		def store = new FileHashStore([], [])
 		
 		when:
-		store.write(writer)
-		writer.close();
+		def data = store.getData()
 		
 		then:
-		writer.toString() == ""
+		data.size() == 0
 	}
 	
-	def "write single file store"() {
+	def "data for single file store"() {
 		setup:
-		def store = new FileHashStore(new StringReader(data1), new StringReader(data2))
-		def writer = new StringWriter()
+		def store = new FileHashStore(data1, data2)
 		
 		when:
-		store.write(writer)
-		writer.close();
+		def data = store.getData()
 		
 		then:
-		writer.toString() == line1 + lineEnding
-		
+		data.size() == 1
+		data[0] == line1
+
 		where:
-		data1 | data2
-		line1 | ""
-		""    | line1
+		data1   | data2
+		[line1] | []
+		[]      | [line1]
+		[line1] | [line1]
 	}
 	
-	def "write double file store"() {
+	def "data for double file store"() {
 		setup:
-		def store = new FileHashStore(new StringReader(data1), new StringReader(data2))
-		def writer = new StringWriter()
+		def store = new FileHashStore(data1, data2)
 		
 		when:
-		store.write(writer)
-		writer.close();
+		def data = store.getData()
 		
 		then:
-		writer.toString() == line1 + lineEnding + line2 + lineEnding
+		data.size() == 2
+		data[0] == line1
+		data[1] == line2
 		
 		where:
-		data1                      | data2
-		line1 + lineEnding + line2 | ""
-		""                         | line1 + lineEnding + line2
+		data1          | data2
+		[line1, line2] | []
+		[]             | [line1, line2]
+		[line1]        | [line2]
+		[line2]        | [line1]
 	}	
 }
