@@ -18,7 +18,7 @@ public class HashFileSource {
 	}
 	
 	public List<String> getData() throws IOException {
-		return Files.readAllLines(getFilePath(), Charset.defaultCharset());
+		return Files.readAllLines(getFilePath(), getCharset());
 	}
 
 	public void writeData(List<String> data) throws IOException {
@@ -28,17 +28,20 @@ public class HashFileSource {
 					writer.println(line);
 				}
 			}
-			
 		}
 	}
 	
 	private Writer getBufferedWriter() throws IOException {
 		return Files.newBufferedWriter(
 				getFilePath(),
-				Charset.defaultCharset(),
+				getCharset(),
 				StandardOpenOption.CREATE,
 				StandardOpenOption.TRUNCATE_EXISTING,
 				StandardOpenOption.WRITE);
+	}
+	
+	private Charset getCharset() {
+		return Charset.defaultCharset();
 	}
 
 	private Path getFilePath() {
