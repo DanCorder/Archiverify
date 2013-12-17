@@ -7,13 +7,13 @@ import java.util.List;
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence;
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeVisitor;
 
-public class SynchingVisitor implements ParallelFileTreeVisitor {
+class SynchingVisitor implements ParallelFileTreeVisitor {
 
 	private final Path root1;
 	private final Path root2;
 	private final ArrayList<Action> actions = new ArrayList<Action>();
 	
-	public SynchingVisitor(Path root1, Path root2) {
+	SynchingVisitor(Path root1, Path root2) {
 		this.root1 = root1;
 		this.root2 = root2;
 	}
@@ -38,7 +38,7 @@ public class SynchingVisitor implements ParallelFileTreeVisitor {
 		}
 	}
 	
-	public List<Action> getActions() {
+	List<Action> getActions() {
 		return actions;
 	}
 }

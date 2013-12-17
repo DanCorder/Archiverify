@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
-public class HashFileSource {
+class HashFileSource {
 	
 	private Path directory;
 	
@@ -17,11 +17,11 @@ public class HashFileSource {
 		this.directory = directory;
 	}
 	
-	public List<String> getData() throws IOException {
+	List<String> getData() throws IOException {
 		return Files.readAllLines(getFilePath(), getCharset());
 	}
 
-	public void writeData(List<String> data) throws IOException {
+	void writeData(List<String> data) throws IOException {
 		try (Writer bufferedWriter = getBufferedWriter()) {
 			try (PrintWriter writer = new PrintWriter(bufferedWriter)) {
 				for (String line : data) {

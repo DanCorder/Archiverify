@@ -8,7 +8,7 @@ class Parameters {
 	private final Path path1;
 	private final Path path2;
 	
-	public Parameters(String[] args) throws UsageException {
+	Parameters(String[] args) throws UsageException {
 		
 		if (args == null || args.length != 2)
 		{
@@ -28,11 +28,11 @@ class Parameters {
 		}		
 	}
 
-	public Path getPath1() {
+	Path getPath1() {
 		return path1;
 	}
 	
-	public Path getPath2() {
+	Path getPath2() {
 		return path2;
 	}
 

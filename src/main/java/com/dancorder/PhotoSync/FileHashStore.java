@@ -9,11 +9,11 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 
-public class FileHashStore {
+class FileHashStore {
 	
 	private final Dictionary<Path, String> store = new Hashtable<Path, String>();
 	
-	public FileHashStore(List<String> path1Data, List<String> path2Data) throws IOException {
+	FileHashStore(List<String> path1Data, List<String> path2Data) throws IOException {
 		parseData(path1Data);
 		parseData(path2Data);
 	}
@@ -24,7 +24,7 @@ public class FileHashStore {
 		}
 	}
 
-	public List<String> getData() throws IOException {
+	List<String> getData() throws IOException {
 		ArrayList<String> lines = new ArrayList<String>();
 		List<Path> paths = Collections.list(store.keys());
 		Collections.sort(paths);
@@ -63,11 +63,11 @@ public class FileHashStore {
 		return store.get(key) + "\t" + key.toString();
 	}
 	
-	public boolean hashExists(Path filePath) {
+	boolean hashExists(Path filePath) {
 		return store.get(filePath) != null;
 	}
 	
-	public String getHash(Path filePath) {
+	String getHash(Path filePath) {
 		return store.get(filePath);
 	}
 }

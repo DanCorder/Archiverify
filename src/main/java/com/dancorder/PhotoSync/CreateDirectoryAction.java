@@ -5,11 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 
-public class CreateDirectoryAction implements Action {
+class CreateDirectoryAction implements Action {
 
 	private final Path directory;
 	
-	public CreateDirectoryAction(Path directory) {
+	CreateDirectoryAction(Path directory) {
 		if (directory == null) {
 			throw new InvalidParameterException("Directory cannot be null");
 		}

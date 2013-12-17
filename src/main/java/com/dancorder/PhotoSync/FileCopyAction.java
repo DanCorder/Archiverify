@@ -5,12 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 
-public class FileCopyAction implements Action {
+class FileCopyAction implements Action {
 
 	private final Path from;
 	private final Path to;
 	
-	public FileCopyAction(Path from, Path to) {
+	FileCopyAction(Path from, Path to) {
 		if (from == null) {
 			throw new InvalidParameterException("From path must not be null");
 		}

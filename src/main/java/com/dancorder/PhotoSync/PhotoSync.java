@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.dancorder.PhotoSync;
 
 import java.io.IOException;
@@ -9,17 +6,8 @@ import java.util.Scanner;
 
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeWalker;
 
-/**
- * @author Dan
- *
- */
 public class PhotoSync {
 
-	/**
-	 * @param args
-	 * @throws UsageException 
-	 * @throws IOException 
-	 */
 	public static void main(String[] args) throws UsageException, IOException {
 		//TODO: Test/refactor this method
 		Parameters params = new Parameters(args);
@@ -51,5 +39,4 @@ public class PhotoSync {
 			}
 		}
 	}
-
 }

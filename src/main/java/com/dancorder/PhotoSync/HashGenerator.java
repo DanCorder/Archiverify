@@ -7,7 +7,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 class HashGenerator {
-	public byte[] calculateMd5(InputStream data) throws NoSuchAlgorithmException, IOException {
+	byte[] calculateMd5(InputStream data) throws NoSuchAlgorithmException, IOException {
 		MessageDigest md5Digest = MessageDigest.getInstance("MD5");
 		DigestInputStream digestStream = new DigestInputStream(data, md5Digest);
 		int readReturnValue;
