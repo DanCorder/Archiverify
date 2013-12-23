@@ -10,6 +10,9 @@ import java.security.InvalidParameterException;
 
 import org.junit.Test;
 
+import com.dancorder.PhotoSync.Action.Action;
+import com.dancorder.PhotoSync.Action.CreateDirectoryAction;
+
 public class CreateDirectoryActionTest {
 	private final Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
 

@@ -1,15 +1,15 @@
-package com.dancorder.PhotoSync;
+package com.dancorder.PhotoSync.Action;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 
-class CreateDirectoryAction implements Action {
+public class CreateDirectoryAction implements Action {
 
 	private final Path directory;
 	
-	CreateDirectoryAction(Path directory) {
+	public CreateDirectoryAction(Path directory) {
 		if (directory == null) {
 			throw new InvalidParameterException("Directory cannot be null");
 		}

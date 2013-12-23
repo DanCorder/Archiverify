@@ -1,16 +1,16 @@
-package com.dancorder.PhotoSync;
+package com.dancorder.PhotoSync.Action;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 
-class FileCopyAction implements Action {
+public class FileCopyAction implements Action {
 
 	private final Path from;
 	private final Path to;
 	
-	FileCopyAction(Path from, Path to) {
+	public FileCopyAction(Path from, Path to) {
 		if (from == null) {
 			throw new InvalidParameterException("From path must not be null");
 		}

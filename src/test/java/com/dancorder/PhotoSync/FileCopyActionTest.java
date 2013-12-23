@@ -12,6 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.dancorder.PhotoSync.Action.FileCopyAction;
+
 public class FileCopyActionTest {
 	private final Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
 	private Path tempFile;

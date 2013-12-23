@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
+import com.dancorder.PhotoSync.Action.Action;
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeWalker;
 
 public class PhotoSync {

@@ -1,8 +1,8 @@
-package com.dancorder.PhotoSync;
+package com.dancorder.PhotoSync.Action;
 
 import java.io.IOException;
 
-interface Action {
+public interface Action {
 	String toString();
 	void doAction() throws IOException;
 }
