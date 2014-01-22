@@ -5,9 +5,9 @@ import java.nio.file.Paths
 
 import spock.lang.*
 
-import com.dancorder.PhotoSync.Action.Action;
-import com.dancorder.PhotoSync.Action.CreateDirectoryAction;
-import com.dancorder.PhotoSync.Action.FileCopyAction;
+import com.dancorder.PhotoSync.Action.Action
+import com.dancorder.PhotoSync.Action.CreateDirectoryAction
+import com.dancorder.PhotoSync.Action.FileCopyAction
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence
 
 class SynchingVisitorTest extends spock.lang.Specification {
@@ -53,30 +53,6 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		then: "No actions are created"
 		expectedResult.equals(visitor.getActions())
 	}
-	
-	// TODO: Test that when a visitor enters a directory it retrieves any existing hashes from the hash file
-	// either directory might not exist, either hash file might not exist or be empty
-	
-	// TODO: Make this test compile
-	// TODO: worry about character encoding somewhere
-	// qq: Should we separate out the synching logic from the visitor?
-//	def "hash mismatch in path 2"() {
-//		setup: "A file exists in both roots but the hash doesn't match in path 2"
-//		List<Action> expectedResult = new ArrayList<Action>()
-//		// Pass file hash source to visitor?
-//		def hashCollection = Mock(fileHashStore)
-//		// Mock when hashExists => true
-//		// Mock hashMatches(root1.resolve(testFilePath)) => true
-//		// Mock hashMatches(root2.resolve(testFilePath)) => false
-//		//expectedResult.add(new FixHashMismatchAction(root1.resolve(testFilePath), "goodHash", root2.resolve(testFilePath), "badHash"))
-//		//SynchingVisitor visitor = new SynchingVisitor(root1, root2, hashCollection)
-//		
-//		when: "it visits the file"
-//		visitor.visitFile(testFilePath, FileExistence.BothPaths);
-//
-//		then: "a hash mismatch action is created"
-//		expectedResult.equals(visitor.getActions())
-//	}
 	
 	def "file present path 1"() {
 		setup:
