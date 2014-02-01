@@ -2,9 +2,9 @@ package com.dancorder.PhotoSync
 
 import spock.lang.*
 
-class ParametersTest extends spock.lang.Specification{
+class ParametersTest extends spock.lang.Specification {
 
-	private final String rootPath = File.listRoots()[0].getAbsolutePath();
+	private final static rootPath = File.listRoots()[0].getAbsolutePath()
 	
 	def "null parameter"() {
 		when: "A null constructor parameter"
@@ -59,7 +59,7 @@ class ParametersTest extends spock.lang.Specification{
 		Parameters params = new Parameters( [ rootPath, rootPath ] as String[] )
 		
 		then:
-		params.getPath1().toString().equals(rootPath);
-		params.getPath2().toString().equals(rootPath);
+		params.getPath1().toString() == rootPath
+		params.getPath2().toString() == rootPath
 	}
 }

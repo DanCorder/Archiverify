@@ -1,6 +1,5 @@
 package com.dancorder.PhotoSync;
 
-import java.nio.file.Path
 import java.nio.file.Paths
 
 import spock.lang.*
@@ -17,11 +16,11 @@ class FileHashStoreTest extends spock.lang.Specification {
 	private static final line1Bad = "badHash1\t" + testFilename1
 	private static final line2 = testHash2 + "\t" + testFilename2
 	
-	private static final String lineEnding = System.getProperty('line.separator')
+	private static final lineEnding = System.getProperty('line.separator')
 	
 	def "no data"() {
 		setup:
-		Path testFile = Paths.get(testFilename1)
+		def testFile = Paths.get(testFilename1)
 		
 		when: "it is created with no data"
 		def store = new FileHashStore(data1, data2)
@@ -38,7 +37,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 	
 	def "single file hash exists"() {
 		setup:
-		Path testFile = Paths.get(testFilename1)
+		def testFile = Paths.get(testFilename1)
 		
 		when: "it is created"
 		def store = new FileHashStore(data1, data2)
@@ -55,7 +54,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 	
 	def "same file appears in both paths"() {
 		setup:
-		Path testFile = Paths.get(testFilename1)
+		def testFile = Paths.get(testFilename1)
 		
 		when: "it is created"
 		def store = new FileHashStore([line1], [line1])

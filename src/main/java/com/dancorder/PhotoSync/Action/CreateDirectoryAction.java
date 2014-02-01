@@ -3,7 +3,6 @@ package com.dancorder.PhotoSync.Action;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.InvalidParameterException;
 
 public class CreateDirectoryAction implements Action {
 
@@ -11,10 +10,10 @@ public class CreateDirectoryAction implements Action {
 	
 	public CreateDirectoryAction(Path directory) {
 		if (directory == null) {
-			throw new InvalidParameterException("Directory cannot be null");
+			throw new IllegalArgumentException("Directory cannot be null");
 		}
 		if (!directory.isAbsolute()) {
-			throw new InvalidParameterException("Path must be absloute");
+			throw new IllegalArgumentException("Path must be absloute");
 		}
 		
 		this.directory = directory;
