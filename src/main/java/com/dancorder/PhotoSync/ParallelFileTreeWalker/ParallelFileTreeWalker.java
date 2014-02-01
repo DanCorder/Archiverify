@@ -1,5 +1,6 @@
 package com.dancorder.PhotoSync.ParallelFileTreeWalker;
 
+import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.io.IOException;
 
 public class ParallelFileTreeWalker {
 	
@@ -16,15 +16,22 @@ public class ParallelFileTreeWalker {
 	private final ParallelFileTreeVisitor visitor;
 
 	public ParallelFileTreeWalker(Path path1, Path path2, ParallelFileTreeVisitor visitor) {
+		if (path1 == null) {
+			throw new IllegalArgumentException("Path 1 can't be null");
+		}
+		if (path2 == null) {
+			throw new IllegalArgumentException("Path 2 can't be null");
+		}
+		if (visitor == null) {
+			throw new IllegalArgumentException("Visitor can't be null");
+		}
 		if (!Files.exists(path1)) {
 			throw new IllegalArgumentException("Directory doesn't exist: " + path1.toString());
 		}
 		if (!Files.exists(path2)) {
 			throw new IllegalArgumentException("Directory doesn't exist: " + path2.toString());
 		}
-		if (visitor == null) {
-			throw new IllegalArgumentException("Visitor can't be null");
-		}
+		
 		
 		root1 = path1;
 		root2 = path2;

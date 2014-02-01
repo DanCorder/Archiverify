@@ -1,6 +1,6 @@
 package com.dancorder.PhotoSync.ParallelFileTreeWalker;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,89 +13,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeWalker;
-
 public class ParallelFileTreeWalkerTest {
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testMissingPath1() throws IOException {
-		Path tempRootPath1 = null;
-		Path tempRootPath2 = null;
-		
-		try {
-			tempRootPath1 = createRootDirectory();
-			cleanUpDirectory(tempRootPath1);
-			tempRootPath2 = createRootDirectory();
-			MockParallelFileTreeVisitor tpftv = new MockParallelFileTreeVisitor();
-				
-			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
-			pftw.walk();
-		}
-		finally {
-			cleanUpDirectory(tempRootPath1);
-			cleanUpDirectory(tempRootPath2);
-		}
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testMissingPath2() throws IOException {
-		Path tempRootPath1 = null;
-		Path tempRootPath2 = null;
-		
-		try {
-			tempRootPath1 = createRootDirectory();
-			tempRootPath2 = createRootDirectory();
-			cleanUpDirectory(tempRootPath2);
-			MockParallelFileTreeVisitor tpftv = new MockParallelFileTreeVisitor();
-				
-			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
-			pftw.walk();
-		}
-		finally {
-			cleanUpDirectory(tempRootPath1);
-			cleanUpDirectory(tempRootPath2);
-		}
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testMissingBothPaths() throws IOException {
-		Path tempRootPath1 = null;
-		Path tempRootPath2 = null;
-		
-		try {
-			tempRootPath1 = createRootDirectory();
-			cleanUpDirectory(tempRootPath1);
-			tempRootPath2 = createRootDirectory();
-			cleanUpDirectory(tempRootPath2);
-			MockParallelFileTreeVisitor tpftv = new MockParallelFileTreeVisitor();
-				
-			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, tpftv);
-			pftw.walk();
-		}
-		finally {
-			cleanUpDirectory(tempRootPath1);
-			cleanUpDirectory(tempRootPath2);
-		}
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testNullVisitor() throws IOException {
-		Path tempRootPath1 = null;
-		Path tempRootPath2 = null;
-		
-		try {
-			tempRootPath1 = createRootDirectory();
-			tempRootPath2 = createRootDirectory();
-				
-			ParallelFileTreeWalker pftw = new ParallelFileTreeWalker(tempRootPath1, tempRootPath2, null);
-			pftw.walk();
-		}
-		finally {
-			cleanUpDirectory(tempRootPath1);
-			cleanUpDirectory(tempRootPath2);
-		}
-	}
-	
 	@Test
 	public void testEmptyTree() throws IOException {
 		FileTreeBuilder builder = new FileTreeBuilder() {
