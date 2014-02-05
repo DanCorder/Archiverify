@@ -1,7 +1,5 @@
 package com.dancorder.PhotoSync
 
-import spock.lang.*
-
 class ParametersTest extends spock.lang.Specification {
 
 	private final static rootPath = File.listRoots()[0].getAbsolutePath()

@@ -1,7 +1,5 @@
 package com.dancorder.PhotoSync;
 
-import spock.lang.*
-
 class HashGeneratorTest extends spock.lang.Specification {
 
 	def "hash generation"() {

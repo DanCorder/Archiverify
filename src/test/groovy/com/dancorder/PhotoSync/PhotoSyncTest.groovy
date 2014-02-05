@@ -1,7 +1,5 @@
 package com.dancorder.PhotoSync;
 
-import spock.lang.*
-
 public class PhotoSyncTest extends spock.lang.Specification {
 
 	def "Null parameters"() {

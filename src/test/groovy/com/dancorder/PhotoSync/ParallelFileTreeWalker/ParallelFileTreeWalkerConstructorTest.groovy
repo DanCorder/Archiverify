@@ -1,7 +1,5 @@
 package com.dancorder.PhotoSync.ParallelFileTreeWalker;
 
-import static org.junit.Assert.*
-
 import java.nio.file.Files
 import java.nio.file.Path
 

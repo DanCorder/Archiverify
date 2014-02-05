@@ -2,8 +2,6 @@ package com.dancorder.PhotoSync;
 
 import java.nio.file.Paths
 
-import spock.lang.*
-
 class FileHashStoreTest extends spock.lang.Specification {
 
 	private static final testFilename1 = "testFile1"
