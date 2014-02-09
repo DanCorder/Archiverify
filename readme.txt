@@ -1,6 +1,5 @@
 Prerequisites for building the code and running the tests:
 
-Install Groovy - http://groovy.codehaus.org/Installing+Groovy
-Install the Groovy-Eclipse plugin - http://groovy.codehaus.org/Eclipse+Plugin
-Install Spock - https://code.google.com/p/spock/downloads/list
 Install Gradle - http://www.gradle.org/downloads
+From the root folder (where this file is) run "gradle build"
+The jar file is built to build/libs/
