@@ -18,9 +18,7 @@ class HashFileSourceTest extends spock.lang.Specification {
 	
 	def "Read file from disk"() {
 		setup:
-		def writer = Files.newBufferedWriter(tempHashFile, Charset.defaultCharset())
-		writer.write(line1)
-		writer.close()
+		writeTempFile(line1)
 		
 		when: "it is created with a directory" 
 		def source = new HashFileSource(tempHashFile.getParent())
@@ -45,10 +43,8 @@ class HashFileSourceTest extends spock.lang.Specification {
 	
 	def "Check various line endings"() {
 		setup:
-		def writer = Files.newBufferedWriter(tempHashFile, Charset.defaultCharset())
-		writer.write(line1 + lineEnding + line2 + lineEnding)
-		writer.close()
-		
+		writeTempFile(line1 + lineEnding + line2 + lineEnding)
+
 		when: "it reads a file with certain line endings" 
 		def source = new HashFileSource(tempHashFile.getParent())
 		def data = source.getData();
@@ -76,5 +72,25 @@ class HashFileSourceTest extends spock.lang.Specification {
 		def fileContent = Files.readAllLines(tempHashFile, Charset.defaultCharset)
 		fileContent.size() == 1
 		fileContent[0] == line1
-	}	
+	}
+
+	def "Replace existing file"() {
+		setup:
+		writeTempFile(line1 + '\n' + line2)
+		def source = new HashFileSource(tempHashFile.getParent())
+
+		when: "data is passed in"
+		source.writeData([line2])
+
+		then: "that writer writes to hashes.txt"
+		def fileContent = Files.readAllLines(tempHashFile, Charset.defaultCharset)
+		fileContent.size() == 1
+		fileContent[0] == line2
+	}
+
+	private void writeTempFile(String data) throws IOException {
+		def writer = Files.newBufferedWriter(tempHashFile, Charset.defaultCharset())
+		writer.write(data)
+		writer.close()
+	}
 }
