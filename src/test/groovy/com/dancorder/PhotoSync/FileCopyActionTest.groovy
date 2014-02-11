@@ -4,8 +4,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import com.dancorder.PhotoSync.Action.FileCopyAction
-
 public class FileCopyActionTest extends spock.lang.Specification {
 	private static final tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private static final relativePath = Paths.get("testFile")

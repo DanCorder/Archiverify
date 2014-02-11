@@ -4,9 +4,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dancorder.PhotoSync.Action.Action;
-import com.dancorder.PhotoSync.Action.CreateDirectoryAction;
-import com.dancorder.PhotoSync.Action.FileCopyAction;
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence;
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeVisitor;
 

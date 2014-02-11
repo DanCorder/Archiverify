@@ -1,4 +1,4 @@
-package com.dancorder.PhotoSync.Action;
+package com.dancorder.PhotoSync;
 
 import java.io.IOException;
 import java.nio.file.Files;

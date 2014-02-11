@@ -3,8 +3,6 @@ package com.dancorder.PhotoSync;
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import com.dancorder.PhotoSync.Action.CreateDirectoryAction
-
 public class CreateDirectoryActionTest extends spock.lang.Specification {
 	private static final tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 

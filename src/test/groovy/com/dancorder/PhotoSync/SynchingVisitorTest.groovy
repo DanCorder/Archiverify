@@ -2,9 +2,6 @@ package com.dancorder.PhotoSync
 
 import java.nio.file.Paths
 
-import com.dancorder.PhotoSync.Action.Action
-import com.dancorder.PhotoSync.Action.CreateDirectoryAction
-import com.dancorder.PhotoSync.Action.FileCopyAction
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence
 
 class SynchingVisitorTest extends spock.lang.Specification {
