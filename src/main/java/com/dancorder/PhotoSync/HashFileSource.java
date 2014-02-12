@@ -11,7 +11,8 @@ import java.util.List;
 
 class HashFileSource {
 	
-	private Path directory;
+	private static final String HASH_FILE_NAME = "hashes.txt";
+	private final Path directory;
 	
 	HashFileSource(Path directory) {
 		this.directory = directory;
@@ -45,6 +46,6 @@ class HashFileSource {
 	}
 
 	private Path getFilePath() {
-		return directory.resolve("hashes.txt");
+		return directory.resolve(HASH_FILE_NAME);
 	}
 }

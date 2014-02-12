@@ -21,7 +21,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 		def testFile = Paths.get(testFilename1)
 		
 		when: "it is created with no data"
-		def store = new FileHashStore(data1, data2)
+		def store = new FileHashStore(getMockSource(data1), getMockSource(data2))
 		
 		then: "no hash exists"
 		!store.hashExists(testFile)
@@ -38,7 +38,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 		def testFile = Paths.get(testFilename1)
 		
 		when: "it is created"
-		def store = new FileHashStore(data1, data2)
+		def store = new FileHashStore(getMockSource(data1), getMockSource(data2))
 		
 		then: "a hash exists for the test file"
 		store.hashExists(testFile)
@@ -55,7 +55,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 		def testFile = Paths.get(testFilename1)
 		
 		when: "it is created"
-		def store = new FileHashStore([line1], [line1])
+		def store = new FileHashStore(getMockSource([line1]), getMockSource([line1]))
 		
 		then: "a hash exists for the test file"
 		store.hashExists(testFile)
@@ -64,10 +64,10 @@ class FileHashStoreTest extends spock.lang.Specification {
 
 	def "same file appears multiple times with different hashes"() {
 		when: "it is created"
-		def store = new FileHashStore(data1, data2)
+		def store = new FileHashStore(getMockSource(data1), getMockSource(data2))
 		
-		then: "a hash exists for the test file"
-		thrown IllegalArgumentException
+		then: "an exception is thrown"
+		thrown Exception
 		
 		where:
 		data1             | data2
@@ -79,25 +79,35 @@ class FileHashStoreTest extends spock.lang.Specification {
 
 	def "empty store creates empty list"() {
 		setup:
-		def store = new FileHashStore([], [])
-		
+		def mockSource1 = getMockSource([])
+		def mockSource2 = getMockSource([])
+		def store = new FileHashStore(mockSource1, mockSource2)
+
 		when:
-		def data = store.getData()
-		
+		def data = store.write()
+
 		then:
-		data.size() == 0
+		1 * mockSource1.writeData([])
+		1 * mockSource2.writeData([])
+		then:
+		0 * _._
 	}
+
 	
-	def "data for single file store"() {
+	def "write single file hash"() {
 		setup:
-		def store = new FileHashStore(data1, data2)
+		def mockSource1 = getMockSource(data1)
+		def mockSource2 = getMockSource(data2)
+		def store = new FileHashStore(mockSource1, mockSource2)
 		
 		when:
-		def data = store.getData()
+		def data = store.write()
 		
 		then:
-		data.size() == 1
-		data[0] == line1
+		1 * mockSource1.writeData([line1])
+		1 * mockSource2.writeData([line1])
+		then:
+		0 * _._
 
 		where:
 		data1   | data2
@@ -106,17 +116,20 @@ class FileHashStoreTest extends spock.lang.Specification {
 		[line1] | [line1]
 	}
 	
-	def "data for double file store"() {
+	def "write two file hashes"() {
 		setup:
-		def store = new FileHashStore(data1, data2)
+		def mockSource1 = getMockSource(data1)
+		def mockSource2 = getMockSource(data2)
+		def store = new FileHashStore(mockSource1, mockSource2)
 		
 		when:
-		def data = store.getData()
+		def data = store.write()
 		
 		then:
-		data.size() == 2
-		data[0] == line1
-		data[1] == line2
+		1 * mockSource1.writeData([line1, line2])
+		1 * mockSource2.writeData([line1, line2])
+		then:
+		0 * _._
 		
 		where:
 		data1          | data2
@@ -124,5 +137,11 @@ class FileHashStoreTest extends spock.lang.Specification {
 		[]             | [line1, line2]
 		[line1]        | [line2]
 		[line2]        | [line1]
-	}	
+	}
+
+	private def HashFileSource getMockSource(List<String> data) {
+		def source = Mock(HashFileSource)
+		source.getData() >> data
+		return source
+	}
 }

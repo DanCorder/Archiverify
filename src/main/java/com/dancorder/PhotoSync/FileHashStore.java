@@ -10,63 +10,75 @@ import java.util.Hashtable;
 import java.util.List;
 
 class FileHashStore {
-	
+
 	private final Dictionary<Path, String> store = new Hashtable<Path, String>();
-	
-	FileHashStore(List<String> path1Data, List<String> path2Data) throws IOException {
-		parseData(path1Data);
-		parseData(path2Data);
+	private final HashFileSource source1;
+	private final HashFileSource source2;
+
+	FileHashStore(HashFileSource path1Source, HashFileSource path2Source) throws Exception {
+		source1 = path1Source;
+		source2 = path2Source;
+		parseData(source1);
+		parseData(source2);
 	}
 
-	private void parseData(List<String> data) {
-		for (String line : data) {
-			parseLine(line);
-		}
+	void write() throws IOException {
+		List<String> lines = getFileData();
+
+		source1.writeData(lines);
+		source2.writeData(lines);
 	}
 
-	List<String> getData() throws IOException {
+	private List<String> getFileData() {
 		ArrayList<String> lines = new ArrayList<String>();
 		List<Path> paths = Collections.list(store.keys());
 		Collections.sort(paths);
 		for (Path path : paths) {
 			lines.add(createLine(path));
 		}
-		
+
 		return lines;
 	}
 
-	private void parseLine(String line) {
+	private void parseData(HashFileSource source) throws Exception {
+		List<String> data = source.getData();
+		for (String line : data) {
+			parseLine(line);
+		}
+	}
+
+	private void parseLine(String line) throws Exception {
 		String[] strings = line.split("\t");
-		
+
 		if (strings.length != 2) {
 			return;
 		}
-		
+
 		Path path = Paths.get(strings[1]);
 		String hash = strings[0];
-		
+
 		storeValues(path, hash);
 	}
 
-	private void storeValues(Path path, String hash) {
+	private void storeValues(Path path, String hash) throws Exception {
 		if (hashExists(path)) {
 			if (!store.get(path).equals(hash)) {
-				throw new IllegalArgumentException("Multiple hashes " + hash + " and " + store.get(path) + " exist for " + path.toString());
+				throw new Exception("Multiple hashes " + hash + " and " + store.get(path) + " exist for " + path.toString());
 			}
 		}
 		else {
 			store.put(path, hash);
 		}
 	}
-	
+
 	private String createLine(Path key) {
 		return store.get(key) + "\t" + key.toString();
 	}
-	
+
 	boolean hashExists(Path filePath) {
 		return store.get(filePath) != null;
 	}
-	
+
 	String getHash(Path filePath) {
 		return store.get(filePath);
 	}
