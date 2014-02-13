@@ -1,14 +1,32 @@
 apply plugin: 'groovy'
 
 repositories {
+    flatDir {
+        dirs 'lib', 'libTest'
+    }
     mavenCentral()
 }
 
 dependencies {
-    testCompile 'org.codehaus.groovy:groovy-all:2.0.0',
+    testCompile 'junit:junit:4.10',
+                'org.codehaus.groovy:groovy-all:2.0.5',
                 'org.spockframework:spock-core:0.7-groovy-2.0',
-                'cglib:cglib-nodep:2.2.2'
+                'cglib:cglib-nodep:2.2.2',
+                'org.objenesis:objenesis:2.1'
 }
+
+task copyToLib(type: Copy) {
+    into "lib"
+    from configurations.runtime
+}
+
+task copyToTestLib(type: Copy) {
+    into "libTest"
+    from configurations.testRuntime
+}
+
+build.dependsOn copyToLib
+build.dependsOn copyToTestLib
 
 jar {
     manifest {
