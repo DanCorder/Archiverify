@@ -22,6 +22,18 @@ class FileHashStore {
 		parseData(source2);
 	}
 
+	boolean hashExists(Path filePath) {
+		return store.get(filePath) != null;
+	}
+
+	String getHash(Path filePath) {
+		return store.get(filePath);
+	}
+
+	void addHash(Path file, String hash) {
+		store.put(file, hash);
+	}
+
 	void write() throws IOException {
 		List<String> lines = getFileData();
 
@@ -57,10 +69,10 @@ class FileHashStore {
 		Path path = Paths.get(strings[1]);
 		String hash = strings[0];
 
-		storeValues(path, hash);
+		storeValue(path, hash);
 	}
 
-	private void storeValues(Path path, String hash) throws Exception {
+	private void storeValue(Path path, String hash) throws Exception {
 		if (hashExists(path)) {
 			if (!store.get(path).equals(hash)) {
 				throw new Exception("Multiple hashes " + hash + " and " + store.get(path) + " exist for " + path.toString());
@@ -73,13 +85,5 @@ class FileHashStore {
 
 	private String createLine(Path key) {
 		return store.get(key) + "\t" + key.toString();
-	}
-
-	boolean hashExists(Path filePath) {
-		return store.get(filePath) != null;
-	}
-
-	String getHash(Path filePath) {
-		return store.get(filePath);
 	}
 }
