@@ -16,6 +16,15 @@ class HashFileSourceTest extends spock.lang.Specification {
 		Files.deleteIfExists(tempHashFile)
 	}
 	
+	def "Retrieve directory"() {
+		setup:
+		def source = new HashFileSource(tempHashFile.getParent())
+		
+		expect:
+		source.getDirectory() == tempHashFile.getParent()
+		
+	}
+	
 	def "Read file from disk"() {
 		setup:
 		writeTempFile(line1)

@@ -1,5 +1,6 @@
 package com.dancorder.PhotoSync;
 
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class FileHashStoreTest extends spock.lang.Specification {
@@ -15,6 +16,22 @@ class FileHashStoreTest extends spock.lang.Specification {
 	private static final line2 = testHash2 + "\t" + testFilename2
 	
 	private static final lineEnding = System.getProperty('line.separator')
+	
+	private static final directory1 = Paths.get("dir1")
+	private static final directory2 = Paths.get("dir2")
+	
+	def "get directories"() {
+		setup:
+		def store = new FileHashStore(getMockSource([], directory1), getMockSource([], directory2))
+		
+		when: "we ask for directories"
+		def directories = store.getDirectories()
+		
+		then: "the source directories are returned"
+		directories.size() == 2
+		directories.contains(directory1)
+		directories.contains(directory2)
+	}
 	
 	def "create with no data"() {
 		setup:
@@ -243,8 +260,13 @@ class FileHashStoreTest extends spock.lang.Specification {
 	}
 
 	private def HashFileSource getMockSource(List<String> data) {
+		return getMockSource(data, directory1)
+	}
+
+	private def HashFileSource getMockSource(List<String> data, Path directory) {
 		def source = Mock(HashFileSource)
 		source.getData() >> data
+		source.getDirectory() >> directory
 		return source
 	}
 }

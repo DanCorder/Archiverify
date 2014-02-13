@@ -21,6 +21,13 @@ class FileHashStore {
 		parseData(source1);
 		parseData(source2);
 	}
+	
+	List<Path> getDirectories() {
+		ArrayList<Path> ret = new ArrayList<Path>();
+		ret.add(source1.getDirectory());
+		ret.add(source2.getDirectory());
+		return ret;
+	}
 
 	boolean hashExists(Path filePath) {
 		return store.get(filePath) != null;

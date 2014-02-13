@@ -18,6 +18,10 @@ class HashFileSource {
 		this.directory = directory;
 	}
 	
+	Path getDirectory() {
+		return directory;
+	}
+	
 	List<String> getData() throws IOException {
 		return Files.readAllLines(getFilePath(), getCharset());
 	}
