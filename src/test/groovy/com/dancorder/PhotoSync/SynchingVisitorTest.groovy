@@ -9,16 +9,26 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private final static root1 = tempDir.resolve("testRoot1")
 	private final static root2 = tempDir.resolve("testRoot2")
+	private defaultFileHashStore
+	private defaultFileHashStoreFactory
 	
 	private final static testFilePath = Paths.get("testFile")
 	private final static testDirectoryPath = Paths.get("testDirectory")
+	private final static testDirectoryPath2 = Paths.get("testDirectory2")
+	
+	def setup() {
+		defaultFileHashStore = Mock(FileHashStore)
+		defaultFileHashStore.getDirectories() >> [root1, root2]
+		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
+		defaultFileHashStoreFactory.createFileHashStore(_,_) >> defaultFileHashStore
+	}
 	
 	def "no visits"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
 		
 		when: "A new visitor is created"
-		def visitor = new SynchingVisitor(root1, root2)		
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)		
 
 		then: "No actions are created"
 		expectedResult == visitor.getActions()
@@ -27,19 +37,20 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "root directory"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
-		def visitor = new SynchingVisitor(root1, root2)
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)
 		
 		when: "It visits the root directory"
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 
-		then: "No actions are created"
+		then: "A hash update action is created"
 		expectedResult == visitor.getActions()
 	}
 	
 	def "file present both directories"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
-		def visitor = new SynchingVisitor(root1, root2)
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A file exists in both roots"
 		visitor.visitFile(testFilePath, FileExistence.BothPaths)
@@ -52,7 +63,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		setup:
 		def expectedResult = new ArrayList<Action>()
 		expectedResult.add(new FileCopyAction(root1.resolve(testFilePath), root2.resolve(testFilePath)))
-		def visitor = new SynchingVisitor(root1, root2)
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A file exists only in root 1"
 		visitor.visitFile(testFilePath, FileExistence.Path1Only)
@@ -65,7 +76,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		setup:
 		def expectedResult = new ArrayList<Action>()
 		expectedResult.add(new FileCopyAction(root2.resolve(testFilePath), root1.resolve(testFilePath)))
-		def visitor = new SynchingVisitor(root1, root2)
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A file exists only in root 2"
 		visitor.visitFile(testFilePath, FileExistence.Path2Only)
@@ -77,12 +88,13 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "directory present both paths"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
-		def visitor = new SynchingVisitor(root1, root2)
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A directory exists in both roots"
 		visitor.preVisitDirectory(testDirectoryPath, FileExistence.BothPaths)
 
-		then: "No actions are created"
+		then: "A hash update action is created"
 		expectedResult == visitor.getActions()
 	}
 	
@@ -90,7 +102,8 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		setup:
 		def expectedResult = new ArrayList<Action>()
 		expectedResult.add(new CreateDirectoryAction(root2.resolve(testDirectoryPath)))
-		def visitor = new SynchingVisitor(root1, root2)
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A directory exists only in root 1"
 		visitor.preVisitDirectory(testDirectoryPath, FileExistence.Path1Only)
@@ -103,7 +116,8 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		setup:
 		def expectedResult = new ArrayList<Action>()
 		expectedResult.add(new CreateDirectoryAction(root1.resolve(testDirectoryPath)))
-		def visitor = new SynchingVisitor(root1, root2)
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A directory exists only in root 2"
 		visitor.preVisitDirectory(testDirectoryPath, FileExistence.Path2Only)
@@ -122,11 +136,14 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def file3Path = directory2Path.resolve("file3")
 		
 		def expectedResult = new ArrayList<Action>()
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
 		expectedResult.add(new FileCopyAction(root1.resolve(file1Path), root2.resolve(file1Path)))
 		expectedResult.add(new CreateDirectoryAction(root1.resolve(directory1Path)))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
 		expectedResult.add(new FileCopyAction(root2.resolve(file2Path), root1.resolve(file2Path)))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
 		
-		def visitor = new SynchingVisitor(root1, root2)
+		def visitor = new SynchingVisitor(defaultFileHashStoreFactory, root1, root2)
 		
 		when: "It visits a number of files and directories"
 		visitor.preVisitDirectory(rootPath, FileExistence.BothPaths)
@@ -138,6 +155,5 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		
 		then: "The correct actions are created in the correct order"
 		expectedResult == visitor.getActions()
-	}
-	
+	}	
 }

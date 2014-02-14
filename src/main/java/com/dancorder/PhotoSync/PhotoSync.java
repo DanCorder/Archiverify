@@ -1,6 +1,5 @@
 package com.dancorder.PhotoSync;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -8,11 +7,11 @@ import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeWalker;
 
 public class PhotoSync {
 
-	public static void main(String[] args) throws UsageException, IOException {
+	public static void main(String[] args) throws Exception {
 		//TODO: Test/refactor this method
 		Parameters params = new Parameters(args);
 
-		SynchingVisitor visitor = new SynchingVisitor(params.getPath1(), params.getPath2());
+		SynchingVisitor visitor = new SynchingVisitor(new FileHashStoreFactory(), params.getPath1(), params.getPath2());
 		ParallelFileTreeWalker walker = new ParallelFileTreeWalker(params.getPath1(), params.getPath2(), visitor);
 		
 		walker.walk();
