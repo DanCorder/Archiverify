@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 class HashFileSource {
@@ -23,7 +24,13 @@ class HashFileSource {
 	}
 	
 	List<String> getData() throws IOException {
-		return Files.readAllLines(getFilePath(), getCharset());
+		if (Files.exists(getFilePath())) {
+			return Files.readAllLines(getFilePath(), getCharset());
+		}
+		else {
+			return new ArrayList<String>();
+		}
+			
 	}
 
 	void writeData(List<String> data) throws IOException {

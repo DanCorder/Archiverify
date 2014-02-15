@@ -50,6 +50,17 @@ class HashFileSourceTest extends spock.lang.Specification {
 		data.size() == 0
 	}
 	
+	def "Read non-existant file"() {
+		setup:
+		
+		when: "it is created with a directory"
+		def source = new HashFileSource(tempHashFile.getParent())
+		def data = source.getData();
+		
+		then: "data is empty"
+		data.size() == 0
+	}
+	
 	def "Check various line endings"() {
 		setup:
 		writeTempFile(line1 + lineEnding + line2 + lineEnding)
