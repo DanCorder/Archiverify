@@ -141,7 +141,7 @@ public class ParallelFileTreeWalker {
 	
 	private class FileProcessor extends PathProcessor {
 		@Override
-		public void process(Path relativePath1, Path relativePath2) {
+		public void process(Path relativePath1, Path relativePath2) throws IOException {
 			visitor.visitFile(getPath(relativePath1, relativePath2), getExistence(relativePath1, relativePath2));
 		}
 		

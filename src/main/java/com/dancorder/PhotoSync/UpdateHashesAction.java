@@ -9,7 +9,7 @@ class UpdateHashesAction implements Action {
 
 	UpdateHashesAction(FileHashStore hashes) {
 		if (hashes == null) {
-			throw new IllegalArgumentException("hashes cannot be null");
+			throw new IllegalArgumentException("Hash store cannot be null");
 		}
 		
 		store = hashes;
