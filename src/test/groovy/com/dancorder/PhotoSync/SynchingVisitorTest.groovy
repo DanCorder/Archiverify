@@ -87,36 +87,26 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	//TODO existing file matching hash
 	//TODO existing file not matching hash
 
-	def "file present path 1"() {
+	def "file present on one path"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
 		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
-		expectedResult.add(new FileCopyAction(root1.resolve(testFilePath), root2.resolve(testFilePath)))
+		expectedResult.add(new FileCopyAction(from, to))
 		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A file exists only in root 1"
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		visitor.visitFile(testFilePath, FileExistence.Path1Only)
+		visitor.visitFile(testFilePath, existence)
 
-		then: "An action is created to copy from root 1 to root 2"
+		then: "An action is created to copy from path 1 to path 2"
 		expectedResult == visitor.getActions()
-	}
-	
-	def "file present path 2"() {
-		setup:
-		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
-		expectedResult.add(new FileCopyAction(root2.resolve(testFilePath), root1.resolve(testFilePath)))
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		
-		when: "A file exists only in root 2"
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		visitor.visitFile(testFilePath, FileExistence.Path2Only)
-
-		then: "An action is created to copy from root 2 to root 1"
-		expectedResult == visitor.getActions()
+		where:
+		from                        | to                          | existence
+		root1.resolve(testFilePath) | root2.resolve(testFilePath) | FileExistence.Path1Only
+		root2.resolve(testFilePath) | root1.resolve(testFilePath) | FileExistence.Path2Only
 	}
-	
+
 	def "directory present both paths"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
@@ -129,33 +119,24 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		then: "A hash update action is created"
 		expectedResult == visitor.getActions()
 	}
-	
-	def "directory present path 1"() {
-		setup:
-		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new CreateDirectoryAction(root2.resolve(testDirectoryPath)))
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
-		
-		when: "A directory exists only in root 1"
-		visitor.preVisitDirectory(testDirectoryPath, FileExistence.Path1Only)
 
-		then: "An action is created to create directory under root 2"
-		expectedResult == visitor.getActions()
-	}
-	
-	def "directory present path 2"() {
+	def "directory present on one path"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new CreateDirectoryAction(root1.resolve(testDirectoryPath)))
+		expectedResult.add(new CreateDirectoryAction(newDirectory))
 		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
 		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A directory exists only in root 2"
-		visitor.preVisitDirectory(testDirectoryPath, FileExistence.Path2Only)
+		visitor.preVisitDirectory(testDirectoryPath, existence)
 
-		then: "An action is created to create directory under root 1"
+		then: "An action is created to create a directory"
 		expectedResult == visitor.getActions()
+
+		where:
+		existence               | newDirectory
+		FileExistence.Path1Only | root2.resolve(testDirectoryPath)
+		FileExistence.Path2Only | root1.resolve(testDirectoryPath)
 	}
 		
 	def "files and directories together"() {
