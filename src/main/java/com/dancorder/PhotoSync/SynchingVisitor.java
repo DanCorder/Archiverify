@@ -50,6 +50,9 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 			actions.add(new FileCopyAction(absolutePath2, absolutePath1));
 			hashStore.addHash(filePath, fileHashGenerator.calculateMd5(absolutePath2));
 		}
+		else {
+			hashStore.addHash(filePath, fileHashGenerator.calculateMd5(absolutePath1));
+		}
 	}
 	
 	List<Action> getActions() {
