@@ -8,6 +8,9 @@ class FileHashStoreTest extends spock.lang.Specification {
 	private static final testFilename1 = "testFile1"
 	private static final testFilename2 = "testFile2"
 	
+	private static final testFile1 = Paths.get(testFilename1)
+	private static final testFile2 = Paths.get(testFilename2)
+	
 	private static final testHash1 = "testHash1"
 	private static final testHash2 = "testHash2"
 	
@@ -34,15 +37,12 @@ class FileHashStoreTest extends spock.lang.Specification {
 	}
 	
 	def "create with no data"() {
-		setup:
-		def testFile = Paths.get(testFilename1)
-		
 		when: "it is created with no data"
 		def store = new FileHashStore(getMockSource(data1), getMockSource(data2))
 		
 		then: "no hash exists"
-		!store.hashExists(testFile)
-		store.getHash(testFile) == null
+		!store.hashExists(testFile1)
+		store.getHash(testFile1) == null
 		
 		where:
 		data1 | data2
@@ -67,15 +67,12 @@ class FileHashStoreTest extends spock.lang.Specification {
 	}
 
 	def "create with single file hash"() {
-		setup:
-		def testFile = Paths.get(testFilename1)
-		
 		when: "it is created"
 		def store = new FileHashStore(getMockSource(data1), getMockSource(data2))
 		
 		then: "a hash exists for the test file"
-		store.hashExists(testFile)
-		store.getHash(testFile) == testHash1
+		store.hashExists(testFile1)
+		store.getHash(testFile1) == testHash1
 		
 		where:
 		data1   | data2
@@ -106,10 +103,6 @@ class FileHashStoreTest extends spock.lang.Specification {
 	}
 
 	def "create with two file hashes"() {
-		setup:
-		def testFile1 = Paths.get(testFilename1)
-		def testFile2 = Paths.get(testFilename2)
-
 		when: "it is created"
 		def store = new FileHashStore(getMockSource(data1), getMockSource(data2))
 
@@ -152,15 +145,12 @@ class FileHashStoreTest extends spock.lang.Specification {
 	}
 	
 	def "create with same file in both paths"() {
-		setup:
-		def testFile = Paths.get(testFilename1)
-		
 		when: "it is created"
 		def store = new FileHashStore(getMockSource([line1]), getMockSource([line1]))
 		
 		then: "a hash exists for the test file"
-		store.hashExists(testFile)
-		store.getHash(testFile) == testHash1
+		store.hashExists(testFile1)
+		store.getHash(testFile1) == testHash1
 	}
 	
 	def "write same hash entered twice"() {
@@ -181,24 +171,22 @@ class FileHashStoreTest extends spock.lang.Specification {
 
 	def "Add hash to empty store"() {
 		setup:
-		def testFile = Paths.get(testFilename1)
 		def store = new FileHashStore(getMockSource([]), getMockSource([]))
 		
 		when: "a new hash is added"
-		store.addHash(testFile, testHash1)
+		store.addHash(testFile1, testHash1)
 		
 		then: "a hash exists in the store"
-		store.hashExists(testFile)
-		store.getHash(testFile) == testHash1
+		store.hashExists(testFile1)
+		store.getHash(testFile1) == testHash1
 	}
 	
 	def "write hash added to empty store"() {
 		setup:
-		def testFile = Paths.get(testFilename1)
 		def mockSource1 = getMockSource([])
 		def mockSource2 = getMockSource([])
 		def store = new FileHashStore(mockSource1, mockSource2)
-		store.addHash(testFile, testHash1)
+		store.addHash(testFile1, testHash1)
 		
 		when:
 		def data = store.write()
@@ -212,8 +200,6 @@ class FileHashStoreTest extends spock.lang.Specification {
 	
 	def "Add new hash to store"() {
 		setup:
-		def testFile1 = Paths.get(testFilename1)
-		def testFile2 = Paths.get(testFilename2)
 		def store = new FileHashStore(getMockSource([line2]), getMockSource([line2]))
 		
 		when: "a new hash is added"
@@ -228,11 +214,10 @@ class FileHashStoreTest extends spock.lang.Specification {
 	
 	def "write hash added to non-empty store"() {
 		setup:
-		def testFile = Paths.get(testFilename1)
 		def mockSource1 = getMockSource([line2])
 		def mockSource2 = getMockSource([line2])
 		def store = new FileHashStore(mockSource1, mockSource2)
-		store.addHash(testFile, testHash1)
+		store.addHash(testFile1, testHash1)
 		
 		when:
 		def data = store.write()
