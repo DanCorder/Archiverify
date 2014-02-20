@@ -98,7 +98,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		visitor.visitFile(testDirectoryPath.resolve(testFilePath), existence)
 
 		then: "The hash is added to the store"
-		1 * defaultFileHashStore.addHash(testDirectoryPath.resolve(testFilePath), testHash)
+		1 * defaultFileHashStore.addHash(testFilePath, testHash)
 		then: 0 * defaultFileHashStore._
 
 		where:

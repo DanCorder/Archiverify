@@ -44,14 +44,14 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 
 		if (existence == FileExistence.Path1Only) {
 			actions.add(new FileCopyAction(absolutePath1, absolutePath2));
-			hashStore.addHash(filePath, fileHashGenerator.calculateMd5(absolutePath1));
+			hashStore.addHash(filePath.getFileName(), fileHashGenerator.calculateMd5(absolutePath1));
 		}
 		else if (existence == FileExistence.Path2Only) {
 			actions.add(new FileCopyAction(absolutePath2, absolutePath1));
-			hashStore.addHash(filePath, fileHashGenerator.calculateMd5(absolutePath2));
+			hashStore.addHash(filePath.getFileName(), fileHashGenerator.calculateMd5(absolutePath2));
 		}
 		else {
-			hashStore.addHash(filePath, fileHashGenerator.calculateMd5(absolutePath1));
+			hashStore.addHash(filePath.getFileName(), fileHashGenerator.calculateMd5(absolutePath1));
 		}
 	}
 	
