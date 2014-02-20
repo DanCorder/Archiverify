@@ -64,14 +64,14 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		expectedResult == visitor.getActions()
 	}
 
-	def "test hash generation for new file"() {
+	def "test hash generation for new file in root"() {
 		setup:
 		def generator = Mock(FileHashGenerator)
 		generator.calculateMd5(path1) >> testHash
 		generator.calculateMd5(path2) >> testHash
 		def visitor = new SynchingVisitor(generator, defaultFileHashStoreFactory, root1, root2)
 
-		when: "A file exists in root 1"
+		when: "A file exists in a directory"
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		visitor.visitFile(testFilePath, existence)
 
@@ -85,9 +85,30 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		root2.resolve(testFilePath) | null                        | FileExistence.Path2Only
 		root1.resolve(testFilePath) | root2.resolve(testFilePath) | FileExistence.BothPaths
 	}
+	
+	def "test hash generation for new file in subdirectory"() {
+		setup:
+		def generator = Mock(FileHashGenerator)
+		generator.calculateMd5(path1) >> testHash
+		generator.calculateMd5(path2) >> testHash
+		def visitor = new SynchingVisitor(generator, defaultFileHashStoreFactory, root1, root2)
+
+		when: "A file exists in a directory"
+		visitor.preVisitDirectory(testDirectoryPath, FileExistence.BothPaths)
+		visitor.visitFile(testDirectoryPath.resolve(testFilePath), existence)
+
+		then: "The hash is added to the store"
+		1 * defaultFileHashStore.addHash(testDirectoryPath.resolve(testFilePath), testHash)
+		then: 0 * defaultFileHashStore._
+
+		where:
+		path1                                                  | path2                                                  | existence
+		root1.resolve(testDirectoryPath).resolve(testFilePath) | null                                                   | FileExistence.Path1Only
+		root2.resolve(testDirectoryPath).resolve(testFilePath) | null                                                   | FileExistence.Path2Only
+		root1.resolve(testDirectoryPath).resolve(testFilePath) | root2.resolve(testDirectoryPath).resolve(testFilePath) | FileExistence.BothPaths
+	}
 
 	//TODO both paths but different
-
 	//TODO existing file matching hash
 	//TODO existing file not matching hash
 

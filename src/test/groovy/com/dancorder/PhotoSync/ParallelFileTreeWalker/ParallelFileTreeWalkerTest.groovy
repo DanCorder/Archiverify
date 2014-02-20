@@ -142,7 +142,6 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	
 	def "sub directory both paths"() {
 		setup:
-		//qq use def
 		def final directoryPath = Paths.get("subDirectory1")
 		createDirectory(path1Root, directoryPath)
 		createDirectory(path2Root, directoryPath)
