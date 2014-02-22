@@ -50,7 +50,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 		[""]  | [""]
 	}
 
-	def "write no data"() {
+	def "don't write empty data"() {
 		setup:
 		def mockSource1 = getMockSource([])
 		def mockSource2 = getMockSource([])
@@ -59,9 +59,6 @@ class FileHashStoreTest extends spock.lang.Specification {
 		when:
 		def data = store.write()
 
-		then:
-		1 * mockSource1.writeData([])
-		1 * mockSource2.writeData([])
 		then:
 		0 * _._
 	}

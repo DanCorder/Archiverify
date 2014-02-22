@@ -44,8 +44,10 @@ class FileHashStore {
 	void write() throws IOException {
 		List<String> lines = getFileData();
 
-		source1.writeData(lines);
-		source2.writeData(lines);
+		if (lines.size() > 0) {
+			source1.writeData(lines);
+			source2.writeData(lines);
+		}
 	}
 
 	private List<String> getFileData() {
