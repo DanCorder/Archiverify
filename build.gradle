@@ -3,6 +3,7 @@ apply plugin: 'application'
 
 mainClassName = "com.dancorder.PhotoSync.PhotoSync"
 
+// Use local copies of dependencies first, then get from Maven if needed
 repositories {
     flatDir {
         dirs 'lib', 'libTest'
@@ -19,6 +20,7 @@ dependencies {
                 'org.objenesis:objenesis:2.1'
 }
 
+// Copy dependencies into the git repository
 task copyToLib(type: Copy) {
     into "lib"
     from configurations.runtime
@@ -33,6 +35,7 @@ jar.dependsOn copyToLib
 test.dependsOn copyToTestLib
 
 jar {
+    // Pull all dependencies into one jar
     doFirst {
         from (configurations.runtime.resolve().collect { it.isDirectory() ? it : zipTree(it) })
     }
