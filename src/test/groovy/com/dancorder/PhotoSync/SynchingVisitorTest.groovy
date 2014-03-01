@@ -9,7 +9,8 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private final static root1 = tempDir.resolve("testRoot1")
 	private final static root2 = tempDir.resolve("testRoot2")
-	private defaultFileHashStore
+	private defaultFileHashStore1
+	private defaultFileHashStore2
 	private defaultFileHashStoreFactory
 	private defaultFileHashGenerator
 	
@@ -20,9 +21,10 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	private final static testHash = "testHash"
 	
 	def setup() {
-		defaultFileHashStore = Mock(FileHashStore)
+		defaultFileHashStore1 = Mock(FileHashStore)
+		defaultFileHashStore2 = Mock(FileHashStore)
 		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
-		defaultFileHashStoreFactory.createFileHashStore(_,_) >> defaultFileHashStore
+		defaultFileHashStoreFactory.createFileHashStore(_) >>> [defaultFileHashStore1, defaultFileHashStore2]
 		defaultFileHashGenerator = Mock(FileHashGenerator)
 	}
 	
@@ -40,7 +42,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "root directory"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
 		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		
 		when: "It visits the root directory"
@@ -53,7 +55,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "file present both directories"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
 		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A file exists in both roots"
@@ -67,17 +69,20 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "test hash generation for new file in root"() {
 		setup:
 		def generator = Mock(FileHashGenerator)
-		generator.calculateMd5(path1) >> testHash
-		generator.calculateMd5(path2) >> testHash
+		generator.calculateMd5(root1.resolve(testFilePath)) >> testHash
+		generator.calculateMd5(root2.resolve(testFilePath)) >> testHash
 		def visitor = new SynchingVisitor(generator, defaultFileHashStoreFactory, root1, root2)
 
 		when: "A file exists in a directory"
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		visitor.visitFile(testFilePath, existence)
 
-		then: "The hash is added to the store"
-		1 * defaultFileHashStore.addHash(testFilePath, testHash)
-		then: 0 * defaultFileHashStore._
+		then: "The hash is added to the stores"
+		1 * defaultFileHashStore1.addHash(testFilePath, testHash)
+		1 * defaultFileHashStore2.addHash(testFilePath, testHash)
+		then:
+		0 * defaultFileHashStore1._
+		0 * defaultFileHashStore2._
 
 		where:
 		path1                       | path2                       | existence
@@ -85,7 +90,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		root2.resolve(testFilePath) | null                        | FileExistence.Path2Only
 		root1.resolve(testFilePath) | root2.resolve(testFilePath) | FileExistence.BothPaths
 	}
-	
+
 	def "test hash generation for new file in subdirectory"() {
 		setup:
 		def generator = Mock(FileHashGenerator)
@@ -98,8 +103,11 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		visitor.visitFile(testDirectoryPath.resolve(testFilePath), existence)
 
 		then: "The hash is added to the store"
-		1 * defaultFileHashStore.addHash(testFilePath, testHash)
-		then: 0 * defaultFileHashStore._
+		1 * defaultFileHashStore1.addHash(testFilePath, testHash)
+		1 * defaultFileHashStore2.addHash(testFilePath, testHash)
+		then:
+		0 * defaultFileHashStore1._
+		0 * defaultFileHashStore2._
 
 		where:
 		path1                                                  | path2                                                  | existence
@@ -108,14 +116,14 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		root1.resolve(testDirectoryPath).resolve(testFilePath) | root2.resolve(testDirectoryPath).resolve(testFilePath) | FileExistence.BothPaths
 	}
 
-	//TODO both paths but different
+	//TODO both paths but different (verify on copy?)
 	//TODO existing file matching hash
 	//TODO existing file not matching hash
 
 	def "file present on one path"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
 		expectedResult.add(new FileCopyAction(from, to))
 		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		
@@ -135,7 +143,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "directory present both paths"() {
 		setup:
 		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
 		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A directory exists in both roots"
@@ -149,7 +157,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		setup:
 		def expectedResult = new ArrayList<Action>()
 		expectedResult.add(new CreateDirectoryAction(newDirectory))
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
 		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		
 		when: "A directory exists only in root 2"
@@ -166,6 +174,10 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		
 	def "files and directories together"() {
 		setup:
+		defaultFileHashStore1.getDirectory() >> root1
+		defaultFileHashStore2.getDirectory() >> root2
+		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
+		defaultFileHashStoreFactory.createFileHashStore(_) >>> [defaultFileHashStore1, defaultFileHashStore2, defaultFileHashStore1, defaultFileHashStore2, defaultFileHashStore1, defaultFileHashStore2]
 		def rootPath = Paths.get("")
 		def file1Path = Paths.get("file1")
 		def directory1Path = Paths.get("testDirectory1")
@@ -174,12 +186,12 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def file3Path = directory2Path.resolve("file3")
 		
 		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
 		expectedResult.add(new FileCopyAction(root1.resolve(file1Path), root2.resolve(file1Path)))
 		expectedResult.add(new CreateDirectoryAction(root1.resolve(directory1Path)))
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
 		expectedResult.add(new FileCopyAction(root2.resolve(file2Path), root1.resolve(file2Path)))
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore))
+		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
 		
 		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
 		

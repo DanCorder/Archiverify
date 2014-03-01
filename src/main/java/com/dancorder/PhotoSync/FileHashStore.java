@@ -12,41 +12,34 @@ import java.util.List;
 class FileHashStore {
 
 	private final Dictionary<Path, String> store = new Hashtable<Path, String>();
-	private final HashFileSource source1;
-	private final HashFileSource source2;
+	private final HashFileSource source;
 
-	FileHashStore(HashFileSource path1Source, HashFileSource path2Source) throws Exception {
-		source1 = path1Source;
-		source2 = path2Source;
-		parseData(source1);
-		parseData(source2);
+	FileHashStore(HashFileSource source) throws Exception {
+		this.source = source;
+		parseData(source);
 	}
 	
-	List<Path> getDirectories() {
-		ArrayList<Path> ret = new ArrayList<Path>();
-		ret.add(source1.getDirectory());
-		ret.add(source2.getDirectory());
-		return ret;
+	Path getDirectory() {
+		return source.getDirectory();
 	}
 
-	boolean hashExists(Path filePath) {
-		return store.get(filePath) != null;
+	boolean hashExists(Path fileName) {
+		return store.get(fileName) != null;
 	}
 
-	String getHash(Path filePath) {
-		return store.get(filePath);
+	String getHash(Path fileName) {
+		return store.get(fileName);
 	}
 
-	void addHash(Path file, String hash) {
-		store.put(file, hash);
+	void addHash(Path fileName, String hash) {
+		store.put(fileName, hash);
 	}
 
 	void write() throws IOException {
 		List<String> lines = getFileData();
 
 		if (lines.size() > 0) {
-			source1.writeData(lines);
-			source2.writeData(lines);
+			source.writeData(lines);
 		}
 	}
 
