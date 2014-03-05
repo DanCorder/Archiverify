@@ -11,7 +11,7 @@ public class PhotoSync {
 		//TODO: Test/refactor this method
 		Parameters params = new Parameters(args);
 
-		SynchingVisitor visitor = new SynchingVisitor(new FileHashGenerator(), new FileHashStoreFactory(), params.getPath1(), params.getPath2());
+		SynchingVisitor visitor = new SynchingVisitor(new SyncLogic(new FileHashGenerator()), new FileHashStoreFactory(), params.getPath1(), params.getPath2());
 		ParallelFileTreeWalker walker = new ParallelFileTreeWalker(params.getPath1(), params.getPath2(), visitor);
 		
 		walker.walk();

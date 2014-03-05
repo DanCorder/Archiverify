@@ -7,203 +7,141 @@ import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence
 class SynchingVisitorTest extends spock.lang.Specification {
 
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
-	private final static root1 = tempDir.resolve("testRoot1")
-	private final static root2 = tempDir.resolve("testRoot2")
-	private defaultFileHashStore1
-	private defaultFileHashStore2
-	private defaultFileHashStoreFactory
-	private defaultFileHashGenerator
+	private final static root1Absolute = tempDir.resolve("testRoot1")
+	private final static root2Absolute = tempDir.resolve("testRoot2")
+	private final static subDirRelative = Paths.get("subDir")
+	private final static subDir1Absolute = root1Absolute.resolve(subDirRelative)
+	private final static subDir2Absolute = root2Absolute.resolve(subDirRelative)
+	private final static file1Relative = Paths.get("file1")
+	private final defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
+
 	
-	private final static testFilePath = Paths.get("testFile")
-	private final static testDirectoryPath = Paths.get("testDirectory")
-	private final static testDirectoryPath2 = Paths.get("testDirectory2")
-	
-	private final static testHash = "testHash"
-	
-	def setup() {
-		defaultFileHashStore1 = Mock(FileHashStore)
-		defaultFileHashStore2 = Mock(FileHashStore)
-		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
-		defaultFileHashStoreFactory.createFileHashStore(_) >>> [defaultFileHashStore1, defaultFileHashStore2]
-		defaultFileHashGenerator = Mock(FileHashGenerator)
-	}
-	
-	def "no visits"() {
+	def "Actions returned correctly for compare directories call"() {
 		setup:
-		def expectedResult = new ArrayList<Action>()
+		def action = Mock(Action)
+		def action2 = Mock(Action)
+		def actions = new ArrayList<Action>()
+		actions.add(action)
+		actions.add(action2)
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_, _, _) >> actions
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
-		when: "A new visitor is created"
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)		
-
-		then: "No actions are created"
-		expectedResult == visitor.getActions()
-	}
-	
-	def "root directory"() {
-		setup:
-		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
+		when:
+		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		
-		when: "It visits the root directory"
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-
-		then: "A hash update action is created"
-		expectedResult == visitor.getActions()
-	}
-	
-	def "file present both directories"() {
-		setup:
-		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
-		
-		when: "A file exists in both roots"
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		visitor.visitFile(testFilePath, FileExistence.BothPaths)
-
-		then: "No actions are created"
-		expectedResult == visitor.getActions()
-	}
-
-	def "test hash generation for new file in root"() {
-		setup:
-		def generator = Mock(FileHashGenerator)
-		generator.calculateMd5(root1.resolve(testFilePath)) >> testHash
-		generator.calculateMd5(root2.resolve(testFilePath)) >> testHash
-		def visitor = new SynchingVisitor(generator, defaultFileHashStoreFactory, root1, root2)
-
-		when: "A file exists in a directory"
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		visitor.visitFile(testFilePath, existence)
-
-		then: "The hash is added to the stores"
-		1 * defaultFileHashStore1.addHash(testFilePath, testHash)
-		1 * defaultFileHashStore2.addHash(testFilePath, testHash)
 		then:
-		0 * defaultFileHashStore1._
-		0 * defaultFileHashStore2._
-
-		where:
-		path1                       | path2                       | existence
-		root1.resolve(testFilePath) | null                        | FileExistence.Path1Only
-		root2.resolve(testFilePath) | null                        | FileExistence.Path2Only
-		root1.resolve(testFilePath) | root2.resolve(testFilePath) | FileExistence.BothPaths
+		visitor.getActions().size() == 2
+		visitor.getActions()[0] == action
+		visitor.getActions()[1] == action2
 	}
-
-	def "test hash generation for new file in subdirectory"() {
+	
+	def "Parameters passed correctly to compare directories for root directory"() {
 		setup:
-		def generator = Mock(FileHashGenerator)
-		generator.calculateMd5(path1) >> testHash
-		generator.calculateMd5(path2) >> testHash
-		def visitor = new SynchingVisitor(generator, defaultFileHashStoreFactory, root1, root2)
-
-		when: "A file exists in a directory"
-		visitor.preVisitDirectory(testDirectoryPath, FileExistence.BothPaths)
-		visitor.visitFile(testDirectoryPath.resolve(testFilePath), existence)
-
-		then: "The hash is added to the store"
-		1 * defaultFileHashStore1.addHash(testFilePath, testHash)
-		1 * defaultFileHashStore2.addHash(testFilePath, testHash)
-		then:
-		0 * defaultFileHashStore1._
-		0 * defaultFileHashStore2._
-
-		where:
-		path1                                                  | path2                                                  | existence
-		root1.resolve(testDirectoryPath).resolve(testFilePath) | null                                                   | FileExistence.Path1Only
-		root2.resolve(testDirectoryPath).resolve(testFilePath) | null                                                   | FileExistence.Path2Only
-		root1.resolve(testDirectoryPath).resolve(testFilePath) | root2.resolve(testDirectoryPath).resolve(testFilePath) | FileExistence.BothPaths
-	}
-
-	//TODO both paths but different (verify on copy?)
-	//TODO existing file matching hash
-	//TODO existing file not matching hash
-
-	def "file present on one path"() {
-		setup:
-		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
-		expectedResult.add(new FileCopyAction(from, to))
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
+		def logic = Mock(SyncLogic)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
-		when: "A file exists only in root 1"
+		when:
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		visitor.visitFile(testFilePath, existence)
-
-		then: "An action is created to copy from path 1 to path 2"
-		expectedResult == visitor.getActions()
+		
+		then:
+		1 * logic.compareDirectories(root1Absolute, root2Absolute, FileExistence.BothPaths) >> new ArrayList<Action>()
+	}
+	
+	def "Parameters passed correctly to compare directories for sub directories"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		
+		when:
+		visitor.preVisitDirectory(subDirRelative, existence)
+		
+		then:
+		1 * logic.compareDirectories(subDir1Absolute, subDir2Absolute, existence) >> new ArrayList<Action>()
 		
 		where:
-		from                        | to                          | existence
-		root1.resolve(testFilePath) | root2.resolve(testFilePath) | FileExistence.Path1Only
-		root2.resolve(testFilePath) | root1.resolve(testFilePath) | FileExistence.Path2Only
+		existence               | _
+		FileExistence.BothPaths | _
+		FileExistence.Path1Only | _
+		FileExistence.Path2Only | _
 	}
-
-	def "directory present both paths"() {
+	
+	def "Actions returned correctly for compare files call"() {
 		setup:
-		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
+		def action = Mock(Action)
+		def action2 = Mock(Action)
+		def actions = new ArrayList<Action>()
+		actions.add(action)
+		actions.add(action2)
+		def logic = Mock(SyncLogic)
+		logic.compareFiles(_, _, _, _, _) >> actions
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
-		when: "A directory exists in both roots"
-		visitor.preVisitDirectory(testDirectoryPath, FileExistence.BothPaths)
-
-		then: "A hash update action is created"
-		expectedResult == visitor.getActions()
+		when:
+		visitor.visitFile(file1Relative, FileExistence.BothPaths)
+		
+		then:
+		visitor.getActions().size() == 2
+		visitor.getActions()[0] == action
+		visitor.getActions()[1] == action2
 	}
-
-	def "directory present on one path"() {
+	
+	def "Parameters passed correctly to compare files in root"() {
 		setup:
-		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new CreateDirectoryAction(newDirectory))
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
+		def fileHashStore1 = Mock(FileHashStore)
+		def fileHashStore2 = Mock(FileHashStore)
+		def fileHashStoreFactory = Mock(FileHashStoreFactory)
+		fileHashStoreFactory.createFileHashStore(root1Absolute) >> fileHashStore1
+		fileHashStoreFactory.createFileHashStore(root2Absolute) >> fileHashStore2
+		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
 		
-		when: "A directory exists only in root 2"
-		visitor.preVisitDirectory(testDirectoryPath, existence)
-
-		then: "An action is created to create a directory"
-		expectedResult == visitor.getActions()
+		when:
+		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.visitFile(file1Relative, existence)
+		
+		then:
+		1 * logic.compareFiles(root1Absolute.resolve(file1Relative),
+			                   fileHashStore1,
+							   root2Absolute.resolve(file1Relative),
+							   fileHashStore2,
+							   existence) >> new ArrayList<Action>()
+		
+		where:
+		existence               | _
+		FileExistence.BothPaths | _
+		FileExistence.Path1Only | _
+		FileExistence.Path2Only | _
+	}
+	
+	def "Parameters passed correctly to compare files in subdirectory"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
+		def fileHashStore1 = Mock(FileHashStore)
+		def fileHashStore2 = Mock(FileHashStore)
+		def fileHashStoreFactory = Mock(FileHashStoreFactory)
+		fileHashStoreFactory.createFileHashStore(root1Absolute.resolve(subDirRelative)) >> fileHashStore1
+		fileHashStoreFactory.createFileHashStore(root2Absolute.resolve(subDirRelative)) >> fileHashStore2
+		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
+		
+		when:
+		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		visitor.visitFile(subDirRelative.resolve(file1Relative), existence)
+		
+		then:
+		1 * logic.compareFiles(root1Absolute.resolve(subDirRelative).resolve(file1Relative),
+							   fileHashStore1,
+							   root2Absolute.resolve(subDirRelative).resolve(file1Relative),
+							   fileHashStore2,
+							   existence) >> new ArrayList<Action>()
 
 		where:
-		existence               | newDirectory
-		FileExistence.Path1Only | root2.resolve(testDirectoryPath)
-		FileExistence.Path2Only | root1.resolve(testDirectoryPath)
+		existence               | _
+		FileExistence.BothPaths | _
+		FileExistence.Path1Only | _
+		FileExistence.Path2Only | _
 	}
-		
-	def "files and directories together"() {
-		setup:
-		defaultFileHashStore1.getDirectory() >> root1
-		defaultFileHashStore2.getDirectory() >> root2
-		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
-		defaultFileHashStoreFactory.createFileHashStore(_) >>> [defaultFileHashStore1, defaultFileHashStore2, defaultFileHashStore1, defaultFileHashStore2, defaultFileHashStore1, defaultFileHashStore2]
-		def rootPath = Paths.get("")
-		def file1Path = Paths.get("file1")
-		def directory1Path = Paths.get("testDirectory1")
-		def file2Path = directory1Path.resolve("file2")
-		def directory2Path = Paths.get("testDirectory2")
-		def file3Path = directory2Path.resolve("file3")
-		
-		def expectedResult = new ArrayList<Action>()
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
-		expectedResult.add(new FileCopyAction(root1.resolve(file1Path), root2.resolve(file1Path)))
-		expectedResult.add(new CreateDirectoryAction(root1.resolve(directory1Path)))
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
-		expectedResult.add(new FileCopyAction(root2.resolve(file2Path), root1.resolve(file2Path)))
-		expectedResult.add(new UpdateHashesAction(defaultFileHashStore1, defaultFileHashStore2))
-		
-		def visitor = new SynchingVisitor(defaultFileHashGenerator, defaultFileHashStoreFactory, root1, root2)
-		
-		when: "It visits a number of files and directories"
-		visitor.preVisitDirectory(rootPath, FileExistence.BothPaths)
-		visitor.visitFile(file1Path, FileExistence.Path1Only)
-		visitor.preVisitDirectory(directory1Path, FileExistence.Path2Only)
-		visitor.visitFile(file2Path, FileExistence.Path2Only)
-		visitor.preVisitDirectory(directory1Path, FileExistence.BothPaths)
-		visitor.visitFile(file3Path, FileExistence.BothPaths)
-		
-		then: "The correct actions are created in the correct order"
-		expectedResult == visitor.getActions()
-	}	
 }
