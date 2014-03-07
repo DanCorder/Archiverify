@@ -31,7 +31,7 @@ class FileHashStore {
 		return store.get(fileName);
 	}
 
-	void addHash(Path fileName, String hash) {
+	void setHash(Path fileName, String hash) {
 		store.put(fileName, hash);
 	}
 
@@ -81,7 +81,7 @@ class FileHashStore {
 			}
 		}
 		else {
-			store.put(path, hash);
+			setHash(path, hash);
 		}
 	}
 

@@ -15,6 +15,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	private final static file1Relative = Paths.get("file1")
 	private final defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
 
+	//TODO Exception thrown by sync logic adds a warning action
 	
 	def "Actions returned correctly for compare directories call"() {
 		setup:

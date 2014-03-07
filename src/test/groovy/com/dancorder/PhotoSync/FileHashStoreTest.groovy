@@ -98,7 +98,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 		def store = new FileHashStore(getMockSource([]))
 		
 		when: "a new hash is added"
-		store.addHash(path, hash)
+		store.setHash(path, hash)
 
 		then: "a hash exists in the store"
 		store.hashExists(path)
@@ -114,7 +114,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 		setup:
 		def mockSource = getMockSource([])
 		def store = new FileHashStore(mockSource)
-		store.addHash(testFile1RelativePath, testHash1)
+		store.setHash(testFile1RelativePath, testHash1)
 
 		when:
 		def data = store.write()
@@ -130,7 +130,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 		def store = new FileHashStore(getMockSource([line1]))
 		
 		when: "a new hash is added"
-		store.addHash(testFile2RelativePath, testHash2)
+		store.setHash(testFile2RelativePath, testHash2)
 		
 		then: "both hashes exist in the store"
 		store.hashExists(testFile1RelativePath)
@@ -143,7 +143,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 		setup:
 		def mockSource = getMockSource([line1])
 		def store = new FileHashStore(mockSource)
-		store.addHash(testFile2RelativePath, testHash2)
+		store.setHash(testFile2RelativePath, testHash2)
 		
 		when:
 		def data = store.write()
@@ -152,6 +152,18 @@ class FileHashStoreTest extends spock.lang.Specification {
 		1 * mockSource.writeData([line1, line2])
 		then:
 		0 * _._
+	}
+	
+	def "Update hash in store"() {
+		setup:
+		def store = new FileHashStore(getMockSource([line1]))
+		
+		when: "a hash is updated"
+		store.setHash(testFile1RelativePath, testHash2)
+		
+		then: "the new hash is stored"
+		store.hashExists(testFile1RelativePath)
+		store.getHash(testFile1RelativePath) == testHash2
 	}
 
 	def "same file appears multiple times with different hashes"() {
