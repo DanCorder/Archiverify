@@ -20,17 +20,34 @@ class SyncLogic {
 		String hashFromStore2 = store2.getHash(file2.getFileName());
 		String hashFromFile1 = hashGenerator.calculateMd5(file1);
 		String hashFromFile2 = hashGenerator.calculateMd5(file2);
+		ArrayList<Action> actions = new ArrayList<Action>();
 		
 		if (hashFromStore1 != hashFromStore2) {
-			if (hashFromStore1 == hashFromFile1 && hashFromStore1 == hashFromFile2) {
-				store2.setHash(file2.getFileName(), hashFromStore1);
+			if (hashFromFile1 == hashFromFile2) {
+				if (hashFromStore1 == hashFromFile1) {
+					store2.setHash(file2.getFileName(), hashFromStore1);
+					return actions;
+				}
+				if (hashFromStore2 == hashFromFile1) {
+					store1.setHash(file1.getFileName(), hashFromStore2);
+					return actions;
+				}
 			}
-			if (hashFromStore2 == hashFromFile1 && hashFromStore2 == hashFromFile2) {
-				store1.setHash(file1.getFileName(), hashFromStore2);
+		}
+		else if (hashFromFile1 != hashFromFile2) {
+			if (hashFromStore1 == hashFromStore2) {
+				if (hashFromFile1 == hashFromStore1) {
+					actions.add(new FileCopyAction(file1, file2));
+					return actions;
+				}
+				if (hashFromFile2 == hashFromStore1) {
+					actions.add(new FileCopyAction(file2, file1));
+					return actions;
+				}
 			}
 		}
 
-		return new ArrayList<Action>();
+		return actions;
 	}
 	
 	List<Action> compareDirectories(Path absolutePath1, Path absolutePath2, FileExistence existence) {

@@ -15,6 +15,7 @@ class SyncLogicTest extends spock.lang.Specification {
 //		Hash2 - The hash stored in the hash file under root 2
 //  The values in the columns (A, B, C, D, NULL) show which values match and
 //  which are different in each case.
+//  Each combination needs to be tested with file1/hash1 and file2/hash2 switched
 //	
 //	File1 & Hash1 match
 //	File1 | Hash1 | File2 | Hash2 | Action
@@ -85,18 +86,17 @@ class SyncLogicTest extends spock.lang.Specification {
 	private final static hashB = "hashB"
 	private final static hashC = "hashC"
 	private final static hashD = "hashD"
-	
-	def private FileHashGenerator hashGenerator
+
 	def private Path absolutePath1
 	def private Path absolutePath2
 	def private FileHashStore store1
 	def private FileHashStore store2
+	def private SyncLogic logic
 	
 	def "AAAA"() {
 		setup:
 		setupScenario(hashA, hashA, hashA, hashA)
 		def expectedResult = new ArrayList<Action>()
-		def logic = new SyncLogic(hashGenerator)
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
@@ -111,7 +111,6 @@ class SyncLogicTest extends spock.lang.Specification {
 		setup:
 		setupScenario(hashA, hashA, hashA, hashB)
 		def expectedResult = new ArrayList<Action>()
-		def logic = new SyncLogic(hashGenerator)
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
@@ -126,15 +125,72 @@ class SyncLogicTest extends spock.lang.Specification {
 		setup:
 		setupScenario(hashA, hashB, hashA, hashA)
 		def expectedResult = new ArrayList<Action>()
-		def logic = new SyncLogic(hashGenerator)
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
 
 		then:
 		expectedResult == result
-		0 * store2.setHash(_,_)
 		1 * store1.setHash(filePath, hashA)
+		0 * store2.setHash(_,_)
+	}
+	
+	def "AAAN"() {
+		setup:
+		setupScenario(hashA, hashA, hashA, null)
+		def expectedResult = new ArrayList<Action>()
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		0 * store1.setHash(_,_)
+		1 * store2.setHash(filePath, hashA)
+	}
+	
+	def "AAAN reversed"() {
+		setup:
+		setupScenario(hashA, null, hashA, hashA)
+		def expectedResult = new ArrayList<Action>()
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		1 * store1.setHash(filePath, hashA)
+		0 * store2.setHash(_,_)
+	}
+	
+	def "AABA"() {
+		setup:
+		setupScenario(hashA, hashA, hashB, hashA)
+		def expectedResult = new ArrayList<Action>()
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		0 * store1.setHash(_,_)
+		0 * store2.setHash(_,_)
+	}
+	
+	def "AABA reversed"() {
+		setup:
+		setupScenario(hashB, hashA, hashA, hashA)
+		def expectedResult = new ArrayList<Action>()
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		0 * store1.setHash(_,_)
+		0 * store2.setHash(_,_)
 	}
 	
 	// TODO Remaining file test
@@ -143,9 +199,10 @@ class SyncLogicTest extends spock.lang.Specification {
 	def private setupScenario(String fileHash1, String storeHash1, String fileHash2, String storeHash2) {
 		absolutePath1 = root1.resolve(filePath)
 		absolutePath2 = root2.resolve(filePath)
-		hashGenerator = Mock(FileHashGenerator)
+		def hashGenerator = Mock(FileHashGenerator)
 		hashGenerator.calculateMd5(absolutePath1) >> fileHash1
 		hashGenerator.calculateMd5(absolutePath2) >> fileHash2
+		logic = new SyncLogic(hashGenerator)
 		
 		store1 = Mock(FileHashStore)
 		store1.hashExists(filePath) >> true
