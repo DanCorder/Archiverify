@@ -33,6 +33,9 @@ class SyncLogic {
 					return actions;
 				}
 			}
+			else if (hashFromFile1 == hashFromStore1 && hashFromFile2 == hashFromStore2) {
+				actions.add(new SyncWarningAction("File " + file1 + " and file " + file2 + " are different but both have matching hashes. Please manually move or delete the incorrect file."));
+			}
 		}
 		else if (hashFromFile1 != hashFromFile2) {
 			if (hashFromStore1 == hashFromStore2) {
