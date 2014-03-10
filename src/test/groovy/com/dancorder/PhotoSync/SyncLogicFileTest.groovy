@@ -248,6 +248,25 @@ class SyncLogicTest extends spock.lang.Specification {
 		0 * store2.setHash(_,_)
 	}
 	
+	def "AANA and reversed"() {
+		setup:
+		setupScenario(hash1, hash2, hash3, hash4)
+		expectedResult.add(new FileCopyAction(from, to))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		0 * store1.setHash(_,_)
+		0 * store2.setHash(_,_)
+		
+		where:
+		hash1 | hash2 | hash3 | hash4 | from          | to
+		hashA | hashA | null  | hashA | absolutePath1 | absolutePath2
+		null  | hashA | hashA | hashA | absolutePath2 | absolutePath1
+	}
+	
 	// TODO Remaining file test
 	// TODO Directory tests
 	
