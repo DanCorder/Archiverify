@@ -35,6 +35,17 @@ class SyncLogic {
 			}
 			else if (hashFromFile1 == hashFromStore1 && hashFromFile2 == hashFromStore2) {
 				actions.add(new SyncWarningAction("File " + file1 + " and file " + file2 + " are different but both have matching hashes. Please manually move or delete the incorrect file."));
+				return actions;
+			}
+			else if (hashFromFile1 == hashFromStore1 && hashFromFile2 != hashFromStore2) {
+				actions.add(new FileCopyAction(file1, file2));
+				store2.setHash(file2.getFileName(), hashFromStore1);
+				return actions;
+			}
+			else if (hashFromFile1 != hashFromStore1 && hashFromFile2 == hashFromStore2) {
+				actions.add(new FileCopyAction(file2, file1));
+				store1.setHash(file1.getFileName(), hashFromStore2);
+				return actions;
 			}
 		}
 		else if (hashFromFile1 != hashFromFile2) {

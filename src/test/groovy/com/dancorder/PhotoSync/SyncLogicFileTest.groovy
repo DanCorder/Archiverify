@@ -192,6 +192,34 @@ class SyncLogicTest extends spock.lang.Specification {
 		0 * store2.setHash(_,_)
 	}
 	
+	def "AABC"() {
+		setup:
+		setupScenario(hashA, hashA, hashB, hashC)
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		0 * store1.setHash(_,_)
+		1 * store2.setHash(filePath, hashA)
+	}
+	
+	def "AABC reversed"() {
+		setup:
+		setupScenario(hashB, hashC, hashA, hashA)
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		1 * store1.setHash(filePath, hashA)
+		0 * store2.setHash(_,_)
+	}
+	
 	// TODO Remaining file test
 	// TODO Directory tests
 	
