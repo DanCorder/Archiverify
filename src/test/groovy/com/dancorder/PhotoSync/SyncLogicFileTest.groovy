@@ -220,6 +220,34 @@ class SyncLogicTest extends spock.lang.Specification {
 		0 * store2.setHash(_,_)
 	}
 	
+	def "AABN"() {
+		setup:
+		setupScenario(hashA, hashA, hashB, null)
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		0 * store1.setHash(_,_)
+		1 * store2.setHash(filePath, hashA)
+	}
+	
+	def "AABN reversed"() {
+		setup:
+		setupScenario(hashB, null, hashA, hashA)
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+
+		then:
+		expectedResult == result
+		1 * store1.setHash(filePath, hashA)
+		0 * store2.setHash(_,_)
+	}
+	
 	// TODO Remaining file test
 	// TODO Directory tests
 	
@@ -232,12 +260,21 @@ class SyncLogicTest extends spock.lang.Specification {
 		logic = new SyncLogic(hashGenerator)
 		
 		store1 = Mock(FileHashStore)
-		store1.hashExists(filePath) >> true
-		store1.getHash(filePath) >> storeHash1
+		setupStore(storeHash1, store1)
 		store2 = Mock(FileHashStore)
-		store2.hashExists(filePath) >> true
-		store2.getHash(filePath) >> storeHash2
+		setupStore(storeHash2, store2)
 		
 		expectedResult = new ArrayList();
+	}
+
+	private setupStore(String storeHash, FileHashStore store) {
+		if (storeHash == null) {
+			store.hashExists(filePath) >> false
+			store.getHash(filePath) >> null
+		}
+		else {
+			store.hashExists(filePath) >> true
+			store.getHash(filePath) >> storeHash
+		}
 	}
 }
