@@ -25,11 +25,11 @@ class SyncLogic {
 			return new ArrayList<Action>();
 		}
 		
-		if (hashFromFile1 == hashFromStore1) {
+		if (hashFromFile1 == hashFromStore1 && hashFromFile1 != null) {
 			return oneFileAndStoreHashMatch(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
 		}
 		
-		if (hashFromFile2 == hashFromStore2) {
+		if (hashFromFile2 == hashFromStore2 && hashFromFile2 != null) {
 			return oneFileAndStoreHashMatch(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
 		}
 
@@ -48,21 +48,41 @@ class SyncLogic {
 		
 		ArrayList<Action> actions = new ArrayList<Action>();
 		
-		if (otherHashFromFile == otherHashFromStore) {
+		if (otherHashFromFile == null && otherHashFromStore == null) {
+			overwriteFileAndHash(matchingHashFromStore, matchingFile, otherFile, otherStore, actions);
+		}
+		else if (otherHashFromFile == otherHashFromStore) {
 			actions.add(new SyncWarningAction("File " + matchingFile + " and file " + otherFile + " are different but both have matching hashes. Please manually move or delete the incorrect file."));
 		}
 		else if (matchingHashFromFile == otherHashFromFile) {
-			otherStore.setHash(otherFile.getFileName(), otherHashFromFile);
+			overwriteHash(otherHashFromFile, otherFile, otherStore);
 		}
 		else if (matchingHashFromStore == otherHashFromStore) {
-			actions.add(new FileCopyAction(matchingFile, otherFile));
+			overwriteFile(matchingFile, otherFile, actions);
 		}
 		else {
-			otherStore.setHash(otherFile.getFileName(), matchingHashFromStore);
-			actions.add(new FileCopyAction(matchingFile, otherFile));
+			overwriteFileAndHash(matchingHashFromStore, matchingFile, otherFile, otherStore, actions);
 		}
 
 		return actions;
+	}
+
+	private void overwriteFileAndHash(
+			String goodHash,
+			Path goodFile,
+			Path badFile,
+			FileHashStore badStore,
+			ArrayList<Action> actions) {
+		overwriteHash(goodHash, badFile, badStore);
+		overwriteFile(goodFile, badFile, actions);
+	}
+
+	private void overwriteHash(String goodHash, Path badFile, FileHashStore badStore) {
+		badStore.setHash(badFile.getFileName(), goodHash);
+	}
+
+	private void overwriteFile(Path goodFile, Path badFile,	ArrayList<Action> actions) {
+		actions.add(new FileCopyAction(goodFile, badFile));
 	}
 
 	private boolean allHashesMatch(String hash1, String hash2,String hash3, String hash4) {
