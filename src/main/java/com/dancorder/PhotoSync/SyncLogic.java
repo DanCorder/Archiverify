@@ -15,7 +15,7 @@ class SyncLogic {
 		this.hashGenerator = hashGenerator;
 	}
 	
-	List<Action> compareFiles(Path file1, FileHashStore store1, Path file2, FileHashStore store2, FileExistence existence) throws IOException {
+	List<Action> compareFiles(Path file1, FileHashStore store1, Path file2, FileHashStore store2) throws IOException {
 		String hashFromFile1 = hashGenerator.calculateMd5(file1);
 		String hashFromFile2 = hashGenerator.calculateMd5(file2);
 		String hashFromStore1 = store1.getHash(file1.getFileName());

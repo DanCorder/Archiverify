@@ -42,7 +42,7 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 		Path file1 = root1.resolve(relativeFilePath);
 		Path file2 = root2.resolve(relativeFilePath);
 		
-		List<Action> newActions = syncLogic.compareFiles(file1, hashStore1, file2, hashStore2, existence);
+		List<Action> newActions = syncLogic.compareFiles(file1, hashStore1, file2, hashStore2);
 		actions.addAll(newActions);
 	}
 	

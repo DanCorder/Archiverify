@@ -16,11 +16,18 @@ class FileHashGeneratorTest extends spock.lang.Specification {
 	def "hash generation"() {
 		setup: "correct hash value calculated by http://onlinemd5.com/"
 		writeTempFile("testData")
-		def expected = "3a760fae784d30a1b50e304e97a17355"
 		def generator = new FileHashGenerator()
 
 		expect: "check the generator creates the correct hash"
-		generator.calculateMd5(tempInputFile) == expected
+		generator.calculateMd5(tempInputFile) == "3a760fae784d30a1b50e304e97a17355"
+	}
+	
+	def "hash generation for non-existant file"() {
+		setup:
+		def generator = new FileHashGenerator()
+
+		expect: "check the generator creates the correct hash"
+		generator.calculateMd5(tempInputFile) == null
 	}
 
 	private void writeTempFile(String data) throws IOException {

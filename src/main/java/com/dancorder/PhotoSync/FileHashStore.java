@@ -24,7 +24,7 @@ class FileHashStore {
 	}
 
 	boolean hashExists(Path fileName) {
-		return store.get(fileName) != null;
+		return getHash(fileName) != null;
 	}
 
 	String getHash(Path fileName) {

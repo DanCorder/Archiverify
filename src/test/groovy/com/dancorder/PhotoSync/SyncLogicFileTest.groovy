@@ -3,8 +3,6 @@ package com.dancorder.PhotoSync
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence
-
 class SyncLogicTest extends spock.lang.Specification {
 	
 //	The rules for the synching logic are tabulated below
@@ -99,7 +97,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		setupScenario(hashA, hashA, hashA, hashA)
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -112,7 +110,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		setupScenario(hashA, hashA, hashA, hashB)
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -125,7 +123,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		setupScenario(hashA, hashB, hashA, hashA)
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -138,7 +136,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		setupScenario(hashA, hashA, hashA, null)
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -151,7 +149,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		setupScenario(hashA, null, hashA, hashA)
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -165,7 +163,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(from, to))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -184,7 +182,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new SyncWarningAction("File " + absolutePath1 + " and file " + absolutePath2 + " are different but both have matching hashes. Please manually move or delete the incorrect file."))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -198,7 +196,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -212,7 +210,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -226,7 +224,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -240,7 +238,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -254,7 +252,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(from, to))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -273,7 +271,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -287,7 +285,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -301,7 +299,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result
@@ -315,7 +313,7 @@ class SyncLogicTest extends spock.lang.Specification {
 		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
 		
 		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2, FileExistence.BothPaths)
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
 		then:
 		expectedResult == result

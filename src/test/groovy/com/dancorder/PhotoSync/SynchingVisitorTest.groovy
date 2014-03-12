@@ -75,7 +75,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		actions.add(action)
 		actions.add(action2)
 		def logic = Mock(SyncLogic)
-		logic.compareFiles(_, _, _, _, _) >> actions
+		logic.compareFiles(_, _, _, _) >> actions
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
@@ -106,9 +106,8 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		1 * logic.compareFiles(root1Absolute.resolve(file1Relative),
 			                   fileHashStore1,
 							   root2Absolute.resolve(file1Relative),
-							   fileHashStore2,
-							   existence) >> new ArrayList<Action>()
-		
+							   fileHashStore2) >> new ArrayList<Action>()
+	
 		where:
 		existence               | _
 		FileExistence.BothPaths | _
@@ -136,8 +135,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		1 * logic.compareFiles(root1Absolute.resolve(subDirRelative).resolve(file1Relative),
 							   fileHashStore1,
 							   root2Absolute.resolve(subDirRelative).resolve(file1Relative),
-							   fileHashStore2,
-							   existence) >> new ArrayList<Action>()
+							   fileHashStore2) >> new ArrayList<Action>()
 
 		where:
 		existence               | _
