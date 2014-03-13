@@ -24,18 +24,38 @@ class SyncLogic {
 		if (allHashesMatch(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2)) {
 			return new ArrayList<Action>();
 		}
-		
-		if (hashFromFile1 == hashFromStore1 && hashFromFile1 != null) {
+		else if (hashFromFile1 == hashFromStore1 && hashFromFile1 != null) {
 			return oneFileAndStoreHashMatch(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
 		}
-		
-		if (hashFromFile2 == hashFromStore2 && hashFromFile2 != null) {
+		else if (hashFromFile2 == hashFromStore2 && hashFromFile2 != null) {
 			return oneFileAndStoreHashMatch(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
+		}
+		else if (hashFromFile1 != hashFromStore1 && hashFromFile1 != null && hashFromStore1 != null) {
+			return mismatchedFileAndStoreHash(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, file1, file2);
+		}
+		else if (hashFromFile2 != hashFromStore2 && hashFromFile2 != null && hashFromStore2 != null) {
+			return mismatchedFileAndStoreHash(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, file2, file1);
 		}
 
 		return null;
 	}
 	
+	private List<Action> mismatchedFileAndStoreHash(
+			String mismatchHashFromFile,
+			String mismatchedHashFromStore,
+			String otherHashFromFile,
+			String otherHashFromStore,
+			Path mismatchedFile,
+			Path otherFile) {
+		ArrayList<Action> actions = new ArrayList<Action>();
+		actions.add(new SyncWarningAction(
+				"There was a problem synching " +
+				mismatchedFile + " (calculated hash: " + mismatchHashFromFile + ", stored hash: " + mismatchedHashFromStore + ") and" +
+				otherFile + " (calculated hash: " + otherHashFromFile + ", stored hash: " + otherHashFromStore + ")" +
+				" please determine the correct file and hash and update the file(s) and/or hash(es)."));
+		return actions;
+	}
+
 	private List<Action> oneFileAndStoreHashMatch(
 			String matchingHashFromFile,
 			String matchingHashFromStore,

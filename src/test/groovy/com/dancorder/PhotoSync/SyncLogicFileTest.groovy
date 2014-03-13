@@ -321,6 +321,55 @@ class SyncLogicTest extends spock.lang.Specification {
 		0 * store2.setHash(_,_)
 	}
 	
+	def "ABXX tests"() {
+		setup:
+		setupScenario(hash1, hash2, hash3, hash4)
+		def warning1 = new SyncWarningAction(
+			"There was a problem synching " +
+			absolutePath1 + " (calculated hash: " + hash1 + ", stored hash: " + hash2 + ") and" +
+			absolutePath2 + " (calculated hash: " + hash3 + ", stored hash: " + hash4 + ")" +
+			" please determine the correct file and hash and update the file(s) and/or hash(es).")
+		def warning2 = new SyncWarningAction(
+			"There was a problem synching " +
+			absolutePath2 + " (calculated hash: " + hash3 + ", stored hash: " + hash4 + ") and" +
+			absolutePath1 + " (calculated hash: " + hash1 + ", stored hash: " + hash2 + ")" +
+			" please determine the correct file and hash and update the file(s) and/or hash(es).")
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		result.size() == 1
+		result[0] == warning1 || result[0] == warning2
+		0 * store1.setHash(_,_)
+		0 * store2.setHash(_,_)
+		
+		where:
+		hash1 | hash2 | hash3 | hash4
+		hashA | hashB | hashA | hashB // ABAB no reverse
+		hashA | hashB | hashA | hashC // ABAC no reverse
+		hashA | hashB | hashA | null  // ABAN
+		hashA | null  | hashA | hashB // ABAN reverse
+		hashA | hashB | hashB | hashA // ABBA no reverse
+		hashA | hashB | hashB | hashC // ABBC
+		hashB | hashC | hashA | hashB // ABBC reverse
+		hashA | hashB | hashB | null  // ABBN
+		hashB | null  | hashA | hashB // ABBN reverse
+		hashA | hashB | hashC | hashB // ABCB no reverse
+		hashC | hashB | hashC | hashD // ABCD no reverse
+		hashA | hashB | hashC | null  // ABCN
+		hashC | null  | hashA | hashB // ABCN reverse
+		hashA | hashB | null  | hashA // ABNA
+		null  | hashA | hashA | hashB // ABNA reverse
+		hashA | hashB | null  | hashB // ABNB
+		null  | hashB | hashA | hashB // ABNB reverse
+		hashA | hashB | null  | hashC // ABNC
+		null  | hashC | hashA | hashB // ABNC reverse
+		hashA | hashB | null  | null  // ABNN
+		null  | null  | hashA | hashB // ABNN reverse
+	}
+	
+	// TODO fix null file test to be realistic
 	// TODO Remaining file test
 	// TODO Directory tests
 	
