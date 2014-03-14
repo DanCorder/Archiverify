@@ -1,52 +1,13 @@
 package com.dancorder.PhotoSync;
 
-import java.io.IOException;
+import java.nio.file.Path;
 
-public class SyncWarningAction implements Action {
+class SyncWarningAction extends WarningAction {
 
-	private final String warning;
-
-	SyncWarningAction(String warning) {
-		if (warning == null || warning == "") {
-			throw new IllegalArgumentException("Warning cannot be empty");
-		}
-		
-		this.warning = "WARNING: " + warning;
-	}
-	
-	@Override
-	public void doAction() throws IOException {
-		// Nothing to do here.
-	}
-	
-	@Override
-	public String toString() {
-		return warning;
-	}
-
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((warning == null) ? 0 : warning.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SyncWarningAction other = (SyncWarningAction) obj;
-		if (warning == null) {
-			if (other.warning != null)
-				return false;
-		} else if (!warning.equals(other.warning))
-			return false;
-		return true;
+	SyncWarningAction(Path file1, String calculatedHash1, String storedHash1, Path file2, String calculatedHash2, String storedHash2) {
+		super("There was a problem synching " +
+				file1 + " (calculated hash: " + calculatedHash1 + ", stored hash: " + storedHash1 + ") and" +
+				file2 + " (calculated hash: " + calculatedHash2 + ", stored hash: " + storedHash2 + ")" +
+				" please determine the correct file and hash and update the file(s) and/or hash(es).");
 	}
 }

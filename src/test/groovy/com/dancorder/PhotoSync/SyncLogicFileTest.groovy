@@ -179,7 +179,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AABB"() {
 		setup:
 		setupScenario(hashA, hashA, hashB, hashB)
-		expectedResult.add(new SyncWarningAction("File " + absolutePath1 + " and file " + absolutePath2 + " are different but both have matching hashes. Please manually move or delete the incorrect file."))
+		expectedResult.add(new SyncWarningAction(absolutePath1, hashA, hashA, absolutePath2, hashB, hashB))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -324,16 +324,8 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "ABXX tests"() {
 		setup:
 		setupScenario(hash1, hash2, hash3, hash4)
-		def warning1 = new SyncWarningAction(
-			"There was a problem synching " +
-			absolutePath1 + " (calculated hash: " + hash1 + ", stored hash: " + hash2 + ") and" +
-			absolutePath2 + " (calculated hash: " + hash3 + ", stored hash: " + hash4 + ")" +
-			" please determine the correct file and hash and update the file(s) and/or hash(es).")
-		def warning2 = new SyncWarningAction(
-			"There was a problem synching " +
-			absolutePath2 + " (calculated hash: " + hash3 + ", stored hash: " + hash4 + ") and" +
-			absolutePath1 + " (calculated hash: " + hash1 + ", stored hash: " + hash2 + ")" +
-			" please determine the correct file and hash and update the file(s) and/or hash(es).")
+		def warning1 = new SyncWarningAction(absolutePath1, hash1, hash2, absolutePath2, hash3, hash4)
+		def warning2 = new SyncWarningAction(absolutePath2, hash3, hash4, absolutePath1, hash1, hash2)
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -369,7 +361,71 @@ class SyncLogicTest extends spock.lang.Specification {
 		null  | null  | hashA | hashB // ABNN reverse
 	}
 	
-	// TODO fix null file test to be realistic
+	
+	def "NAAN"() {
+		setup:
+		setupScenario(null, hashA, hashA, null)
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		expectedResult == result
+		0 * store1.setHash(_,_)
+		1 * store2.setHash(filePath, hashA)
+	}
+	
+	def "NAAN reversed"() {
+		setup:
+		setupScenario(hashA, null, null, hashA)
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		expectedResult == result
+		1 * store1.setHash(filePath, hashA)
+		0 * store2.setHash(_,_)
+	}
+	
+	def "NABN"() {
+		setup:
+		setupScenario(null, hashA, hashB, null)
+		expectedResult.add(new SyncWarningAction(absolutePath1, null, hashA, absolutePath2, hashB, null))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		result == expectedResult
+		0 * store1.setHash(_,_)
+		0 * store2.setHash(_,_)
+	}
+	
+	def "NABN reversed"() {
+		setup:
+		setupScenario(hashB, null, null, hashA)
+		expectedResult.add(new SyncWarningAction(absolutePath2, null, hashA, absolutePath1, hashB, null))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		result == expectedResult
+		0 * store1.setHash(_,_)
+		0 * store2.setHash(_,_)
+	}
+	
+	//	File1 | Hash1 | File2 | Hash2 | Action
+
+	//	NULL  | A     | B     | NULL  | Ask user
+	//	NULL  | A     | NULL  | A     | Remove hash
+	//	NULL  | A     | NULL  | B     | Remove hash
+	//	NULL  | A     | NULL  | NULL  | Remove hash
+	
+
 	// TODO Remaining file test
 	// TODO Directory tests
 	
