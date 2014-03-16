@@ -42,10 +42,34 @@ class SyncLogic {
 		else if (hashFromFile2 == null && hashFromStore2 != null) {
 			return missingFileWithHash(hashFromStore2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
 		}
+		else if (hashFromFile1 != null && hashFromStore1 == null) {
+			return missingHashWithFile(hashFromFile1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
+		}
+		else if (hashFromFile2 != null && hashFromStore2 == null) {
+			return missingHashWithFile(hashFromFile2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
+		}
 
 		return null;
 	}
 	
+	private List<Action> missingHashWithFile(
+			String hashForFileWithMissingStoreHash,
+			String hashFromOtherFile,
+			String hashFromOtherStore,
+			Path fileWithMissingStoreHash,
+			Path otherFile,
+			FileHashStore storeWithMissingHash,
+			FileHashStore otherStore) {
+		ArrayList<Action> actions = new ArrayList<Action>();
+		
+		if (hashForFileWithMissingStoreHash == hashFromOtherFile) {
+			storeWithMissingHash.setHash(fileWithMissingStoreHash.getFileName(), hashForFileWithMissingStoreHash);
+			otherStore.setHash(otherFile.getFileName(), hashFromOtherFile);
+		}
+
+		return actions;
+	}
+
 	private List<Action> missingFileWithHash(
 			String hashFromStoreForMissingFile,
 			String hashFromOtherFile,

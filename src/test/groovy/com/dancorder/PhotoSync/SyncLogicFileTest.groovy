@@ -461,6 +461,34 @@ class SyncLogicTest extends spock.lang.Specification {
 		0 * store1.removeHash(filePath)
 		1 * store2.removeHash(filePath)
 	}
+	
+	def "ANAN"() {
+		setup:
+		setupScenario(hashA, null, hashA, null)
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		result == expectedResult
+		1 * store1.setHash(filePath, hashA)
+		1 * store2.setHash(filePath, hashA)
+	}
+	
+	
+//	Hash1 is NULL
+//	File1 | Hash1 | File2 | Hash2 | Action
+//	A     | NULL  | A     | A     | see above - AAAN
+//	A     | NULL  | A     | B     | see above - ABAN
+//	A     | NULL  | A     | NULL  | Create hash
+//	A     | NULL  | B     | A     | see above - ABBN
+//	A     | NULL  | B     | B     | see above - AABN
+//	A     | NULL  | B     | C     | see above - ABCN
+//	A     | NULL  | B     | NULL  | Ask user
+//	A     | NULL  | NULL  | A     | see above - NAAN
+//	A     | NULL  | NULL  | B     | see above - NABN
+//	A     | NULL  | NULL  | NULL  | Create hash and copy file
+	
 
 	// TODO Remaining file test
 	// TODO Directory tests
