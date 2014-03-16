@@ -475,6 +475,20 @@ class SyncLogicTest extends spock.lang.Specification {
 		1 * store2.setHash(filePath, hashA)
 	}
 	
+	def "ANBN"() {
+		setup:
+		setupScenario(hashA, null, hashB, null)
+		expectedResult.add(new SyncWarningAction(absolutePath1, hashA, null, absolutePath2, hashB, null))
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		result == expectedResult
+		0 * store1.setHash(_,_)
+		0 * store2.setHash(_,_)
+	}
+	
 	
 //	Hash1 is NULL
 //	File1 | Hash1 | File2 | Hash2 | Action

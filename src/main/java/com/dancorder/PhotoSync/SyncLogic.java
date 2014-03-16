@@ -66,6 +66,9 @@ class SyncLogic {
 			storeWithMissingHash.setHash(fileWithMissingStoreHash.getFileName(), hashForFileWithMissingStoreHash);
 			otherStore.setHash(otherFile.getFileName(), hashFromOtherFile);
 		}
+		else if (hashFromOtherStore == null) {
+			actions.add(new SyncWarningAction(fileWithMissingStoreHash, hashForFileWithMissingStoreHash, null, otherFile, hashFromOtherFile, hashFromOtherStore));
+		}
 
 		return actions;
 	}
