@@ -63,6 +63,19 @@ class FileHashStoreTest extends spock.lang.Specification {
 		store.hashExists(testFile2RelativePath)
 		store.getHash(testFile2RelativePath) == testHash2
 	}
+	
+	def "remove hash"() {
+		setup:
+		def store = new FileHashStore(getMockSource([line1, line2]))
+		
+		when:
+		store.removeHash(testFile1RelativePath)
+		
+		then:
+		!store.hashExists(testFile1RelativePath)
+		store.hashExists(testFile2RelativePath)
+		store.getHash(testFile2RelativePath) == testHash2
+	}
 
 	def "don't write empty data"() {
 		setup:

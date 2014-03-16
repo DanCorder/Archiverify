@@ -418,13 +418,49 @@ class SyncLogicTest extends spock.lang.Specification {
 		0 * store2.setHash(_,_)
 	}
 	
-	//	File1 | Hash1 | File2 | Hash2 | Action
+	def "NANA and NANB"() {
+		setup:
+		setupScenario(null, hash1, null, hash2)
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
 
-	//	NULL  | A     | B     | NULL  | Ask user
-	//	NULL  | A     | NULL  | A     | Remove hash
-	//	NULL  | A     | NULL  | B     | Remove hash
-	//	NULL  | A     | NULL  | NULL  | Remove hash
+		then:
+		result == expectedResult
+		1 * store1.removeHash(filePath)
+		1 * store2.removeHash(filePath)
+		
+		where:
+		hash1 | hash2
+		hashA | hashA
+		hashA | hashB
+	}
 	
+	def "NANN"() {
+		setup:
+		setupScenario(null, hashA, null, null)
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		result == expectedResult
+		1 * store1.removeHash(filePath)
+		0 * store2.removeHash(filePath)
+	}
+	
+	def "NANN reversed"() {
+		setup:
+		setupScenario(null, null, null, hashA)
+		
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		result == expectedResult
+		0 * store1.removeHash(filePath)
+		1 * store2.removeHash(filePath)
+	}
 
 	// TODO Remaining file test
 	// TODO Directory tests

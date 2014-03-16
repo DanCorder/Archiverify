@@ -56,7 +56,13 @@ class SyncLogic {
 			FileHashStore otherStore) {
 		ArrayList<Action> actions = new ArrayList<Action>();
 		
-		if (hashFromStoreForMissingFile == hashFromOtherFile && hashFromOtherStore == null) {
+		if (hashFromOtherFile == null) {
+			storeForMissingFile.removeHash(missingFile.getFileName());
+			if (hashFromOtherStore != null) {
+				otherStore.removeHash(otherFile.getFileName());
+			}
+		}
+		else if (hashFromStoreForMissingFile == hashFromOtherFile && hashFromOtherStore == null) {
 			actions.add(new FileCopyAction(otherFile, missingFile));
 			otherStore.setHash(otherFile.getFileName(), hashFromStoreForMissingFile);
 		}

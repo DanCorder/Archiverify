@@ -34,6 +34,10 @@ class FileHashStore {
 	void setHash(Path fileName, String hash) {
 		store.put(fileName, hash);
 	}
+	
+	void removeHash(Path filename) {
+		store.remove(filename);
+	}
 
 	void write() throws IOException {
 		List<String> lines = getFileData();
