@@ -516,8 +516,6 @@ class SyncLogicTest extends spock.lang.Specification {
 		1 * store1.setHash(filePath, hashA)
 		1 * store2.setHash(filePath, hashA)
 	}
-
-	// TODO Directory tests
 	
 	def private setupScenario(String fileHash1, String storeHash1, String fileHash2, String storeHash2) {
 		absolutePath1 = root1.resolve(filePath)

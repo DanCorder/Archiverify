@@ -195,6 +195,15 @@ class SyncLogic {
 	}
 
 	List<Action> compareDirectories(Path absolutePath1, Path absolutePath2, FileExistence existence) {
-		return new ArrayList<Action>();
+		List<Action> actions = new ArrayList<Action>();
+		
+		if (existence == FileExistence.Path1Only) {
+			actions.add(new CreateDirectoryAction(absolutePath2));
+		}
+		else if (existence == FileExistence.Path2Only) {
+			actions.add(new CreateDirectoryAction(absolutePath1));
+		}
+		
+		return actions;
 	}
 }
