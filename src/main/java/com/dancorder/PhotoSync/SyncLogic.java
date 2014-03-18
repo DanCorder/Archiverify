@@ -24,35 +24,63 @@ class SyncLogic {
 		if (allHashesMatch(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2)) {
 			return new ArrayList<Action>();
 		}
-		else if (hashFromFile1 == hashFromStore1 && hashFromFile1 != null) {
+		else if (fileAndStoreHashesExistAndMatch(hashFromFile1, hashFromStore1)) {
 			return oneFileAndStoreHashMatch(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
 		}
-		else if (hashFromFile2 == hashFromStore2 && hashFromFile2 != null) {
+		else if (fileAndStoreHashesExistAndMatch(hashFromFile2, hashFromStore2)) {
 			return oneFileAndStoreHashMatch(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
 		}
-		else if (hashFromFile1 != hashFromStore1 && hashFromFile1 != null && hashFromStore1 != null) {
+		else if (fileAndStoreHashesExistAndDontMatch(hashFromFile1, hashFromStore1)) {
 			return mismatchedFileAndStoreHash(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, file1, file2);
 		}
-		else if (hashFromFile2 != hashFromStore2 && hashFromFile2 != null && hashFromStore2 != null) {
+		else if (fileAndStoreHashesExistAndDontMatch(hashFromFile2, hashFromStore2)) {
 			return mismatchedFileAndStoreHash(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, file2, file1);
 		}
-		else if (hashFromFile1 == null && hashFromStore1 != null) {
+		else if (fileHashExistsButStoreHashDoesnt(hashFromFile1, hashFromStore1)) {
 			return missingFileWithHash(hashFromStore1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
 		}
-		else if (hashFromFile2 == null && hashFromStore2 != null) {
+		else if (fileHashExistsButStoreHashDoesnt(hashFromFile2, hashFromStore2)) {
 			return missingFileWithHash(hashFromStore2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
 		}
-		else if (hashFromFile1 != null && hashFromStore1 == null) {
-			return missingHashWithFile(hashFromFile1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
+		else if (storeHashExistsButFileDoesnt(hashFromFile1, hashFromStore1)) {
+			return fileWithMissingHash(hashFromFile1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
 		}
-		else if (hashFromFile2 != null && hashFromStore2 == null) {
-			return missingHashWithFile(hashFromFile2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
+		else if (storeHashExistsButFileDoesnt(hashFromFile2, hashFromStore2)) {
+			return fileWithMissingHash(hashFromFile2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
 		}
 
-		return null;
+		throw new RuntimeException(
+				String.format("Unforeseen combination of file and store hashes. File1: %s, Store1: %s, File2: %s, Store2: %s",
+						hashFromFile1,
+						hashFromStore1,
+						hashFromFile2,
+						hashFromStore2));
+	}
+
+	private boolean storeHashExistsButFileDoesnt(String hashFromFile,
+			String hashFromStore) {
+		return hashFromFile != null && hashFromStore == null;
+	}
+
+	private boolean fileHashExistsButStoreHashDoesnt(String hashFromFile,
+			String hashFromStore) {
+		return hashFromFile == null && hashFromStore != null;
+	}
+
+	private boolean fileAndStoreHashesExistAndDontMatch(String hashFromFile,
+			String hashFromStore) {
+		return hashFromFile != hashFromStore && hashFromFile != null && hashFromStore != null;
+	}
+
+	private boolean allHashesMatch(String hash1, String hash2,String hash3, String hash4) {
+		return hash1 == hash2 && hash2 == hash3 && hash3 == hash4;
 	}
 	
-	private List<Action> missingHashWithFile(
+	private boolean fileAndStoreHashesExistAndMatch(String hashFromFile, String hashFromStore) {
+		return hashFromFile == hashFromStore && hashFromFile != null;
+	}
+	
+	private List<Action> fileWithMissingHash(
 			String hashForFileWithMissingStoreHash,
 			String hashFromOtherFile,
 			String hashFromOtherStore,
@@ -63,13 +91,13 @@ class SyncLogic {
 		ArrayList<Action> actions = new ArrayList<Action>();
 		
 		if (hashForFileWithMissingStoreHash == hashFromOtherFile) {
-			storeWithMissingHash.setHash(fileWithMissingStoreHash.getFileName(), hashForFileWithMissingStoreHash);
-			otherStore.setHash(otherFile.getFileName(), hashFromOtherFile);
+			setHash(hashForFileWithMissingStoreHash, fileWithMissingStoreHash, storeWithMissingHash);
+			setHash(hashFromOtherFile, otherFile, otherStore);
 		}
 		else if (hashFromOtherStore == null && hashFromOtherFile == null) {
-			actions.add(new FileCopyAction(fileWithMissingStoreHash, otherFile));
-			storeWithMissingHash.setHash(fileWithMissingStoreHash.getFileName(), hashForFileWithMissingStoreHash);
-			otherStore.setHash(otherFile.getFileName(), hashForFileWithMissingStoreHash);
+			copyFile(fileWithMissingStoreHash, otherFile, actions);
+			setHash(hashForFileWithMissingStoreHash, fileWithMissingStoreHash, storeWithMissingHash);
+			setHash(hashForFileWithMissingStoreHash, otherFile, otherStore);
 		}
 		else if (hashFromOtherStore == null) {
 			actions.add(new SyncWarningAction(fileWithMissingStoreHash, hashForFileWithMissingStoreHash, null, otherFile, hashFromOtherFile, hashFromOtherStore));
@@ -95,8 +123,8 @@ class SyncLogic {
 			}
 		}
 		else if (hashFromStoreForMissingFile == hashFromOtherFile && hashFromOtherStore == null) {
-			actions.add(new FileCopyAction(otherFile, missingFile));
-			otherStore.setHash(otherFile.getFileName(), hashFromStoreForMissingFile);
+			copyFile(otherFile, missingFile, actions);
+			setHash(hashFromStoreForMissingFile, otherFile, otherStore);
 		}
 		else if (hashFromStoreForMissingFile != hashFromOtherFile && hashFromOtherStore == null) {
 			actions.add(new SyncWarningAction(missingFile, null, hashFromStoreForMissingFile, otherFile, hashFromOtherFile, hashFromOtherStore));
@@ -130,44 +158,40 @@ class SyncLogic {
 		ArrayList<Action> actions = new ArrayList<Action>();
 		
 		if (otherHashFromFile == null && otherHashFromStore == null) {
-			overwriteFileAndHash(matchingHashFromStore, matchingFile, otherFile, otherStore, actions);
+			copyFileAndSetHash(matchingHashFromStore, matchingFile, otherFile, otherStore, actions);
 		}
 		else if (otherHashFromFile == otherHashFromStore) {
 			actions.add(new SyncWarningAction(matchingFile, matchingHashFromFile, matchingHashFromStore, otherFile, otherHashFromFile, otherHashFromStore));
 		}
 		else if (matchingHashFromFile == otherHashFromFile) {
-			overwriteHash(otherHashFromFile, otherFile, otherStore);
+			setHash(otherHashFromFile, otherFile, otherStore);
 		}
 		else if (matchingHashFromStore == otherHashFromStore) {
-			overwriteFile(matchingFile, otherFile, actions);
+			copyFile(matchingFile, otherFile, actions);
 		}
 		else {
-			overwriteFileAndHash(matchingHashFromStore, matchingFile, otherFile, otherStore, actions);
+			copyFileAndSetHash(matchingHashFromStore, matchingFile, otherFile, otherStore, actions);
 		}
 
 		return actions;
 	}
 
-	private void overwriteFileAndHash(
+	private void copyFileAndSetHash(
 			String goodHash,
 			Path goodFile,
 			Path badFile,
 			FileHashStore badStore,
 			ArrayList<Action> actions) {
-		overwriteHash(goodHash, badFile, badStore);
-		overwriteFile(goodFile, badFile, actions);
+		setHash(goodHash, badFile, badStore);
+		copyFile(goodFile, badFile, actions);
 	}
 
-	private void overwriteHash(String goodHash, Path badFile, FileHashStore badStore) {
+	private void setHash(String goodHash, Path badFile, FileHashStore badStore) {
 		badStore.setHash(badFile.getFileName(), goodHash);
 	}
 
-	private void overwriteFile(Path goodFile, Path badFile,	ArrayList<Action> actions) {
+	private void copyFile(Path goodFile, Path badFile, ArrayList<Action> actions) {
 		actions.add(new FileCopyAction(goodFile, badFile));
-	}
-
-	private boolean allHashesMatch(String hash1, String hash2,String hash3, String hash4) {
-		return hash1 == hash2 && hash2 == hash3 && hash3 == hash4;
 	}
 
 	List<Action> compareDirectories(Path absolutePath1, Path absolutePath2, FileExistence existence) {
