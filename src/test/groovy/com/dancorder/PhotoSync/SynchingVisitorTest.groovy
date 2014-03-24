@@ -4,6 +4,7 @@ import java.nio.file.Paths
 
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence
 
+
 class SynchingVisitorTest extends spock.lang.Specification {
 
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
@@ -66,6 +67,24 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		FileExistence.Path1Only | _
 		FileExistence.Path2Only | _
 	}
+	
+	def "Logic exception in directory comparison converted to warning"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_,_,_) >> { throw new NullPointerException("Test exception") }
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		
+		when:
+		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		def result = visitor.getActions()
+		
+		then:
+		result.size() == 1
+		result[0] instanceof WarningAction
+	}
+	
+	// TODO Exception in file comparison
+	// TODO error in directory comparison stops file comparisons within that directory
 	
 	def "Actions returned correctly for compare files call"() {
 		setup:
