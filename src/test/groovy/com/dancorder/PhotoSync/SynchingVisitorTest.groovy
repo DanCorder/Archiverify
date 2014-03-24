@@ -83,7 +83,23 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		result[0] instanceof WarningAction
 	}
 	
-	// TODO Exception in file comparison
+	def "Logic exception in file comparison converted to warning"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_,_,_) >> new ArrayList<Action>()
+		logic.compareFiles(_,_,_,_) >> { throw new NullPointerException("Test exception") }
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		
+		when:
+		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		visitor.visitFile(file1Relative, FileExistence.BothPaths)
+		def result = visitor.getActions()
+		
+		then:
+		result.size() == 1
+		result[0] instanceof WarningAction
+	}
+	
 	// TODO error in directory comparison stops file comparisons within that directory
 	
 	def "Actions returned correctly for compare files call"() {
