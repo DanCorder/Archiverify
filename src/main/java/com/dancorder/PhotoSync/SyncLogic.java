@@ -15,38 +15,38 @@ class SyncLogic {
 		this.hashGenerator = hashGenerator;
 	}
 	
-	List<Action> compareFiles(Path file1, FileHashStore store1, Path file2, FileHashStore store2) throws IOException {
-		String hashFromFile1 = hashGenerator.calculateMd5(file1);
-		String hashFromFile2 = hashGenerator.calculateMd5(file2);
-		String hashFromStore1 = store1.getHash(file1.getFileName());
-		String hashFromStore2 = store2.getHash(file2.getFileName());
+	List<Action> compareFiles(Path absoultePath1, FileHashStore store1, Path absolutePath2, FileHashStore store2) throws IOException {
+		String hashFromFile1 = hashGenerator.calculateMd5(absoultePath1);
+		String hashFromFile2 = hashGenerator.calculateMd5(absolutePath2);
+		String hashFromStore1 = store1.getHash(absoultePath1.getFileName());
+		String hashFromStore2 = store2.getHash(absolutePath2.getFileName());
 
 		if (allHashesMatch(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2)) {
 			return new ArrayList<Action>();
 		}
 		else if (fileAndStoreHashesExistAndMatch(hashFromFile1, hashFromStore1)) {
-			return oneFileAndStoreHashMatch(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
+			return oneFileAndStoreHashMatch(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, absoultePath1, absolutePath2, store1, store2);
 		}
 		else if (fileAndStoreHashesExistAndMatch(hashFromFile2, hashFromStore2)) {
-			return oneFileAndStoreHashMatch(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
+			return oneFileAndStoreHashMatch(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, absolutePath2, absoultePath1, store2, store1);
 		}
 		else if (fileAndStoreHashesExistAndDontMatch(hashFromFile1, hashFromStore1)) {
-			return mismatchedFileAndStoreHash(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, file1, file2);
+			return mismatchedFileAndStoreHash(hashFromFile1, hashFromStore1, hashFromFile2, hashFromStore2, absoultePath1, absolutePath2);
 		}
 		else if (fileAndStoreHashesExistAndDontMatch(hashFromFile2, hashFromStore2)) {
-			return mismatchedFileAndStoreHash(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, file2, file1);
+			return mismatchedFileAndStoreHash(hashFromFile2, hashFromStore2, hashFromFile1, hashFromStore1, absolutePath2, absoultePath1);
 		}
 		else if (fileHashExistsButStoreHashDoesnt(hashFromFile1, hashFromStore1)) {
-			return missingFileWithHash(hashFromStore1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
+			return missingFileWithHash(hashFromStore1, hashFromFile2, hashFromStore2, absoultePath1, absolutePath2, store1, store2);
 		}
 		else if (fileHashExistsButStoreHashDoesnt(hashFromFile2, hashFromStore2)) {
-			return missingFileWithHash(hashFromStore2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
+			return missingFileWithHash(hashFromStore2, hashFromFile1, hashFromStore1, absolutePath2, absoultePath1, store2, store1);
 		}
 		else if (storeHashExistsButFileDoesnt(hashFromFile1, hashFromStore1)) {
-			return fileWithMissingHash(hashFromFile1, hashFromFile2, hashFromStore2, file1, file2, store1, store2);
+			return fileWithMissingHash(hashFromFile1, hashFromFile2, hashFromStore2, absoultePath1, absolutePath2, store1, store2);
 		}
 		else if (storeHashExistsButFileDoesnt(hashFromFile2, hashFromStore2)) {
-			return fileWithMissingHash(hashFromFile2, hashFromFile1, hashFromStore1, file2, file1, store2, store1);
+			return fileWithMissingHash(hashFromFile2, hashFromFile1, hashFromStore1, absolutePath2, absoultePath1, store2, store1);
 		}
 
 		throw new RuntimeException(
