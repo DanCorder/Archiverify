@@ -10,7 +10,7 @@ class HashFileSourceTest extends spock.lang.Specification {
 	private final static line2 = "Some more text"
 	
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
-	private final static tempHashFile = tempDir.resolve("hashes.txt")
+	private final static tempHashFile = tempDir.resolve(HashFileSource.HASH_FILE_NAME)
 	
 	def cleanup() {
 		Files.deleteIfExists(tempHashFile)

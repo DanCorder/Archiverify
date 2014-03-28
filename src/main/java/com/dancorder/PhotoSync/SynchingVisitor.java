@@ -41,6 +41,8 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 				hashStore2 = fileHashStoreFactory.createFileHashStore(directory2);
 				
 				List<Action> newActions = syncLogic.compareDirectories(directory1, directory2, existence);
+				newActions.add(new UpdateHashesAction(hashStore1, hashStore2));
+				
 				actions.addAll(newActions);
 			}
 		}
@@ -58,7 +60,7 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	public void visitFile(Path relativeFilePath, FileExistence existence) throws IOException {
 		try
 		{
-			if (isNotInErrorPath(relativeFilePath))
+			if (isNotInErrorPath(relativeFilePath) && isNotHashFile(relativeFilePath))
 			{
 				Path file1 = root1.resolve(relativeFilePath);
 				Path file2 = root2.resolve(relativeFilePath);
@@ -73,6 +75,10 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 				new WarningAction(
 					String.format("Error caught visiting file %s this file will not be synched. %s", relativeFilePath, e)));
 		}
+	}
+
+	private boolean isNotHashFile(Path relativeFilePath) {
+		return !HashFileSource.HASH_FILE_NAME.equals(relativeFilePath.getFileName().toString());
 	}
 
 	private boolean isNotInErrorPath(Path relativeFilePath) {

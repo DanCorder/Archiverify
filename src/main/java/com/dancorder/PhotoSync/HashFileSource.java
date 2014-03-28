@@ -12,7 +12,7 @@ import java.util.List;
 
 class HashFileSource {
 	
-	private static final String HASH_FILE_NAME = "hashes.txt";
+	public static final String HASH_FILE_NAME = "hashes.txt";
 	private final Path directory;
 	
 	HashFileSource(Path directory) {
