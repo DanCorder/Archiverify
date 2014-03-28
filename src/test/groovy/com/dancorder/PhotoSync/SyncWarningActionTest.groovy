@@ -15,7 +15,7 @@ public class SyncWarningActionTest extends spock.lang.Specification {
 		def hash4 = "hash4"
 		
 		def warning = "There was a problem synching " +
-			file1 + " (calculated hash: " + hash1 + ", stored hash: " + hash2 + ") and" +
+			file1 + " (calculated hash: " + hash1 + ", stored hash: " + hash2 + ") and " +
 			file2 + " (calculated hash: " + hash3 + ", stored hash: " + hash4 + ")" +
 			" please determine the correct file and hash and update the file(s) and/or hash(es)."
 		
