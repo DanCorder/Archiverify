@@ -248,7 +248,6 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "Hash files not compared"() {
 		setup:
 		def logic = Mock(SyncLogic)
-		logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:

@@ -19,16 +19,19 @@ public class PhotoSync {
 		
 		List<Action> actions = visitor.getActions();
 		
+		printActions(actions);
+		
+		if (getAnswerFromUser("Execute actions?")) {
+			executeActions(actions);
+		}
+	}
+
+	private static void printActions(List<Action> actions) {
 		System.out.println("Actions found:");
 		for (Action action :actions) {
-			System.out.println(action.toString());
-		}
-		
-		System.out.println("Execute actions (y/n)?");
-		String response = getAnswerFromUser();
-		
-		if (response.equals("y")) {
-			executeActions(actions);
+			if (!(action instanceof UpdateHashesAction)) {
+				System.out.println(action.toString());
+			}
 		}
 	}
 
@@ -41,13 +44,14 @@ public class PhotoSync {
 		}
 	}
 
-	private static String getAnswerFromUser() {
+	private static boolean getAnswerFromUser(String question) {
+		System.out.println(question + " (y/n)");
 		String response;
 		try (Scanner scanIn = new Scanner(System.in)) {
 			do {
 			    response = scanIn.nextLine();
 			} while (!response.equals("y") && !response.equals("n"));
 		}
-		return response;
+		return response.equals("y");
 	}
 }
