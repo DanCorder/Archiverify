@@ -11,9 +11,9 @@ public class WarningActionTest extends spock.lang.Specification {
 		thrown(IllegalArgumentException)
 
 		where:
-		warning | _
-		null    | _
-		""      | _
+		warning        | _
+		null           | _
+		new String("") | _
 	}
 
 	def "String value"() {

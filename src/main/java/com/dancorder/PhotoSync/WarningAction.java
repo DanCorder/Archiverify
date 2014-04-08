@@ -7,7 +7,7 @@ public class WarningAction implements Action {
 	private final String warning;
 
 	WarningAction(String warning) {
-		if (warning == null || warning == "") {
+		if (warning == null || warning.equals("")) {
 			throw new IllegalArgumentException("Warning cannot be empty");
 		}
 		
