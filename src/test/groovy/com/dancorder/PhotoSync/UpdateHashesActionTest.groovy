@@ -6,42 +6,32 @@ import java.nio.file.Paths
 public class UpdateHashesActionTest extends spock.lang.Specification {
 	def "Null FileHashStore"() {
 		when: "A null parameter is passed"
-		new UpdateHashesAction(store1, store2)
+		new UpdateHashesAction(null)
 
 		then: "expect IllegalArgumentException"
 		thrown(IllegalArgumentException)
-
-		where:
-		store1              | store2
-		null                | null
-		null                | Mock(FileHashStore)
-		Mock(FileHashStore) | null
 	}
 
 	def "Do action"() {
 		setup: "Create the action"
-		def store1 = Mock(FileHashStore)
-		def store2 = Mock(FileHashStore)
-		def action = new UpdateHashesAction(store1, store2)
+		def store = Mock(FileHashStore)
+		def action = new UpdateHashesAction(store)
 
 		when: "it does the action"
 		action.doAction()
 
 		then: "the hash store is written out"
-		1 * store1.write()
-		1 * store2.write()
+		1 * store.write()
 		then: 0 * _._
 	}
 
 	def "String value"() {
 		setup: "Create the action"
-		def store1 = Mock(FileHashStore)
-		def store2 = Mock(FileHashStore)
-		store1.getDirectory() >> Paths.get("dir1")
-		store2.getDirectory() >> Paths.get("dir2")
-		def action = new UpdateHashesAction(store1, store2)
+		def store = Mock(FileHashStore)
+		store.getDirectory() >> Paths.get("dir1")
+		def action = new UpdateHashesAction(store)
 
 		expect:
-		action.toString() == "Write hashes to dir1 and dir2"
+		action.toString() == "Write hashes to dir1"
 	}
 }

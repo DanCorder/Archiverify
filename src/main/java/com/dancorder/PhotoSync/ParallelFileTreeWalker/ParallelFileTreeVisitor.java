@@ -1,9 +1,9 @@
 package com.dancorder.PhotoSync.ParallelFileTreeWalker;
 
-import java.io.IOException;
 import java.nio.file.Path;
 
 public interface ParallelFileTreeVisitor {
-	void preVisitDirectory(Path relativePath, FileExistence existence) throws Exception;
-	void visitFile(Path filename, FileExistence existence) throws IOException;
+	void preVisitDirectory(Path relativePath, FileExistence existence);
+	void visitFile(Path filename, FileExistence existence);
+	void postVisitDirectory(Path relativePath, FileExistence existence);
 }

@@ -33,6 +33,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		walker.walk()
 
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -47,6 +48,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(filePath, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -60,6 +62,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(filePath, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -73,6 +76,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(filePath, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -91,6 +95,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file1Path, FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file2Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 
@@ -115,6 +120,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.visitFile(file2Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file3Path, FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file4Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -135,8 +141,12 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file1Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(directory1Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory1Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(directory2Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory2Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(directory3Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory3Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -151,6 +161,8 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 1 * visitor.preVisitDirectory(directoryPath, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(directoryPath, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -164,6 +176,8 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 1 * visitor.preVisitDirectory(directoryPath, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directoryPath, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 
@@ -177,6 +191,8 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 
 		then: 1 * visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 1 * visitor.preVisitDirectory(directoryPath, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(directoryPath, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 
@@ -199,6 +215,11 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.preVisitDirectory(level2Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(level3Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(level4Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(level4Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(level3Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(level2Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(level1Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -221,6 +242,11 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.preVisitDirectory(level2Path, FileExistence.Path2Only)
 		then: 1 * visitor.preVisitDirectory(level3Path, FileExistence.Path2Only)
 		then: 1 * visitor.preVisitDirectory(level4Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(level4Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(level3Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(level2Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(level1Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -247,6 +273,11 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.preVisitDirectory(level2Path, FileExistence.BothPaths)
 		then: 1 * visitor.preVisitDirectory(level3Path, FileExistence.BothPaths)
 		then: 1 * visitor.preVisitDirectory(level4Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(level4Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(level3Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(level2Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(level1Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -269,6 +300,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.preVisitDirectory(level2Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(level3Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(filePath, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(level3Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(level2Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(level1Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -291,6 +326,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.preVisitDirectory(level2Path, FileExistence.Path2Only)
 		then: 1 * visitor.preVisitDirectory(level3Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(filePath, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(level3Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(level2Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(level1Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 	
@@ -317,6 +356,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.preVisitDirectory(level2Path, FileExistence.BothPaths)
 		then: 1 * visitor.preVisitDirectory(level3Path, FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(filePath, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(level3Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(level2Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(level1Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		then: 0 * _._
 	}
 
@@ -450,14 +493,18 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.visitFile(file111Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file112Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file113Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(directory11Path, FileExistence.Path2Only)
 		then: 1 * visitor.preVisitDirectory(directory12Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file121Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file122Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file123Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(directory12Path, FileExistence.Path2Only)
 		then: 1 * visitor.preVisitDirectory(directory13Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file131Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file132Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file133Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(directory13Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(directory1Path, FileExistence.Path2Only)
 		then: 1 * visitor.preVisitDirectory(directory2Path, FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file21Path, FileExistence.Path2Only)
 		then: 1 * visitor.visitFile(file22Path, FileExistence.Path2Only)
@@ -466,6 +513,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.visitFile(file211Path, FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file212Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file213Path, FileExistence.Path2Only)
+		then: 1 * visitor.postVisitDirectory(directory21Path, FileExistence.BothPaths)
 		then: 1 * visitor.preVisitDirectory(directory22Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file221Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file222Path, FileExistence.Path1Only)
@@ -474,22 +522,30 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.visitFile(file2211Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file2212Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file2213Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory221Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(directory222Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file2221Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file2222Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file2223Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory222Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(directory223Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file2231Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file2232Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file2233Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory223Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory22Path, FileExistence.Path1Only)
 		then: 1 * visitor.preVisitDirectory(directory23Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file231Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file232Path, FileExistence.Path1Only)
 		then: 1 * visitor.visitFile(file233Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory23Path, FileExistence.Path1Only)
+		then: 1 * visitor.postVisitDirectory(directory2Path, FileExistence.BothPaths)
 		then: 1 * visitor.preVisitDirectory(directory3Path, FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file31Path, FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file32Path, FileExistence.BothPaths)
 		then: 1 * visitor.visitFile(file33Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(directory3Path, FileExistence.BothPaths)
+		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		
 		then: 0 * _._
 	}

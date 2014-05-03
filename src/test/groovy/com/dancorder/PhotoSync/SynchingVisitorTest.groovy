@@ -30,6 +30,44 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		defaultFileHashStoreFactory.createFileHashStore(_) >>> [store1, store2]
 	}
 	
+	def "Actions returned correctly for check hash stores call"() {
+		setup:
+		def action = Mock(Action)
+		def action2 = Mock(Action)
+		def actions = new ArrayList<Action>()
+		actions.add(action)
+		actions.add(action2)
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_,_,_) >> new ArrayList()
+		logic.checkHashStores(store1, store2) >> actions
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		
+		when:
+		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		
+		then:
+		visitor.getActions().size() == 2
+		visitor.getActions()[0] == action
+		visitor.getActions()[1] == action2
+	}
+	
+	def "Logic exception in hash store comparison converted to warning"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		logic.checkHashStores(_,_) >> { throw new NullPointerException("Test exception") }
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		
+		when:
+		visitor.postVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		def result = visitor.getActions()
+		
+		then:
+		result.size() == 1
+		result[0] instanceof WarningAction
+	}
+
+	
 	def "Actions returned correctly for compare directories call"() {
 		setup:
 		def action = Mock(Action)
@@ -45,42 +83,9 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		
 		then:
-		visitor.getActions().size() == 3
-		visitor.getActions()[0] == action
-		visitor.getActions()[1] == action2
-		visitor.getActions()[2] == new UpdateHashesAction(store1, store2)
-	}
-	
-	def "Hashes updated when visiting directory"() {
-		setup:
-		def logic = Mock(SyncLogic)
-		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
-		
-		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		
-		then:
-		visitor.getActions().size() == 1
-		visitor.getActions()[0] == new UpdateHashesAction(store1, store2)
-	}
-	
-	def "Hashes updated after directory synching"() {
-		setup:
-		def action = Mock(Action)
-		def actions = new ArrayList<Action>()
-		actions.add(action)
-		def logic = Mock(SyncLogic)
-		logic.compareDirectories(_, _, _) >> actions
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
-		
-		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		
-		then:
 		visitor.getActions().size() == 2
 		visitor.getActions()[0] == action
-		visitor.getActions()[1] == new UpdateHashesAction(store1, store2)
+		visitor.getActions()[1] == action2
 	}
 	
 	def "Parameters passed correctly to compare directories for root directory"() {
@@ -138,16 +143,21 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		visitor.visitFile(subDirFileRelative, FileExistence.BothPaths)
 		visitor.preVisitDirectory(subSubDirRelative, FileExistence.BothPaths)
 		visitor.visitFile(subSubDirFileRelative, FileExistence.BothPaths)
+		visitor.postVisitDirectory(subSubDirRelative, FileExistence.BothPaths)
+		visitor.postVisitDirectory(subDirRelative, FileExistence.BothPaths)
 		visitor.preVisitDirectory(subDir2Relative, FileExistence.BothPaths)
 		visitor.visitFile(subDir2FileRelative, FileExistence.BothPaths)
+		visitor.postVisitDirectory(subDir2Relative, FileExistence.BothPaths)
 		
-		then:
-		1 * logic.compareDirectories(subDirAbsoluteRoot1,subDirAbsoluteRoot2,_) >> { throw new NullPointerException("Test exception") }
-		0 * logic.compareFiles(root1Absolute.resolve(subDirFileRelative), _ , root2Absolute.resolve(subDirFileRelative), _) >> new ArrayList<Action>()
-		0 * logic.compareDirectories(root1Absolute.resolve(subSubDirRelative) ,root2Absolute.resolve(subSubDirRelative), _) >> new ArrayList<Action>()
-		0 * logic.compareFiles(root1Absolute.resolve(subSubDirFileRelative), _ , root2Absolute.resolve(subSubDirFileRelative), _) >> new ArrayList<Action>()
-		1 * logic.compareDirectories(root1Absolute.resolve(subDir2Relative), root2Absolute.resolve(subDir2Relative), _) >> new ArrayList<Action>()
-		1 * logic.compareFiles(root1Absolute.resolve(subDir2FileRelative), _ , root2Absolute.resolve(subDir2FileRelative), _) >> new ArrayList<Action>()
+		then: 1 * logic.compareDirectories(subDirAbsoluteRoot1,subDirAbsoluteRoot2,_) >> { throw new NullPointerException("Test exception") }
+		then: 0 * logic.compareFiles(root1Absolute.resolve(subDirFileRelative), _ , root2Absolute.resolve(subDirFileRelative), _) >> new ArrayList<Action>()
+		then: 0 * logic.compareDirectories(root1Absolute.resolve(subSubDirRelative) ,root2Absolute.resolve(subSubDirRelative), _) >> new ArrayList<Action>()
+		then: 0 * logic.compareFiles(root1Absolute.resolve(subSubDirFileRelative), _ , root2Absolute.resolve(subSubDirFileRelative), _) >> new ArrayList<Action>()
+		then: 0 * logic.checkHashStores(_,_) >> new ArrayList<Action>()
+		then: 0 * logic.checkHashStores(_,_) >> new ArrayList<Action>()
+		then: 1 * logic.compareDirectories(root1Absolute.resolve(subDir2Relative), root2Absolute.resolve(subDir2Relative), _) >> new ArrayList<Action>()
+		then: 1 * logic.compareFiles(root1Absolute.resolve(subDir2FileRelative), _ , root2Absolute.resolve(subDir2FileRelative), _) >> new ArrayList<Action>()
+		then: 1 * logic.checkHashStores(_,_) >> new ArrayList<Action>()
 	}
 	
 	def "Logic exception in file comparison converted to warning"() {
@@ -163,9 +173,8 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def result = visitor.getActions()
 		
 		then:
-		result.size() == 2
-		result[0] instanceof UpdateHashesAction
-		result[1] instanceof WarningAction
+		result.size() == 1
+		result[0] instanceof WarningAction
 	}
 	
 	def "Actions returned correctly for compare files call"() {

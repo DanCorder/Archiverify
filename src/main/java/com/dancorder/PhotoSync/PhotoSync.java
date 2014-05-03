@@ -29,9 +29,7 @@ public class PhotoSync {
 	private static void printActions(List<Action> actions) {
 		System.out.println("Actions found:");
 		for (Action action :actions) {
-			if (!(action instanceof UpdateHashesAction)) {
-				System.out.println(action.toString());
-			}
+			System.out.println(action.toString());
 		}
 	}
 

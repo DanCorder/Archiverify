@@ -1,6 +1,5 @@
 package com.dancorder.PhotoSync;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,7 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	}
 
 	@Override
-	public void preVisitDirectory(Path relativeDirectoryPath, FileExistence existence) throws Exception {
+	public void preVisitDirectory(Path relativeDirectoryPath, FileExistence existence) {
 		try
 		{
 			if (isNotInErrorPath(relativeDirectoryPath))
@@ -41,7 +40,6 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 				hashStore2 = fileHashStoreFactory.createFileHashStore(directory2);
 				
 				List<Action> newActions = syncLogic.compareDirectories(directory1, directory2, existence);
-				newActions.add(new UpdateHashesAction(hashStore1, hashStore2));
 				
 				actions.addAll(newActions);
 			}
@@ -55,9 +53,29 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 					String.format("Error caught visiting directory %s this directory will not be synched. %s", relativeDirectoryPath, e)));
 		}
 	}
+	
+	@Override
+	public void postVisitDirectory(Path relativeDirectoryPath, FileExistence existence) {
+		try
+		{
+			if (isNotInErrorPath(relativeDirectoryPath))
+			{
+				List<Action> newActions = syncLogic.checkHashStores(hashStore1, hashStore2);
+				actions.addAll(newActions);
+			}
+		}
+		catch (Exception e)
+		{
+			errorPath = relativeDirectoryPath;
+			
+			actions.add(
+				new WarningAction(
+					String.format("Error caught ending visit of directory %s. Hashes in this directory will not be synched. %s", relativeDirectoryPath, e)));
+		}
+	}
 
 	@Override
-	public void visitFile(Path relativeFilePath, FileExistence existence) throws IOException {
+	public void visitFile(Path relativeFilePath, FileExistence existence) {
 		try
 		{
 			if (isNotInErrorPath(relativeFilePath) && isNotHashFile(relativeFilePath))

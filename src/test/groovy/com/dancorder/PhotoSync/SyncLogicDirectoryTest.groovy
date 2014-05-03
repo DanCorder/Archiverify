@@ -14,12 +14,6 @@ class SyncLogicDirectoryTest extends spock.lang.Specification {
 	private final static absolutePath1 = tempDir.resolve("testRoot1").resolve("dir1")
 	private final static absolutePath2 = tempDir.resolve("testRoot2").resolve("dir1")
 	
-
-	def private FileHashStore store1
-	def private FileHashStore store2
-	def private SyncLogic logic
-	def private List<Action> expectedResult
-	
 	def "directory exists in both roots"() {
 		setup:
 		def logic = new SyncLogic(null)

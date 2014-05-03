@@ -42,6 +42,7 @@ public class ParallelFileTreeWalker {
 		Path emptyPath = Paths.get("");
 		visitor.preVisitDirectory(emptyPath, FileExistence.BothPaths);
 		walkRecursive(emptyPath, emptyPath);
+		visitor.postVisitDirectory(emptyPath, FileExistence.BothPaths);
 	}
 	
 	private void walkRecursive(Path relativeDirectory1, Path relativeDirectory2) throws Exception {
@@ -150,8 +151,11 @@ public class ParallelFileTreeWalker {
 	private class DirectoryProcessor extends PathProcessor {
 		@Override
 		public void process(Path relativePath1, Path relativePath2) throws Exception {
-			visitor.preVisitDirectory(getPath(relativePath1, relativePath2), getExistence(relativePath1, relativePath2));
+			Path path = getPath(relativePath1, relativePath2);
+			FileExistence existence = getExistence(relativePath1, relativePath2);
+			visitor.preVisitDirectory(path, existence);
 			walkRecursive(relativePath1, relativePath2);
+			visitor.postVisitDirectory(path, existence);
 		}
 	};
 	

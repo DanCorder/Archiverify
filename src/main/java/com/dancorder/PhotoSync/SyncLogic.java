@@ -15,6 +15,34 @@ class SyncLogic {
 		this.hashGenerator = hashGenerator;
 	}
 	
+	List<Action> compareDirectories(Path absolutePath1, Path absolutePath2, FileExistence existence) {
+		List<Action> actions = new ArrayList<Action>();
+		
+		if (existence == FileExistence.Path1Only) {
+			actions.add(new CreateDirectoryAction(absolutePath2));
+		}
+		else if (existence == FileExistence.Path2Only) {
+			actions.add(new CreateDirectoryAction(absolutePath1));
+		}
+		
+		return actions;
+	}
+	
+	List<Action> checkHashStores(FileHashStore store1, FileHashStore store2) {
+		ArrayList<Action> actions = new ArrayList<Action>();
+		
+		addActionIfDirty(store1, actions);
+		addActionIfDirty(store2, actions);
+
+		return actions;
+	}
+	
+	private void addActionIfDirty(FileHashStore store, ArrayList<Action> actions) {
+		if (store.isDirty()) {
+			actions.add(new UpdateHashesAction(store));
+		}
+	}
+	
 	List<Action> compareFiles(Path absoultePath1, FileHashStore store1, Path absolutePath2, FileHashStore store2) throws IOException {
 		String hashFromFile1 = hashGenerator.calculateMd5(absoultePath1);
 		String hashFromFile2 = hashGenerator.calculateMd5(absolutePath2);
@@ -192,18 +220,5 @@ class SyncLogic {
 
 	private void copyFile(Path goodFile, Path badFile, ArrayList<Action> actions) {
 		actions.add(new FileCopyAction(goodFile, badFile));
-	}
-
-	List<Action> compareDirectories(Path absolutePath1, Path absolutePath2, FileExistence existence) {
-		List<Action> actions = new ArrayList<Action>();
-		
-		if (existence == FileExistence.Path1Only) {
-			actions.add(new CreateDirectoryAction(absolutePath2));
-		}
-		else if (existence == FileExistence.Path2Only) {
-			actions.add(new CreateDirectoryAction(absolutePath1));
-		}
-		
-		return actions;
 	}
 }

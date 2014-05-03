@@ -13,10 +13,12 @@ class FileHashStore {
 
 	private final Dictionary<Path, String> store = new Hashtable<Path, String>();
 	private final HashFileSource source;
+	private boolean isDirty;
 
 	FileHashStore(HashFileSource source) throws Exception {
 		this.source = source;
 		parseData(source);
+		isDirty = false;
 	}
 	
 	Path getDirectory() {
@@ -32,11 +34,18 @@ class FileHashStore {
 	}
 
 	void setHash(Path fileName, String hash) {
-		store.put(fileName, hash);
+		String currentValue = store.get(fileName);
+		if (currentValue == null || !currentValue.equals(hash)) {
+			store.put(fileName, hash);
+			isDirty = true;
+		}
 	}
 	
 	void removeHash(Path filename) {
-		store.remove(filename);
+		if (store.get(filename) != null) {
+			store.remove(filename);
+			isDirty = true;
+		}
 	}
 
 	void write() throws IOException {
@@ -45,6 +54,10 @@ class FileHashStore {
 		if (lines.size() > 0) {
 			source.writeData(lines);
 		}
+	}
+	
+	boolean isDirty() {
+		return isDirty;
 	}
 
 	private List<String> getFileData() {

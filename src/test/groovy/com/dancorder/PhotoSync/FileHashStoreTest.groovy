@@ -3,6 +3,7 @@ package com.dancorder.PhotoSync;
 import java.nio.file.Path
 import java.nio.file.Paths
 
+
 class FileHashStoreTest extends spock.lang.Specification {
 
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
@@ -21,7 +22,7 @@ class FileHashStoreTest extends spock.lang.Specification {
 	private static final line1 = testHash1 + "\t" + testFilename1
 	private static final line1Bad = badHash + "\t" + testFilename1
 	private static final line2 = testHash2 + "\t" + testFilename2
-
+	
 	def "get directory"() {
 		setup:
 		def store = new FileHashStore(getMockSource([], directory1))
@@ -185,6 +186,82 @@ class FileHashStoreTest extends spock.lang.Specification {
 		
 		then: "an exception is thrown"
 		thrown Exception
+	}
+	
+	def "new store is clean"() {
+		setup:
+		def mockSource = getMockSource(data)
+		def store = new FileHashStore(mockSource)
+		
+		expect:
+		!store.isDirty()
+
+		where:
+		data           | _
+		[]             | _
+		[""]           | _
+		[line1]        | _
+		[line1, line2] | _
+	}
+	
+	def "adding existing hash doesn't make the store dirty"() {
+		setup:
+		def mockSource = getMockSource([line1])
+		def store = new FileHashStore(mockSource)
+		
+		when:
+		store.setHash(testFile1RelativePath, testHash1)
+		
+		then:
+		!store.isDirty()
+	}
+	
+	def "adding new hash makes the store dirty"() {
+		setup:
+		def mockSource = getMockSource([])
+		def store = new FileHashStore(mockSource)
+		
+		when:
+		store.setHash(testFile1RelativePath, testHash1)
+		
+		then:
+		store.isDirty()
+	}
+	
+	def "changing an existing hash makes the store dirty"() {
+		setup:
+		def mockSource = getMockSource([line1])
+		def store = new FileHashStore(mockSource)
+		
+		when:
+		store.setHash(testFile1RelativePath, testHash2)
+		
+		then:
+		store.isDirty()
+	}
+	
+	def "removing an existing hash makes the store dirty"() {
+		setup:
+		def mockSource = getMockSource([line1])
+		def store = new FileHashStore(mockSource)
+		
+		when:
+		store.removeHash(testFile1RelativePath)
+		
+		then:
+		store.isDirty()
+	}
+	
+	def "removing a non-existant hash doesn't make the store dirty"() {
+		setup:
+		def mockSource = getMockSource([line1])
+		def store = new FileHashStore(mockSource)
+		
+		when:
+		store.removeHash(testFile2RelativePath)
+		
+		then:
+		!store.isDirty()
 	}
 
 	private def HashFileSource getMockSource(List<String> data) {
