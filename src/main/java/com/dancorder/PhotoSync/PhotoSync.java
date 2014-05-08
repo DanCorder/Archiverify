@@ -27,7 +27,7 @@ public class PhotoSync {
 		
 		printActions(actions);
 		
-		if (getAnswerFromUser("Execute actions?")) {
+		if (params.getExecuteActions() || getAnswerFromUser("Execute actions?")) {
 			executeActions(actions);
 		}
 	}

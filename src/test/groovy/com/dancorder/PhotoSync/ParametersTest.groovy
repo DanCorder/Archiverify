@@ -52,12 +52,24 @@ class ParametersTest extends spock.lang.Specification {
 		parametersAreInvalid(underTest)
 	}
 	
-	def "valid values"() {
+	def "valid paths, no params"() {
 		when: "Valid paths are supplied"
 		Parameters params = new Parameters( [ rootPath, rootPath ] as String[] )
 		
 		then:
 		params.isValid()
+		params.getExecuteActions() == false
+		params.getPath1().toString() == rootPath
+		params.getPath2().toString() == rootPath
+	}
+	
+	def "test automatically execute actions"() {
+		when:
+		Parameters params = new Parameters( [ "-y", rootPath, rootPath ] as String[] )
+		
+		then:
+		params.isValid()
+		params.getExecuteActions() == true
 		params.getPath1().toString() == rootPath
 		params.getPath2().toString() == rootPath
 	}
