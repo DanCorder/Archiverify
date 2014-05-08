@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeWalker;
 
-public class PhotoSync {
+class PhotoSync {
 
 	public static void main(String[] args) throws Exception {
 

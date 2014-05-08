@@ -2,7 +2,7 @@ package com.dancorder.PhotoSync;
 
 import java.io.IOException;
 
-public class WarningAction implements Action {
+class WarningAction implements Action {
 
 	private final String warning;
 
