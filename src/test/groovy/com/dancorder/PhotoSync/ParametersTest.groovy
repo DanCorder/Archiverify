@@ -6,50 +6,50 @@ class ParametersTest extends spock.lang.Specification {
 	
 	def "null parameter"() {
 		when: "A null constructor parameter"
-		new Parameters(null)
+		def underTest = new Parameters(null)
 
-		then: "expect UsageException"
-		thrown(UsageException)
+		then:
+		parametersAreInvalid(underTest)
 	}
 	
 	def "empty parameter"() {
 		when: "An empty constructor parameter"
-		new Parameters(new String[0])
+		def underTest = new Parameters(new String[0])
 
-		then: "expect UsageException"
-		thrown(UsageException)
+		then:
+		parametersAreInvalid(underTest)
 	}
 	
 	def "single parameter"() {
 		when: "A single value passed to constructor"
-		new Parameters( ["param1"] as String[] )
-
-		then: "expect UsageException"
-		thrown(UsageException)
+		def underTest = new Parameters( ["param1"] as String[] )
+		
+		then:
+		parametersAreInvalid(underTest)
 	}
 	
 	def "three parameters"() {
 		when: "Three values passed to constructor"
-		new Parameters( [ "param1", "param2", "param3" ] as String[] )
+		def underTest = new Parameters( [ "param1", "param2", "param3" ] as String[] )
 
-		then: "expect UsageException"
-		thrown(UsageException)
+		then:
+		parametersAreInvalid(underTest)
 	}
 	
-	def "invalid first value"() {
+	def "invalid first path"() {
 		when: "The first parameter isn't a valid path"
-		new Parameters( [ "invalid1", rootPath ] as String[] )
+		def underTest = new Parameters( [ "invalid1", rootPath ] as String[] )
 
-		then: "expect UsageException"
-		thrown(UsageException)
+		then:
+		parametersAreInvalid(underTest)
 	}
 	
-	def "invalid second value"() {
+	def "invalid second path"() {
 		when: "The second parameter isn't a valid path"
-		new Parameters( [ rootPath, "invalid2" ] as String[] )
+		def underTest = new Parameters( [ rootPath, "invalid2" ] as String[] )
 
-		then: "expect UsageException"
-		thrown(UsageException)
+		then:
+		parametersAreInvalid(underTest)
 	}
 	
 	def "valid values"() {
@@ -57,7 +57,14 @@ class ParametersTest extends spock.lang.Specification {
 		Parameters params = new Parameters( [ rootPath, rootPath ] as String[] )
 		
 		then:
+		params.isValid()
 		params.getPath1().toString() == rootPath
 		params.getPath2().toString() == rootPath
+	}
+	
+	private void parametersAreInvalid(params) {
+		assert !params.isValid()
+		assert params.getErrorMessage() != null
+		assert params.getErrorMessage().trim().length() > 0
 	}
 }

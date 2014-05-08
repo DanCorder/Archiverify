@@ -12,7 +12,8 @@ repositories {
 }
 
 dependencies {
-    compile     'commons-codec:commons-codec:1.9'
+    compile     'commons-codec:commons-codec:1.9',
+                'commons-cli:commons-cli:1.2'
     testCompile 'junit:junit:4.10',
                 'org.codehaus.groovy:groovy-all:2.0.5',
                 'org.spockframework:spock-core:0.7-groovy-2.0',

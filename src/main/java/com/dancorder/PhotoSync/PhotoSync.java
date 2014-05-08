@@ -9,8 +9,14 @@ import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeWalker;
 public class PhotoSync {
 
 	public static void main(String[] args) throws Exception {
-		
+
 		Parameters params = new Parameters(args);
+		
+		if (!params.isValid()) {
+			System.out.println(params.getErrorMessage());
+			params.printUsage();
+			System.exit(1);
+		}
 
 		SynchingVisitor visitor = new SynchingVisitor(new SyncLogic(new FileHashGenerator()), new FileHashStoreFactory(), params.getPath1(), params.getPath2());
 		ParallelFileTreeWalker walker = new ParallelFileTreeWalker(params.getPath1(), params.getPath2(), visitor);
