@@ -20,7 +20,7 @@ class ParametersTest extends spock.lang.Specification {
 		parametersAreInvalid(underTest)
 	}
 	
-	def "single parameter"() {
+	def "single path"() {
 		when: "A single value passed to constructor"
 		def underTest = new Parameters( ["param1"] as String[] )
 		
@@ -28,7 +28,7 @@ class ParametersTest extends spock.lang.Specification {
 		parametersAreInvalid(underTest)
 	}
 	
-	def "three parameters"() {
+	def "three paths"() {
 		when: "Three values passed to constructor"
 		def underTest = new Parameters( [ "param1", "param2", "param3" ] as String[] )
 
@@ -54,24 +54,43 @@ class ParametersTest extends spock.lang.Specification {
 	
 	def "valid paths, no params"() {
 		when: "Valid paths are supplied"
-		Parameters params = new Parameters( [ rootPath, rootPath ] as String[] )
+		def underTest = new Parameters( [ rootPath, rootPath ] as String[] )
 		
 		then:
-		params.isValid()
-		params.getExecuteActions() == false
-		params.getPath1().toString() == rootPath
-		params.getPath2().toString() == rootPath
+		underTest.isValid()
+		underTest.getExecuteActions() == false
+		underTest.getIsSingleDirectoryMode() == false
+		underTest.getPath1().toString() == rootPath
+		underTest.getPath2().toString() == rootPath
 	}
 	
 	def "test automatically execute actions"() {
 		when:
-		Parameters params = new Parameters( [ "-y", rootPath, rootPath ] as String[] )
+		def underTest = new Parameters( [ "-y", rootPath, rootPath ] as String[] )
 		
 		then:
-		params.isValid()
-		params.getExecuteActions() == true
-		params.getPath1().toString() == rootPath
-		params.getPath2().toString() == rootPath
+		underTest.isValid()
+		underTest.getExecuteActions() == true
+		underTest.getPath1().toString() == rootPath
+		underTest.getPath2().toString() == rootPath
+	}
+	
+	def "single directory mode with one path"() {
+		when:
+		def underTest = new Parameters( [ "-s", rootPath ] as String[] )
+		
+		then:
+		underTest.isValid()
+		underTest.getIsSingleDirectoryMode() == true
+		underTest.getPath1().toString() == rootPath
+	}
+	
+	def "single directory mode with one two paths"() {
+		when:
+		def underTest = new Parameters( [ "-s", rootPath, rootPath ] as String[] )
+		
+		then:
+		parametersAreInvalid(underTest)
 	}
 	
 	private void parametersAreInvalid(params) {

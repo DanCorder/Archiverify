@@ -1,6 +1,7 @@
 package com.dancorder.PhotoSync;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Scanner;
 
@@ -17,14 +18,20 @@ class PhotoSync {
 			params.printUsage();
 			System.exit(1);
 		}
+		
+		List<Action> actions;
 
-		SynchingVisitor visitor = new SynchingVisitor(new SyncLogic(new FileHashGenerator()), new FileHashStoreFactory(), params.getPath1(), params.getPath2());
-		ParallelFileTreeWalker walker = new ParallelFileTreeWalker(params.getPath1(), params.getPath2(), visitor);
-		
-		walker.walk();
-		
-		List<Action> actions = visitor.getActions();
-		
+		if (params.getIsSingleDirectoryMode()) {
+			HashCheckingVisitor visitor = new HashCheckingVisitor(new FileHashStoreFactory(), new FileHashGenerator());
+			Files.walkFileTree(params.getPath1(), visitor);
+			actions = visitor.getActions();
+		} else {
+			SynchingVisitor visitor = new SynchingVisitor(new SyncLogic(new FileHashGenerator()), new FileHashStoreFactory(), params.getPath1(), params.getPath2());
+			ParallelFileTreeWalker walker = new ParallelFileTreeWalker(params.getPath1(), params.getPath2(), visitor);
+			walker.walk();
+			actions = visitor.getActions();
+		}
+
 		printActions(actions);
 		
 		if (params.getExecuteActions() || getAnswerFromUser("Execute actions?")) {
