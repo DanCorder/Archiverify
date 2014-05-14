@@ -2,7 +2,11 @@ package com.dancorder.PhotoSync;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence;
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.ParallelFileTreeVisitor;
@@ -14,9 +18,9 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	private final ArrayList<Action> actions = new ArrayList<Action>();
 	private final SyncLogic syncLogic;
 	private final FileHashStoreFactory fileHashStoreFactory;
-	private FileHashStore hashStore1;
-	private FileHashStore hashStore2;
+	private Path currentRelativeDirectoryPath;
 	private Path errorPath;
+	private Dictionary<Path, Pair<FileHashStore, FileHashStore>> hashStores = new Hashtable<Path, Pair<FileHashStore, FileHashStore>>();
 	
 	SynchingVisitor(SyncLogic logic, FileHashStoreFactory factory, Path root1, Path root2) {
 		syncLogic = logic;
@@ -29,6 +33,8 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	public void preVisitDirectory(Path relativeDirectoryPath, FileExistence existence) {
 		try
 		{
+			currentRelativeDirectoryPath = relativeDirectoryPath;
+			
 			if (isNotInErrorPath(relativeDirectoryPath))
 			{
 				errorPath = null;
@@ -36,8 +42,9 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 				Path directory1 = root1.resolve(relativeDirectoryPath);
 				Path directory2 = root2.resolve(relativeDirectoryPath);
 				
-				hashStore1 = fileHashStoreFactory.createFileHashStore(directory1);
-				hashStore2 = fileHashStoreFactory.createFileHashStore(directory2);
+				Pair<FileHashStore, FileHashStore> hashStorePair = Pair.of(fileHashStoreFactory.createFileHashStore(directory1), fileHashStoreFactory.createFileHashStore(directory2));
+				
+				hashStores.put(relativeDirectoryPath, hashStorePair);
 				
 				List<Action> newActions = syncLogic.compareDirectories(directory1, directory2, existence);
 				
@@ -60,7 +67,8 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 		{
 			if (isNotInErrorPath(relativeDirectoryPath))
 			{
-				List<Action> newActions = syncLogic.checkHashStores(hashStore1, hashStore2);
+				Pair<FileHashStore, FileHashStore> hashStorePair = hashStores.get(relativeDirectoryPath);
+				List<Action> newActions = syncLogic.checkHashStores(hashStorePair.getLeft(), hashStorePair.getRight());
 				actions.addAll(newActions);
 			}
 		}
@@ -78,12 +86,13 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	public void visitFile(Path relativeFilePath, FileExistence existence) {
 		try
 		{
-			if (isNotInErrorPath(relativeFilePath) && isNotHashFile(relativeFilePath))
+			if (isNotInErrorPath(relativeFilePath) && !HashFileSource.isHashFile(relativeFilePath))
 			{
 				Path file1 = root1.resolve(relativeFilePath);
 				Path file2 = root2.resolve(relativeFilePath);
-				
-				List<Action> newActions = syncLogic.compareFiles(file1, hashStore1, file2, hashStore2);
+			
+				Pair<FileHashStore, FileHashStore> hashStorePair = hashStores.get(currentRelativeDirectoryPath);
+				List<Action> newActions = syncLogic.compareFiles(file1, hashStorePair.getLeft(), file2, hashStorePair.getRight());
 				actions.addAll(newActions);
 			}
 		}
@@ -93,10 +102,6 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 				new WarningAction(
 					String.format("Error caught visiting file %s this file will not be synched. %s", relativeFilePath, e)));
 		}
-	}
-
-	private boolean isNotHashFile(Path relativeFilePath) {
-		return !HashFileSource.HASH_FILE_NAME.equals(relativeFilePath.getFileName().toString());
 	}
 
 	private boolean isNotInErrorPath(Path relativeFilePath) {

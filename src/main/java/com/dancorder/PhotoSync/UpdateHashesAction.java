@@ -20,7 +20,7 @@ class UpdateHashesAction implements Action {
 	
 	@Override
 	public String toString() {
-		return "Write hashes to " + store.getDirectory().toString();
+		return String.format("Write hashes to %s", store.getDirectory());
 	}
 
 	@Override

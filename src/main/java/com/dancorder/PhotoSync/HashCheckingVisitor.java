@@ -6,6 +6,8 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 
@@ -15,7 +17,7 @@ class HashCheckingVisitor implements FileVisitor<Path> {
 	private final FileHashGenerator hashGenerator;
 	
 	private ArrayList<Action> actions = new ArrayList<Action>();
-	private FileHashStore store;
+	private Dictionary<Path, FileHashStore> stores = new Hashtable<Path, FileHashStore>();
 
 	HashCheckingVisitor(FileHashStoreFactory factory, FileHashGenerator hashGenerator) {
 		this.factory = factory;
@@ -24,6 +26,19 @@ class HashCheckingVisitor implements FileVisitor<Path> {
 	
 	List<Action> getActions() {
 		return actions;
+	}
+
+	@Override
+	public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) throws IOException {
+		try {
+			stores.put(path, factory.createFileHashStore(path));
+		} catch (Exception e) {
+			stores.remove(path);
+			actions.add(
+					new WarningAction(
+						String.format("Error caught visiting directory %s this directory will be ignored. %s", path, e)));
+		}
+		return FileVisitResult.CONTINUE;
 	}
 	
 	@Override
@@ -34,6 +49,7 @@ class HashCheckingVisitor implements FileVisitor<Path> {
 						String.format("Directory %s not fully scanned, some files may not have hashes and some subdirectories may not be scanned. %s", path, e)));
 		}
 		
+		FileHashStore store = stores.get(path);
 		if (store != null && store.isDirty()) {
 			actions.add(new UpdateHashesAction(store));
 		}
@@ -42,21 +58,9 @@ class HashCheckingVisitor implements FileVisitor<Path> {
 	}
 
 	@Override
-	public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) throws IOException {
-		try {
-			store = factory.createFileHashStore(path);
-		} catch (Exception e) {
-			store = null;
-			actions.add(
-					new WarningAction(
-						String.format("Error caught visiting directory %s this directory will be ignored. %s", path, e)));
-		}
-		return FileVisitResult.CONTINUE;
-	}
-
-	@Override
 	public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-		if (store != null) {
+		FileHashStore store = stores.get(path.getParent());
+		if (store != null && !HashFileSource.isHashFile(path)) {
 			String calculatedHash = hashGenerator.calculateMd5(path);
 			Path fileName = path.getFileName();
 			

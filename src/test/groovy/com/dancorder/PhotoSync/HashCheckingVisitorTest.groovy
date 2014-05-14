@@ -16,6 +16,8 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	private final static subDirAbsolute = rootAbsolute.resolve(subDirRelative)
 	private final static rootFileAbsolute = rootAbsolute.resolve(testRootFileName)
 	private final static subDirFileAbsolute = subDirAbsolute.resolve(testSubDirFileName)
+	private final static rootHashFileAbsolute = rootAbsolute.resolve("hashes.txt")
+	private final static subDirHashFileAbsolute = subDirAbsolute.resolve("hashes.txt")
 	
 	private static store
 	private static defaultFileHashStoreFactory
@@ -26,18 +28,29 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	}
 	
 	private def createScenario(Map<Path, String> hashesInStore, Map<Path, String> hashesToGenerate) {
-		def source = Mock(HashFileSource)
-		source.getData() >> hashesInStore.collect { it.value + "\t" + it.key.fileName.toString() }
 		
-		store = new FileHashStore(source)
+		store = createFakeFileHashStore(hashesInStore)
 		
 		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
 		defaultFileHashStoreFactory.createFileHashStore(_) >> store
 		
-		defaultHashGenerator = Mock(FileHashGenerator)
+		defaultHashGenerator = createMockHashGenerator(hashesToGenerate)
+	}
+	
+	private def createFakeFileHashStore(Map<Path, String> hashesInStore) {
+		def source = Mock(HashFileSource)
+		source.getData() >> hashesInStore.collect { it.value + "\t" + it.key.fileName.toString() }
+		
+		return new FileHashStore(source)
+	}
+	
+	private def createMockHashGenerator(Map<Path, String> hashesToGenerate) {
+		def ret = Mock(FileHashGenerator)
 		for (path in hashesToGenerate.keySet()) {
-			defaultHashGenerator.calculateMd5(path) >> hashesToGenerate[path]
+			ret.calculateMd5(path) >> hashesToGenerate[path]
 		}
+		
+		return ret;
 	}
 	
 	def "No actions generated when no files visited"() {
@@ -153,6 +166,29 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		actions.size() == 1
 		actions[0] instanceof WarningAction
 	}
+	
+	def "Hashes.txt ignored"() {
+		setup:
+		createScenario([:], [(filePath):testHash])
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		
+		when:
+		def ret1 = underTest.preVisitDirectory(dirPath, null)
+		def ret2 = underTest.visitFile(filePath, null)
+		def ret3 = underTest.postVisitDirectory(dirPath, null)
+		def actions = underTest.getActions()
+		
+		then:
+		ret1 == FileVisitResult.CONTINUE
+		ret2 == FileVisitResult.CONTINUE
+		ret3 == FileVisitResult.CONTINUE
+		actions.size() == 0
+		
+		where:
+		dirPath        | filePath
+		rootAbsolute   | rootHashFileAbsolute
+		subDirAbsolute | subDirHashFileAbsolute
+	}
 
 	def "Exception in pre visit directory doesn't cause errors for files"() {
 		setup:
@@ -165,10 +201,10 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		when:
 		def ret1 = underTest.preVisitDirectory(rootAbsolute, null)
 		def ret2 = underTest.visitFile(rootFileAbsolute, null)
-		def ret3 = underTest.postVisitDirectory(rootAbsolute, null)
-		def ret4 = underTest.preVisitDirectory(subDirAbsolute, null)
-		def ret5 = underTest.visitFile(subDirFileAbsolute, null)
-		def ret6 = underTest.postVisitDirectory(subDirAbsolute, null)
+		def ret3 = underTest.preVisitDirectory(subDirAbsolute, null)
+		def ret4 = underTest.visitFile(subDirFileAbsolute, null)
+		def ret5 = underTest.postVisitDirectory(subDirAbsolute, null)
+		def ret6 = underTest.postVisitDirectory(rootAbsolute, null)
 		def actions = underTest.getActions()
 		
 		then:
@@ -181,6 +217,37 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		actions.size() == 2
 		actions[0] instanceof WarningAction
 		actions[1] == new UpdateHashesAction(store) 
+	}
+	
+	def "Correct hash stores written out after visiting subdirectory"() {
+		setup:
+		createScenario([:], [(subDirFileAbsolute):testHash, (rootFileAbsolute):testHash])
+		def rootStore = createFakeFileHashStore([:])
+		def subDirStore = createFakeFileHashStore([:])
+		def fileHashStoreFactory = Mock(FileHashStoreFactory)
+		fileHashStoreFactory.createFileHashStore(rootAbsolute) >> rootStore
+		fileHashStoreFactory.createFileHashStore(subDirAbsolute) >> subDirStore
+		def underTest = new HashCheckingVisitor(fileHashStoreFactory, defaultHashGenerator)
+		
+		when:
+		def ret1 = underTest.preVisitDirectory(rootAbsolute, null)
+		def ret2 = underTest.visitFile(rootFileAbsolute, null)
+		def ret3 = underTest.preVisitDirectory(subDirAbsolute, null)
+		def ret4 = underTest.visitFile(subDirFileAbsolute, null)
+		def ret5 = underTest.postVisitDirectory(subDirAbsolute, null)
+		def ret6 = underTest.postVisitDirectory(rootAbsolute, null)
+		def actions = underTest.getActions()
+		
+		then:
+		ret1 == FileVisitResult.CONTINUE
+		ret2 == FileVisitResult.CONTINUE
+		ret3 == FileVisitResult.CONTINUE
+		ret4 == FileVisitResult.CONTINUE
+		ret5 == FileVisitResult.CONTINUE
+		ret6 == FileVisitResult.CONTINUE
+		actions.size() == 2
+		actions[0] == new UpdateHashesAction(subDirStore)
+		actions[1] == new UpdateHashesAction(rootStore)
 	}
 	
 	def "visitFileFailed converted to warning"() {

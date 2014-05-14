@@ -185,10 +185,12 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		actions.add(action)
 		actions.add(action2)
 		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_,_,_) >> new ArrayList<Action>()
 		logic.compareFiles(_, _, _, _) >> actions
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
+		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		visitor.visitFile(fileRelative, FileExistence.BothPaths)
 		
 		then:
@@ -252,6 +254,35 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		FileExistence.BothPaths | _
 		FileExistence.Path1Only | _
 		FileExistence.Path2Only | _
+	}
+	
+	def "Correct hash store written out after subdirectory"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
+		logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
+		def fileHashStore1 = Mock(FileHashStore)
+		def fileHashStore2 = Mock(FileHashStore)
+		def fileHashStore3 = Mock(FileHashStore)
+		def fileHashStore4 = Mock(FileHashStore)
+		def fileHashStoreFactory = Mock(FileHashStoreFactory)
+		fileHashStoreFactory.createFileHashStore(root1Absolute) >> fileHashStore1
+		fileHashStoreFactory.createFileHashStore(root2Absolute) >> fileHashStore2
+		fileHashStoreFactory.createFileHashStore(root1Absolute.resolve(subDirRelative)) >> fileHashStore3
+		fileHashStoreFactory.createFileHashStore(root2Absolute.resolve(subDirRelative)) >> fileHashStore4
+		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
+		
+		when:
+		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.visitFile(Paths.get("").resolve(fileRelative), FileExistence.BothPaths)
+		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		visitor.visitFile(subDirRelative.resolve(fileRelative), FileExistence.BothPaths)
+		visitor.postVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		
+		then:
+		1 * logic.checkHashStores(fileHashStore1, fileHashStore2) >> new ArrayList<Action>()
+		1 * logic.checkHashStores(fileHashStore3, fileHashStore4) >> new ArrayList<Action>()
 	}
 	
 	def "Hash files not compared"() {
