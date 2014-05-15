@@ -34,15 +34,20 @@ class PhotoSync {
 
 		printActions(actions);
 		
-		if (params.getExecuteActions() || getAnswerFromUser("Execute actions?")) {
+		if (actions.size() > 0 && (params.getExecuteActions() || getAnswerFromUser("Execute actions?"))) {
 			executeActions(actions);
 		}
 	}
 
 	private static void printActions(List<Action> actions) {
-		System.out.println("Actions found:");
-		for (Action action :actions) {
-			System.out.println(action.toString());
+		if (actions.size() == 0) {
+			System.out.println("Nothing to do");
+		}
+		else {
+			System.out.println("Actions found:");
+			for (Action action :actions) {
+				System.out.println(action.toString());
+			}
 		}
 	}
 
