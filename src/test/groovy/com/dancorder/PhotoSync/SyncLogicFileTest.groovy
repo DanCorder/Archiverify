@@ -23,7 +23,7 @@ class SyncLogicTest extends spock.lang.Specification {
 //	A     | A     | B     | A     | Copy file
 //	A     | A     | B     | B     | Ask user
 //	A     | A     | B     | C     | Copy file and hash
-//	A     | A     | B     | NULL  | Copy file and hash
+//	A     | A     | B     | NULL  | Ask user
 //	A     | A     | NULL  | A     | Copy file
 //	A     | A     | NULL  | B     | Copy file and hash
 //	A     | A     | NULL  | NULL  | Copy file and hash
@@ -249,7 +249,21 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AABN"() {
 		setup:
 		setupScenario(new String(hashA), new String(hashA), new String(hashB), null)
-		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		expectedResult.add(new SyncWarningAction(absolutePath1, new String(hashA), new String(hashA), absolutePath2, new String(hashB), null))
+
+		when:
+		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
+
+		then:
+		expectedResult == result
+		0 * store1.setHash(_,_)
+		0 * store2.setHash(_,_)
+	}
+	
+	def "AABN reversed"() {
+		setup:
+		setupScenario(new String(hashB), null, new String(hashA), new String(hashA))
+		expectedResult.add(new SyncWarningAction(absolutePath2, new String(hashA), new String(hashA), absolutePath1, new String(hashB), null))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -257,20 +271,6 @@ class SyncLogicTest extends spock.lang.Specification {
 		then:
 		expectedResult == result
 		0 * store1.setHash(_,_)
-		1 * store2.setHash(filePath, new String(hashA))
-	}
-	
-	def "AABN reversed"() {
-		setup:
-		setupScenario(new String(hashB), null, new String(hashA), new String(hashA))
-		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
-		
-		when:
-		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
-
-		then:
-		expectedResult == result
-		1 * store1.setHash(filePath, new String(hashA))
 		0 * store2.setHash(_,_)
 	}
 	

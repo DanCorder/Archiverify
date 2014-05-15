@@ -197,6 +197,9 @@ class SyncLogic {
 		else if (matchingHashFromStore.equals(otherHashFromStore)) {
 			copyFile(matchingFile, otherFile, actions);
 		}
+		else if (otherHashFromFile != null && otherHashFromStore == null) {
+			actions.add(new SyncWarningAction(matchingFile, matchingHashFromFile, matchingHashFromStore, otherFile, otherHashFromFile, otherHashFromStore));
+		}
 		else {
 			copyFileAndSetHash(matchingHashFromStore, matchingFile, otherFile, otherStore, actions);
 		}
