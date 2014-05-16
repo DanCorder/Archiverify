@@ -45,7 +45,9 @@ class PhotoSync {
 		}
 		else {
 			System.out.println("Actions found:");
-			for (Action action :actions) {
+			ActionSorter sorter = new ActionSorter(actions);
+			
+			for (Action action : sorter.sortForDisplay()) {
 				System.out.println(action.toString());
 			}
 		}

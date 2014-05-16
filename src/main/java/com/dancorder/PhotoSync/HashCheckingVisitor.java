@@ -70,7 +70,7 @@ class HashCheckingVisitor implements FileVisitor<Path> {
 			else if (!store.getHash(fileName).equals(calculatedHash)) {
 				actions.add(
 						new WarningAction(
-							String.format("Calculard hash (%s) for file %s does not match stored value (%s)", calculatedHash, path, store.getHash(fileName))));
+							String.format("Calculated hash (%s) for file %s does not match stored value (%s)", calculatedHash, path, store.getHash(fileName))));
 			}
 		}
 		return FileVisitResult.CONTINUE;
