@@ -31,26 +31,39 @@ class PhotoSync {
 			walker.walk();
 			actions = visitor.getActions();
 		}
-
+		
+		actions = sortActions(actions);
+		
 		printActions(actions);
 		
-		if (actions.size() > 0 && (params.getExecuteActions() || getAnswerFromUser("Execute actions?"))) {
+		if (containsNonWarningActions(actions) && (params.getExecuteActions() || getAnswerFromUser("Execute actions?"))) {
 			executeActions(actions);
 		}
 	}
 
-	private static void printActions(List<Action> actions) {
-		if (actions.size() == 0) {
-			System.out.println("Nothing to do");
-		}
-		else {
-			System.out.println("Actions found:");
-			ActionSorter sorter = new ActionSorter(actions);
-			
-			for (Action action : sorter.sortForDisplay()) {
+	private static List<Action> sortActions(List<Action> actions) {
+		ActionSorter sorter = new ActionSorter(actions);
+		return sorter.sortForDisplay();
+	}
+
+	private static void printActions(List<Action> sortedActions) {
+		if (sortedActions.size() > 0) {
+			for (Action action : sortedActions) {
 				System.out.println(action.toString());
 			}
 		}
+		else {
+			System.out.println("Nothing to do");
+		}
+	}
+
+	private static boolean containsNonWarningActions(List<Action> sortedActions) {
+		if (sortedActions.size() == 0) {
+			return false;
+		}
+		
+		Action lastAction = sortedActions.get(sortedActions.size() - 1);
+		return !(lastAction instanceof WarningAction);
 	}
 
 	private static void executeActions(List<Action> actions) throws IOException {
