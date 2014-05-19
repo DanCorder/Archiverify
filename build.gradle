@@ -2,6 +2,7 @@ apply plugin: 'groovy'
 apply plugin: 'application'
 
 mainClassName = "com.dancorder.PhotoSync.PhotoSync"
+version = getVersionTag()
 
 // Use local copies of dependencies first, then get from Maven if needed
 repositories {
@@ -44,7 +45,7 @@ jar {
     manifest {
         attributes(
             "Main-Class": mainClassName,
-            "Implementation-Version": getVersionTag())
+            "Implementation-Version": project.version)
     }
 }
 
