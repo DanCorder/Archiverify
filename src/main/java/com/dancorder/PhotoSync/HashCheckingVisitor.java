@@ -31,6 +31,7 @@ class HashCheckingVisitor implements FileVisitor<Path> {
 	@Override
 	public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) throws IOException {
 		try {
+			System.out.println("Scanning " + path.toString());
 			stores.put(path, factory.createFileHashStore(path));
 		} catch (Exception e) {
 			stores.remove(path);
