@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'application'
 
-mainClassName = "com.dancorder.PhotoSync.PhotoSync"
+mainClassName = 'com.dancorder.PhotoSync.PhotoSync'
 version = getVersionTag()
 
 // Use local copies of dependencies first, then get from Maven if needed
@@ -25,12 +25,12 @@ dependencies {
 
 // Copy dependencies into the git repository
 task copyToLib(type: Copy) {
-    into "lib"
+    into 'lib'
     from configurations.runtime
 }
 
 task copyToTestLib(type: Copy) {
-    into "libTest"
+    into 'libTest'
     from configurations.testRuntime
 }
 
@@ -44,14 +44,14 @@ jar {
     }
     manifest {
         attributes(
-            "Main-Class": mainClassName,
-            "Implementation-Version": project.version)
+            'Main-Class': mainClassName,
+            'Implementation-Version': project.version)
     }
 }
 
 def getVersionTag() {
-    def os = System.getProperty("os.name").toLowerCase()
-    def gitCommand = os.contains("windows") ? 'git.cmd' : 'git'
+    def os = System.getProperty('os.name').toLowerCase()
+    def gitCommand = os.contains('windows') ? 'git.cmd' : 'git'
     def stdout = new ByteArrayOutputStream()
 
     exec {
