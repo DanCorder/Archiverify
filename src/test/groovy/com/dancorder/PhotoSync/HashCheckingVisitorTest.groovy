@@ -6,16 +6,21 @@ import java.nio.file.*
 class HashCheckingVisitorTest extends spock.lang.Specification {
 
 	private static final testHash = "testHash"
+	private static final testHash2 = "testHash2"
 	private static final badHash = "badHash"
 	private static final testRootFileName = "testRootFileName"
+	private static final testRootFileName2 = "testRootFileName2"
 	private static final testSubDirFileName = "testSubDirFileName"
+	private static final testSubDirFileName2 = "testSubDirFileName2"
 	
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private final static rootAbsolute = tempDir.resolve("testRoot")
 	private final static subDirRelative = Paths.get("subDir")
 	private final static subDirAbsolute = rootAbsolute.resolve(subDirRelative)
 	private final static rootFileAbsolute = rootAbsolute.resolve(testRootFileName)
+	private final static rootFileAbsolute2 = rootAbsolute.resolve(testRootFileName2)
 	private final static subDirFileAbsolute = subDirAbsolute.resolve(testSubDirFileName)
+	private final static subDirFileAbsolute2 = subDirAbsolute.resolve(testSubDirFileName2)
 	private final static rootHashFileAbsolute = rootAbsolute.resolve("hashes.txt")
 	private final static subDirHashFileAbsolute = subDirAbsolute.resolve("hashes.txt")
 	
@@ -143,6 +148,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		actions == expected
 		store.hashExists(filePath.getFileName())
 		store.getHash(filePath.getFileName()) == testHash
+		store.getFiles().size() == 1
 
 		where:
 		dirPath        | filePath
@@ -278,5 +284,59 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		ret1 == FileVisitResult.CONTINUE
 		actions.size() == 1
 		actions[0] instanceof WarningAction
+	}
+	
+	def "All hashes removed when no files present"() {
+		setup:
+		createScenario([(filePath1):testHash, (filePath2):testHash2], [:])
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def expected = new ArrayList<Action>()
+		expected.add(new UpdateHashesAction(store))
+		
+		when:
+		def ret1 = underTest.preVisitDirectory(dirPath, null)
+		def ret2 = underTest.postVisitDirectory(dirPath, null)
+		def actions = underTest.getActions()
+		
+		then:
+		ret1 == FileVisitResult.CONTINUE
+		ret2 == FileVisitResult.CONTINUE
+		actions == expected
+		!store.hashExists(filePath1.getFileName())
+		!store.hashExists(filePath2.getFileName())
+		store.getFiles().size() == 0
+
+		where:
+		dirPath        | filePath1          | filePath2
+		rootAbsolute   | rootFileAbsolute   | rootFileAbsolute2
+		subDirAbsolute | subDirFileAbsolute | subDirFileAbsolute2
+	}
+	
+	def "Only non visited hashes removed"() {
+		setup:
+		createScenario([(filePath1):testHash, (filePath2):testHash2], [(filePath1):testHash])
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def expected = new ArrayList<Action>()
+		expected.add(new UpdateHashesAction(store))
+		
+		when:
+		def ret1 = underTest.preVisitDirectory(dirPath, null)
+		def ret2 = underTest.visitFile(filePath1, null)
+		def ret3 = underTest.postVisitDirectory(dirPath, null)
+		def actions = underTest.getActions()
+		
+		then:
+		ret1 == FileVisitResult.CONTINUE
+		ret2 == FileVisitResult.CONTINUE
+		ret3 == FileVisitResult.CONTINUE
+		actions == expected
+		store.hashExists(filePath1.getFileName())
+		!store.hashExists(filePath2.getFileName())
+		store.getFiles().size() == 1
+
+		where:
+		dirPath        | filePath1          | filePath2
+		rootAbsolute   | rootFileAbsolute   | rootFileAbsolute2
+		subDirAbsolute | subDirFileAbsolute | subDirFileAbsolute2
 	}
 }

@@ -59,6 +59,10 @@ class FileHashStore {
 	boolean isDirty() {
 		return isDirty;
 	}
+	
+	List<Path> getFiles() {
+		return Collections.list(store.keys());
+	}
 
 	private List<String> getFileData() {
 		ArrayList<String> lines = new ArrayList<String>();
