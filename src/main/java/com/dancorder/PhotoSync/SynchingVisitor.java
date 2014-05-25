@@ -20,7 +20,8 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	private final FileHashStoreFactory fileHashStoreFactory;
 	private Path currentRelativeDirectoryPath;
 	private Path errorPath;
-	private Dictionary<Path, Pair<FileHashStore, FileHashStore>> hashStores = new Hashtable<Path, Pair<FileHashStore, FileHashStore>>();
+	private Dictionary<Path, Pair<FileHashStore, FileHashStore>> hashStoresByDirectory = new Hashtable<Path, Pair<FileHashStore, FileHashStore>>();
+	private Dictionary<Path, List<Path>> visitedFilesByDirectory = new Hashtable<Path, List<Path>>();
 	
 	SynchingVisitor(SyncLogic logic, FileHashStoreFactory factory, Path root1, Path root2) {
 		syncLogic = logic;
@@ -45,7 +46,8 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 				
 				Pair<FileHashStore, FileHashStore> hashStorePair = Pair.of(fileHashStoreFactory.createFileHashStore(directory1), fileHashStoreFactory.createFileHashStore(directory2));
 				
-				hashStores.put(relativeDirectoryPath, hashStorePair);
+				hashStoresByDirectory.put(relativeDirectoryPath, hashStorePair);
+				visitedFilesByDirectory.put(relativeDirectoryPath, new ArrayList<Path>());
 				
 				List<Action> newActions = syncLogic.compareDirectories(directory1, directory2, existence);
 				
@@ -68,10 +70,17 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 		{
 			if (isNotInErrorPath(relativeDirectoryPath))
 			{
-				Pair<FileHashStore, FileHashStore> hashStorePair = hashStores.get(relativeDirectoryPath);
+				Pair<FileHashStore, FileHashStore> hashStorePair = hashStoresByDirectory.get(relativeDirectoryPath);
+				List<Path> visitedFiles = visitedFilesByDirectory.get(relativeDirectoryPath);
+				
+				syncLogic.removeUnvisitedHashes(hashStorePair.getLeft(), visitedFiles);
+				syncLogic.removeUnvisitedHashes(hashStorePair.getRight(), visitedFiles);
 				List<Action> newActions = syncLogic.checkHashStores(hashStorePair.getLeft(), hashStorePair.getRight());
 				actions.addAll(newActions);
 			}
+			
+			hashStoresByDirectory.remove(relativeDirectoryPath);
+			visitedFilesByDirectory.remove(relativeDirectoryPath);
 		}
 		catch (Exception e)
 		{
@@ -92,7 +101,9 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 				Path file1 = root1.resolve(relativeFilePath);
 				Path file2 = root2.resolve(relativeFilePath);
 			
-				Pair<FileHashStore, FileHashStore> hashStorePair = hashStores.get(currentRelativeDirectoryPath);
+				visitedFilesByDirectory.get(currentRelativeDirectoryPath).add(relativeFilePath.getFileName());
+				
+				Pair<FileHashStore, FileHashStore> hashStorePair = hashStoresByDirectory.get(currentRelativeDirectoryPath);
 				List<Action> newActions = syncLogic.compareFiles(file1, hashStorePair.getLeft(), file2, hashStorePair.getRight());
 				actions.addAll(newActions);
 			}

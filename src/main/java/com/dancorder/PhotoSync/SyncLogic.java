@@ -3,7 +3,9 @@ package com.dancorder.PhotoSync;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.dancorder.PhotoSync.ParallelFileTreeWalker.FileExistence;
 
@@ -40,6 +42,22 @@ class SyncLogic {
 	private void addActionIfDirty(FileHashStore store, ArrayList<Action> actions) {
 		if (store.isDirty()) {
 			actions.add(new UpdateHashesAction(store));
+		}
+	}
+	
+	void removeUnvisitedHashes(FileHashStore store, List<Path> visitedFiles) {
+		List<Path> filesInStore = store.getFiles();
+		
+		Set<Path> filesOnlyInStore = new HashSet<Path>();
+
+		for (Path fileInStore : filesInStore) {
+			if (!visitedFiles.contains(fileInStore)) {
+				filesOnlyInStore.add(fileInStore);
+			}
+		}
+		
+		for (Path fileOnlyInStore : filesOnlyInStore) {
+			store.removeHash(fileOnlyInStore);
 		}
 	}
 	

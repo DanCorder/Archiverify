@@ -10,6 +10,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private final static root1Absolute = tempDir.resolve("testRoot1")
 	private final static root2Absolute = tempDir.resolve("testRoot2")
+	private final static rootDirRelative = Paths.get("")
 	private final static subDirRelative = Paths.get("subDir")
 	private final static subDirAbsoluteRoot1 = root1Absolute.resolve(subDirRelative)
 	private final static subDirAbsoluteRoot2 = root2Absolute.resolve(subDirRelative)
@@ -43,8 +44,8 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
+		visitor.postVisitDirectory(rootDirRelative, FileExistence.BothPaths)
 		
 		then:
 		visitor.getActions().size() == 2
@@ -80,7 +81,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
 		
 		then:
 		visitor.getActions().size() == 2
@@ -94,7 +95,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
 		
 		then:
 		1 * logic.compareDirectories(root1Absolute, root2Absolute, FileExistence.BothPaths) >> new ArrayList<Action>()
@@ -135,7 +136,12 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	
 	def "Logic exception in directory comparison stops processing of children but not siblings"() {
 		setup:
-		def logic = Mock(SyncLogic)		
+		def store3 = Mock(FileHashStore)
+		def store4 = Mock(FileHashStore)
+		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
+		defaultFileHashStoreFactory.createFileHashStore(_) >>> [store1, store2, store3, store4]
+		
+		def logic = Mock(SyncLogic)
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
@@ -153,10 +159,12 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		then: 0 * logic.compareFiles(root1Absolute.resolve(subDirFileRelative), _ , root2Absolute.resolve(subDirFileRelative), _) >> new ArrayList<Action>()
 		then: 0 * logic.compareDirectories(root1Absolute.resolve(subSubDirRelative) ,root2Absolute.resolve(subSubDirRelative), _) >> new ArrayList<Action>()
 		then: 0 * logic.compareFiles(root1Absolute.resolve(subSubDirFileRelative), _ , root2Absolute.resolve(subSubDirFileRelative), _) >> new ArrayList<Action>()
-		then: 0 * logic.checkHashStores(_,_) >> new ArrayList<Action>()
+		then: 0 * logic.removeUnvisitedHashes(_,_)
 		then: 0 * logic.checkHashStores(_,_) >> new ArrayList<Action>()
 		then: 1 * logic.compareDirectories(root1Absolute.resolve(subDir2Relative), root2Absolute.resolve(subDir2Relative), _) >> new ArrayList<Action>()
 		then: 1 * logic.compareFiles(root1Absolute.resolve(subDir2FileRelative), _ , root2Absolute.resolve(subDir2FileRelative), _) >> new ArrayList<Action>()
+		then: 1 * logic.removeUnvisitedHashes(store3, [subDir2FileRelative.getFileName()])
+		then: 1 * logic.removeUnvisitedHashes(store4, [subDir2FileRelative.getFileName()])
 		then: 1 * logic.checkHashStores(_,_) >> new ArrayList<Action>()
 	}
 	
@@ -190,7 +198,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
 		visitor.visitFile(fileRelative, FileExistence.BothPaths)
 		
 		then:
@@ -211,7 +219,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
 		visitor.visitFile(fileRelative, existence)
 		
 		then:
@@ -239,7 +247,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
 		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
 		visitor.visitFile(subDirRelative.resolve(fileRelative), existence)
 		
@@ -273,12 +281,12 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
-		visitor.preVisitDirectory(Paths.get(""), FileExistence.BothPaths)
-		visitor.visitFile(Paths.get("").resolve(fileRelative), FileExistence.BothPaths)
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
+		visitor.visitFile(fileRelative, FileExistence.BothPaths)
 		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
 		visitor.visitFile(subDirRelative.resolve(fileRelative), FileExistence.BothPaths)
 		visitor.postVisitDirectory(subDirRelative, FileExistence.BothPaths)
-		visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
+		visitor.postVisitDirectory(rootDirRelative, FileExistence.BothPaths)
 		
 		then:
 		1 * logic.checkHashStores(fileHashStore1, fileHashStore2) >> new ArrayList<Action>()
@@ -295,6 +303,86 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		
 		then:
 		0 * logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
+		
+		where:
+		existence               | _
+		FileExistence.BothPaths | _
+		FileExistence.Path1Only | _
+		FileExistence.Path2Only | _
+	}
+	
+	def "store checked with correct visited files in root"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
+		logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		
+		when:
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
+		visitor.visitFile(fileRelative, existence)
+		visitor.postVisitDirectory(rootDirRelative, FileExistence.BothPaths)
+		
+		then:
+		1 * logic.removeUnvisitedHashes(store1, [fileRelative])
+		1 * logic.removeUnvisitedHashes(store2, [fileRelative])
+		
+		where:
+		existence               | _
+		FileExistence.BothPaths | _
+		FileExistence.Path1Only | _
+		FileExistence.Path2Only | _
+	}
+	
+	def "store checked with correct visited files in subdirectory"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
+		logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+				
+		when:
+		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		visitor.visitFile(subDirFileRelative, existence)
+		visitor.postVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		
+		then:
+		1 * logic.removeUnvisitedHashes(store1, [subDirFileRelative.getFileName()])
+		1 * logic.removeUnvisitedHashes(store2, [subDirFileRelative.getFileName()])
+		
+		where:
+		existence               | _
+		FileExistence.BothPaths | _
+		FileExistence.Path1Only | _
+		FileExistence.Path2Only | _
+	}
+	
+	def "store checked with correct visited files with subdirectory"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
+		logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
+
+		def store3 = Mock(FileHashStore)
+		def store4 = Mock(FileHashStore)
+		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
+		defaultFileHashStoreFactory.createFileHashStore(_) >>> [store1, store2, store3, store4]
+		
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+				
+		when:
+		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
+		visitor.visitFile(fileRelative, existence)
+		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		visitor.visitFile(subDirFileRelative, existence)
+		visitor.postVisitDirectory(subDirRelative, FileExistence.BothPaths)
+		visitor.postVisitDirectory(rootDirRelative, FileExistence.BothPaths)
+		
+		then:
+		1 * logic.removeUnvisitedHashes(store1, [fileRelative])
+		1 * logic.removeUnvisitedHashes(store2, [fileRelative])
+		1 * logic.removeUnvisitedHashes(store3, [subDirFileRelative.getFileName()])
+		1 * logic.removeUnvisitedHashes(store4, [subDirFileRelative.getFileName()])
 		
 		where:
 		existence               | _
