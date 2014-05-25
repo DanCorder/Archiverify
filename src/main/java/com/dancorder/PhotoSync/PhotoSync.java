@@ -48,6 +48,7 @@ class PhotoSync {
 
 	private static void printActions(List<Action> sortedActions) {
 		if (sortedActions.size() > 0) {
+			System.out.println("Actions found:");
 			for (Action action : sortedActions) {
 				System.out.println(action.toString());
 			}
