@@ -3,6 +3,7 @@ package com.dancorder.PhotoSync;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 class FileCopyAction implements Action {
 
@@ -29,7 +30,7 @@ class FileCopyAction implements Action {
 	
 	@Override
 	public void doAction() throws IOException {
-		Files.copy(from, to);
+		Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
 	}
 	
 	@Override

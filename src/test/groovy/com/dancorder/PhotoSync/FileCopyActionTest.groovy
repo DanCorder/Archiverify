@@ -19,7 +19,7 @@ public class FileCopyActionTest extends spock.lang.Specification {
 	}
 
 
-	def "Null paths"() {
+	def "Null paths cause exception"() {
 		when: "A null parameter is passed"
 		new FileCopyAction(fromPath, toPath)
 
@@ -33,7 +33,7 @@ public class FileCopyActionTest extends spock.lang.Specification {
 		null     | null
 	}
 
-	def "Relative paths"() {
+	def "Relative paths cause exception"() {
 		when: "A relative path is passed"
 		new FileCopyAction(fromPath, toPath)
 
@@ -47,7 +47,7 @@ public class FileCopyActionTest extends spock.lang.Specification {
 		relativePath | relativePath
 	}
 
-	def "Copy a file"() {
+	def "Copy a file that doesn't exist"() {
 		setup:
 		def to = tempDir.resolve("toFile")
 		def fca = new FileCopyAction(tempFile, to)
@@ -61,6 +61,23 @@ public class FileCopyActionTest extends spock.lang.Specification {
 		cleanup:
 		if (Files.exists(to)) {
 			Files.delete(to)
+		}
+	}
+	
+	def "Copy a file that does exist"() {
+		setup:
+		def tempFile2 = Files.createTempFile(null, null);
+		def fca = new FileCopyAction(tempFile, tempFile2)
+
+		when: "doACtion is called"
+		fca.doAction();
+
+		then: "A new file is created"
+		Files.exists(tempFile2)
+
+		cleanup:
+		if (Files.exists(tempFile2)) {
+			Files.delete(tempFile2)
 		}
 	}
 
