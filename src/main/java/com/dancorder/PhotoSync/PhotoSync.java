@@ -71,8 +71,17 @@ class PhotoSync {
 		for (Action action :actions) {
 			if (!(action instanceof WarningAction)) {
 				System.out.println("Executing: " + action.toString());
-				action.doAction();
+				tryExecuteAction(action);
 			}
+		}
+	}
+	
+	private static void tryExecuteAction(Action action) {
+		try {
+			action.doAction();
+		}
+		catch (Exception e) {
+			System.out.println("Error executing action: " + e.getMessage());
 		}
 	}
 
