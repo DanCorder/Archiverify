@@ -107,6 +107,18 @@ class HashFileSourceTest extends spock.lang.Specification {
 		fileContent.size() == 1
 		fileContent[0] == line2
 	}
+	
+	def "Delete file when no hashes present"() {
+		setup:
+		writeTempFile(line1)
+		def source = new HashFileSource(tempHashFile.getParent())
+		
+		when: "no data is written"
+		source.writeData([])
+		
+		then: "the file is removed"
+		!Files.exists(tempHashFile)
+	}
 
 	private void writeTempFile(String data) throws IOException {
 		def writer = Files.newBufferedWriter(tempHashFile, Charset.defaultCharset())

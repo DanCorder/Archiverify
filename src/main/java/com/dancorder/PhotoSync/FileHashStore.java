@@ -49,11 +49,7 @@ class FileHashStore {
 	}
 
 	void write() throws IOException {
-		List<String> lines = getFileData();
-
-		if (lines.size() > 0) {
-			source.writeData(lines);
-		}
+		source.writeData(getFileData());
 	}
 	
 	boolean isDirty() {

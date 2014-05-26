@@ -78,18 +78,6 @@ class FileHashStoreTest extends spock.lang.Specification {
 		store.getHash(testFile2RelativePath) == testHash2
 	}
 
-	def "don't write empty data"() {
-		setup:
-		def mockSource = getMockSource([])
-		def store = new FileHashStore(mockSource)
-
-		when:
-		def data = store.write()
-
-		then:
-		0 * _._
-	}
-
 	def "write hashes from creation"() {
 		setup:
 		def mockSource = getMockSource(data)

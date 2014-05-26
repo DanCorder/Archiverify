@@ -38,6 +38,19 @@ class HashFileSource {
 	}
 
 	void writeData(List<String> data) throws IOException {
+		if (data.size() > 0) {
+			writeDataToFile(data);
+		}
+		else {
+			deleteHashFile();
+		}
+	}
+	
+	private void deleteHashFile() throws IOException {
+		Files.deleteIfExists(getFilePath());
+	}
+
+	private void writeDataToFile(List<String> data) throws IOException {
 		try (Writer bufferedWriter = getBufferedWriter()) {
 			try (PrintWriter writer = new PrintWriter(bufferedWriter)) {
 				for (String line : data) {
@@ -46,7 +59,7 @@ class HashFileSource {
 			}
 		}
 	}
-	
+
 	private Writer getBufferedWriter() throws IOException {
 		return Files.newBufferedWriter(
 				getFilePath(),
