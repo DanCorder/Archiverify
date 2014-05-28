@@ -89,14 +89,16 @@ class SyncLogicTest extends spock.lang.Specification {
 	def private static Path absolutePath2
 	def private FileHashStore store1
 	def private FileHashStore store2
+	def private FileHashGenerator hashGenerator
 	def private SyncLogic logic
 	def private List<Action> expectedResult
+	
 	
 	
 	def private setupScenario(String fileHash1, String storeHash1, String fileHash2, String storeHash2) {
 		absolutePath1 = root1.resolve(filePath)
 		absolutePath2 = root2.resolve(filePath)
-		def hashGenerator = Mock(FileHashGenerator)
+		hashGenerator = Mock(FileHashGenerator)
 		hashGenerator.calculateMd5(absolutePath1) >> fileHash1
 		hashGenerator.calculateMd5(absolutePath2) >> fileHash2
 		logic = new SyncLogic(hashGenerator)
@@ -188,7 +190,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AABA and reversed"() {
 		setup:
 		setupScenario(hash1, hash2, hash3, hash4)
-		expectedResult.add(new FileCopyAction(from, to))
+		expectedResult.add(new FileCopyAction(from, to, new String(hash2), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -221,7 +223,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AABC"() {
 		setup:
 		setupScenario(new String(hashA), new String(hashA), new String(hashB), new String(hashC))
-		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -235,7 +237,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AABC reversed"() {
 		setup:
 		setupScenario(new String(hashB), new String(hashC), new String(hashA), new String(hashA))
-		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -277,7 +279,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AANA and reversed"() {
 		setup:
 		setupScenario(hash1, hash2, hash3, hash4)
-		expectedResult.add(new FileCopyAction(from, to))
+		expectedResult.add(new FileCopyAction(from, to, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -288,15 +290,15 @@ class SyncLogicTest extends spock.lang.Specification {
 		0 * store2.setHash(_,_)
 		
 		where:
-		hash1 | hash2 | hash3 | hash4 | from          | to
-		new String(hashA) | new String(hashA) | null  | new String(hashA) | absolutePath1 | absolutePath2
-		null  | new String(hashA) | new String(hashA) | new String(hashA) | absolutePath2 | absolutePath1
+		hash1             | hash2             | hash3             | hash4             | from          | to
+		new String(hashA) | new String(hashA) | null              | new String(hashA) | absolutePath1 | absolutePath2
+		null              | new String(hashA) | new String(hashA) | new String(hashA) | absolutePath2 | absolutePath1
 	}
 	
 	def "AANB"() {
 		setup:
 		setupScenario(new String(hashA), new String(hashA), null, new String(hashB))
-		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -310,7 +312,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AANB reversed"() {
 		setup:
 		setupScenario(null, new String(hashB), new String(hashA), new String(hashA))
-		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -324,7 +326,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AANN"() {
 		setup:
 		setupScenario(new String(hashA), new String(hashA), null, null)
-		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -338,7 +340,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AANN reversed"() {
 		setup:
 		setupScenario(null, null, new String(hashA), new String(hashA))
-		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -393,7 +395,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "NAAN"() {
 		setup:
 		setupScenario(null, new String(hashA), new String(hashA), null)
-		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -407,7 +409,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "NAAN reversed"() {
 		setup:
 		setupScenario(new String(hashA), null, null, new String(hashA))
-		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -520,7 +522,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "ANNN"() {
 		setup:
 		setupScenario(new String(hashA), null, null, null)
-		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2))
+		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -534,7 +536,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "ANNN reversed"() {
 		setup:
 		setupScenario(null, null, new String(hashA), null)
-		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1))
+		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)

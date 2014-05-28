@@ -81,7 +81,7 @@ class PhotoSync {
 			action.doAction();
 		}
 		catch (Exception e) {
-			System.out.println("Error executing action: " + e.getMessage());
+			System.out.println("ERROR executing action: " + e.getMessage());
 		}
 	}
 

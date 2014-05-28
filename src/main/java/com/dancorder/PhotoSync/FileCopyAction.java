@@ -1,6 +1,5 @@
 package com.dancorder.PhotoSync;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -9,13 +8,21 @@ class FileCopyAction implements Action {
 
 	private final Path from;
 	private final Path to;
+	private final String goodHash;
+	private final FileHashGenerator hashGenerator;
 	
-	FileCopyAction(Path from, Path to) {
+	FileCopyAction(Path from, Path to, String goodHash, FileHashGenerator hashGenerator) {
 		if (from == null) {
 			throw new IllegalArgumentException("From path must not be null");
 		}
 		if (to == null) {
 			throw new IllegalArgumentException("To path must not be null");
+		}
+		if (goodHash == null) {
+			throw new IllegalArgumentException("Hash must not be null");
+		}
+		if (hashGenerator == null) {
+			throw new IllegalArgumentException("Hash generator must not be null");
 		}
 		if (!from.isAbsolute()) {
 			throw new IllegalArgumentException("From path must be absolute: " + from.toString());
@@ -26,16 +33,28 @@ class FileCopyAction implements Action {
 		
 		this.from = from;
 		this.to = to;
+		this.goodHash = goodHash;
+		this.hashGenerator = hashGenerator;
 	}
 	
 	@Override
-	public void doAction() throws IOException {
+	public void doAction() throws Exception {
 		Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
+		
+		String calculatedHash = hashGenerator.calculateMd5(to);
+		
+		if (!goodHash.equals(calculatedHash)) {
+			throw new Exception(String.format(
+					"File copy failed. Hash for file copied to %s (%s) doesn't match source hash (%s)",
+					to,
+					calculatedHash,
+					goodHash));
+		}
 	}
 	
 	@Override
 	public String toString() {
-		return "Copy " + from.toString() + " to " + to.toString();
+		return String.format("Copy %s to %s with hash %s", from, to, goodHash);
 	}
 
 	@Override
@@ -43,6 +62,8 @@ class FileCopyAction implements Action {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((from == null) ? 0 : from.hashCode());
+		result = prime * result
+				+ ((goodHash == null) ? 0 : goodHash.hashCode());
 		result = prime * result + ((to == null) ? 0 : to.hashCode());
 		return result;
 	}
@@ -61,6 +82,11 @@ class FileCopyAction implements Action {
 				return false;
 		} else if (!from.equals(other.from))
 			return false;
+		if (goodHash == null) {
+			if (other.goodHash != null)
+				return false;
+		} else if (!goodHash.equals(other.goodHash))
+			return false;
 		if (to == null) {
 			if (other.to != null)
 				return false;
@@ -68,5 +94,4 @@ class FileCopyAction implements Action {
 			return false;
 		return true;
 	}
-
 }

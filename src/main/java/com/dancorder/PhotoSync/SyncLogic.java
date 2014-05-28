@@ -141,7 +141,7 @@ class SyncLogic {
 			setHash(hashFromOtherFile, otherFile, otherStore);
 		}
 		else if (hashFromOtherStore == null && hashFromOtherFile == null) {
-			copyFile(fileWithMissingStoreHash, otherFile, actions);
+			copyFile(fileWithMissingStoreHash, otherFile, hashForFileWithMissingStoreHash, actions);
 			setHash(hashForFileWithMissingStoreHash, fileWithMissingStoreHash, storeWithMissingHash);
 			setHash(hashForFileWithMissingStoreHash, otherFile, otherStore);
 		}
@@ -169,7 +169,7 @@ class SyncLogic {
 			}
 		}
 		else if (hashFromStoreForMissingFile.equals(hashFromOtherFile) && hashFromOtherStore == null) {
-			copyFile(otherFile, missingFile, actions);
+			copyFile(otherFile, missingFile, hashFromOtherFile, actions);
 			setHash(hashFromStoreForMissingFile, otherFile, otherStore);
 		}
 		else if (!hashFromStoreForMissingFile.equals(hashFromOtherFile) && hashFromOtherStore == null) {
@@ -213,7 +213,7 @@ class SyncLogic {
 			setHash(otherHashFromFile, otherFile, otherStore);
 		}
 		else if (matchingHashFromStore.equals(otherHashFromStore)) {
-			copyFile(matchingFile, otherFile, actions);
+			copyFile(matchingFile, otherFile, matchingHashFromStore, actions);
 		}
 		else if (otherHashFromFile != null && otherHashFromStore == null) {
 			actions.add(new SyncWarningAction(matchingFile, matchingHashFromFile, matchingHashFromStore, otherFile, otherHashFromFile, otherHashFromStore));
@@ -232,14 +232,14 @@ class SyncLogic {
 			FileHashStore badStore,
 			ArrayList<Action> actions) {
 		setHash(goodHash, badFile, badStore);
-		copyFile(goodFile, badFile, actions);
+		copyFile(goodFile, badFile, goodHash, actions);
 	}
 
 	private void setHash(String goodHash, Path badFile, FileHashStore badStore) {
 		badStore.setHash(badFile.getFileName(), goodHash);
 	}
 
-	private void copyFile(Path goodFile, Path badFile, ArrayList<Action> actions) {
-		actions.add(new FileCopyAction(goodFile, badFile));
+	private void copyFile(Path goodFile, Path badFile, String goodHash, ArrayList<Action> actions) {
+		actions.add(new FileCopyAction(goodFile, badFile, goodHash, hashGenerator));
 	}
 }
