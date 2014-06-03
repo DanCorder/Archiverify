@@ -6,10 +6,10 @@ import java.nio.file.StandardCopyOption;
 
 class FileCopyAction implements Action {
 
-	private final Path from;
-	private final Path to;
-	private final String goodHash;
-	private final FileHashGenerator hashGenerator;
+	protected final Path from;
+	protected final Path to;
+	protected final String goodHash;
+	protected final FileHashGenerator hashGenerator;
 	
 	FileCopyAction(Path from, Path to, String goodHash, FileHashGenerator hashGenerator) {
 		if (from == null) {

@@ -212,8 +212,14 @@ class SyncLogic {
 		else if (matchingHashFromFile.equals(otherHashFromFile)) {
 			setHash(otherHashFromFile, otherFile, otherStore);
 		}
-		else if (matchingHashFromStore.equals(otherHashFromStore)) {
+		else if (matchingHashFromStore.equals(otherHashFromStore) && otherHashFromFile == null) {
 			copyFile(matchingFile, otherFile, matchingHashFromStore, actions);
+		}
+		else if (matchingHashFromStore.equals(otherHashFromStore)) {
+			overwriteFile(matchingFile, otherFile, matchingHashFromStore, actions);
+		}
+		else if (otherHashFromFile != null && otherHashFromStore != null) {
+			overwriteFileAndSetHash(matchingHashFromStore, matchingFile, otherFile, otherStore, actions);
 		}
 		else if (otherHashFromFile != null && otherHashFromStore == null) {
 			actions.add(new SyncWarningAction(matchingFile, matchingHashFromFile, matchingHashFromStore, otherFile, otherHashFromFile, otherHashFromStore));
@@ -234,6 +240,16 @@ class SyncLogic {
 		setHash(goodHash, badFile, badStore);
 		copyFile(goodFile, badFile, goodHash, actions);
 	}
+	
+	private void overwriteFileAndSetHash(
+			String goodHash,
+			Path goodFile,
+			Path badFile,
+			FileHashStore badStore,
+			ArrayList<Action> actions) {
+		setHash(goodHash, badFile, badStore);
+		overwriteFile(goodFile, badFile, goodHash, actions);
+	}
 
 	private void setHash(String goodHash, Path badFile, FileHashStore badStore) {
 		badStore.setHash(badFile.getFileName(), goodHash);
@@ -241,5 +257,9 @@ class SyncLogic {
 
 	private void copyFile(Path goodFile, Path badFile, String goodHash, ArrayList<Action> actions) {
 		actions.add(new FileCopyAction(goodFile, badFile, goodHash, hashGenerator));
+	}
+	
+	private void overwriteFile(Path goodFile, Path badFile, String goodHash, ArrayList<Action> actions) {
+		actions.add(new FileOverwriteAction(goodFile, badFile, goodHash, hashGenerator));
 	}
 }

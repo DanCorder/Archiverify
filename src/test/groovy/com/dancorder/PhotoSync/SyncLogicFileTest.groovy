@@ -20,9 +20,9 @@ class SyncLogicTest extends spock.lang.Specification {
 //	A     | A     | A     | A     | None
 //	A     | A     | A     | B     | Copy hash
 //	A     | A     | A     | NULL  | Copy hash
-//	A     | A     | B     | A     | Copy file
+//	A     | A     | B     | A     | Overwrite file
 //	A     | A     | B     | B     | Ask user
-//	A     | A     | B     | C     | Copy file and hash
+//	A     | A     | B     | C     | Overwrite file and hash
 //	A     | A     | B     | NULL  | Ask user
 //	A     | A     | NULL  | A     | Copy file
 //	A     | A     | NULL  | B     | Copy file and hash
@@ -190,7 +190,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AABA and reversed"() {
 		setup:
 		setupScenario(hash1, hash2, hash3, hash4)
-		expectedResult.add(new FileCopyAction(from, to, new String(hash2), hashGenerator))
+		expectedResult.add(new FileOverwriteAction(from, to, new String(hash2), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -223,7 +223,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AABC"() {
 		setup:
 		setupScenario(new String(hashA), new String(hashA), new String(hashB), new String(hashC))
-		expectedResult.add(new FileCopyAction(absolutePath1, absolutePath2, new String(hashA), hashGenerator))
+		expectedResult.add(new FileOverwriteAction(absolutePath1, absolutePath2, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
@@ -237,7 +237,7 @@ class SyncLogicTest extends spock.lang.Specification {
 	def "AABC reversed"() {
 		setup:
 		setupScenario(new String(hashB), new String(hashC), new String(hashA), new String(hashA))
-		expectedResult.add(new FileCopyAction(absolutePath2, absolutePath1, new String(hashA), hashGenerator))
+		expectedResult.add(new FileOverwriteAction(absolutePath2, absolutePath1, new String(hashA), hashGenerator))
 		
 		when:
 		def result = logic.compareFiles(absolutePath1, store1, absolutePath2, store2)
