@@ -11,7 +11,7 @@ class WarningAction implements Action {
 			throw new IllegalArgumentException("Warning cannot be empty");
 		}
 		
-		this.warning = "WARNING: " + warning;
+		this.warning = warning;
 	}
 	
 	@Override

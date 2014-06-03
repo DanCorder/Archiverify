@@ -34,7 +34,7 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	public void preVisitDirectory(Path relativeDirectoryPath, FileExistence existence) {
 		try
 		{
-			System.out.println("Scanning " + relativeDirectoryPath.toString());
+			Logger.log("Scanning " + relativeDirectoryPath.toString());
 			currentRelativeDirectoryPath = relativeDirectoryPath;
 			
 			if (isNotInErrorPath(relativeDirectoryPath))

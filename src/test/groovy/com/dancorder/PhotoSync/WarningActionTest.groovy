@@ -22,6 +22,6 @@ public class WarningActionTest extends spock.lang.Specification {
 		def action = new WarningAction(warning)
 
 		expect:
-		action.toString() == "WARNING: " + warning
+		action.toString() == warning
 	}
 }

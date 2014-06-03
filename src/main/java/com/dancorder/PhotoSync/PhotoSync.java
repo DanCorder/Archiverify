@@ -14,7 +14,7 @@ class PhotoSync {
 		Parameters params = new Parameters(args);
 		
 		if (!params.isValid()) {
-			System.out.println(params.getErrorMessage());
+			Logger.logError(params.getErrorMessage());
 			params.printUsage();
 			System.exit(1);
 		}
@@ -48,13 +48,18 @@ class PhotoSync {
 
 	private static void printActions(List<Action> sortedActions) {
 		if (sortedActions.size() > 0) {
-			System.out.println("Actions found:");
+			Logger.log("Actions found:");
 			for (Action action : sortedActions) {
-				System.out.println(action.toString());
+				if (action instanceof WarningAction) {
+					Logger.logWarning(action.toString());
+				}
+				else {
+					Logger.log(action.toString());
+				}
 			}
 		}
 		else {
-			System.out.println("Nothing to do");
+			Logger.log("Nothing to do");
 		}
 	}
 
@@ -70,7 +75,7 @@ class PhotoSync {
 	private static void executeActions(List<Action> actions) throws IOException {
 		for (Action action :actions) {
 			if (!(action instanceof WarningAction)) {
-				System.out.println("Executing: " + action.toString());
+				Logger.log("Executing: " + action.toString());
 				tryExecuteAction(action);
 			}
 		}
@@ -81,7 +86,7 @@ class PhotoSync {
 			action.doAction();
 		}
 		catch (Exception e) {
-			System.out.println("ERROR executing action: " + e.getMessage());
+			Logger.logError("Problem executing action: " + e.getMessage());
 		}
 	}
 
