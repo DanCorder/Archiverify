@@ -4,7 +4,6 @@ import java.nio.file.Paths
 
 import com.dancorder.Archiverify.ParallelFileTreeWalker.FileExistence
 
-
 class SynchingVisitorTest extends spock.lang.Specification {
 
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))

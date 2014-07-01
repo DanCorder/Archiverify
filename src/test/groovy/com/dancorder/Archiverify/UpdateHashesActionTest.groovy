@@ -2,10 +2,6 @@ package com.dancorder.Archiverify;
 
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.FileHashStore;
-import com.dancorder.Archiverify.UpdateHashesAction;
-
-
 public class UpdateHashesActionTest extends spock.lang.Specification {
 	def "Null FileHashStore"() {
 		when: "A null parameter is passed"

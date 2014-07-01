@@ -1,6 +1,5 @@
-package com.dancorder.Archiverify;
 
-import com.dancorder.Archiverify.WarningAction;
+package com.dancorder.Archiverify;
 
 
 public class WarningActionTest extends spock.lang.Specification {

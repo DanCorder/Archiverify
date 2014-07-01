@@ -4,8 +4,6 @@ import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.HashFileSource;
-
 class HashFileSourceTest extends spock.lang.Specification {
 	
 	private final static line1 = "Some test text"

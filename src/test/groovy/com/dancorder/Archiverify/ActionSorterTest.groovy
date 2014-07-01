@@ -1,11 +1,5 @@
 package com.dancorder.Archiverify;
 
-import com.dancorder.Archiverify.Action;
-import com.dancorder.Archiverify.ActionSorter;
-import com.dancorder.Archiverify.FileHashStore;
-import com.dancorder.Archiverify.UpdateHashesAction;
-import com.dancorder.Archiverify.WarningAction;
-
 
 public class ActionSorterTest extends spock.lang.Specification {
 

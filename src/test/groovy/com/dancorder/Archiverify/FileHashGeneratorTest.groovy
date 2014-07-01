@@ -4,8 +4,6 @@ import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.FileHashGenerator;
-
 class FileHashGeneratorTest extends spock.lang.Specification {
 
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))

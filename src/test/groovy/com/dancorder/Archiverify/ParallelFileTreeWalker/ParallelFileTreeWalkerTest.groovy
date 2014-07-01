@@ -4,10 +4,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.ParallelFileTreeWalker.FileExistence;
-import com.dancorder.Archiverify.ParallelFileTreeWalker.ParallelFileTreeVisitor;
-import com.dancorder.Archiverify.ParallelFileTreeWalker.ParallelFileTreeWalker;
-
 public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	
 	private static path1Root

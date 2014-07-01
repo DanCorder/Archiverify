@@ -3,8 +3,6 @@ package com.dancorder.Archiverify;
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.CreateDirectoryAction;
-
 public class CreateDirectoryActionTest extends spock.lang.Specification {
 	private static final tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 

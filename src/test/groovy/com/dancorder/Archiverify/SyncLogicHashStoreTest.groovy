@@ -3,12 +3,6 @@ package com.dancorder.Archiverify
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.Action;
-import com.dancorder.Archiverify.FileHashStore;
-import com.dancorder.Archiverify.HashFileSource;
-import com.dancorder.Archiverify.SyncLogic;
-import com.dancorder.Archiverify.UpdateHashesAction;
-
 
 class SyncLogicHashStoreTest extends spock.lang.Specification {
 	

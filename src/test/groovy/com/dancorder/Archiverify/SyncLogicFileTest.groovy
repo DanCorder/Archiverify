@@ -3,14 +3,6 @@ package com.dancorder.Archiverify
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.Action;
-import com.dancorder.Archiverify.FileCopyAction;
-import com.dancorder.Archiverify.FileHashGenerator;
-import com.dancorder.Archiverify.FileHashStore;
-import com.dancorder.Archiverify.FileOverwriteAction;
-import com.dancorder.Archiverify.SyncLogic;
-import com.dancorder.Archiverify.SyncWarningAction;
-
 class SyncLogicTest extends spock.lang.Specification {
 	
 //	The rules for the synching logic are tabulated below

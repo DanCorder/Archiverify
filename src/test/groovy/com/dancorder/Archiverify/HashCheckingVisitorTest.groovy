@@ -2,16 +2,6 @@ package com.dancorder.Archiverify
 
 import java.nio.file.*
 
-import com.dancorder.Archiverify.Action;
-import com.dancorder.Archiverify.FileHashGenerator;
-import com.dancorder.Archiverify.FileHashStore;
-import com.dancorder.Archiverify.FileHashStoreFactory;
-import com.dancorder.Archiverify.HashCheckingVisitor;
-import com.dancorder.Archiverify.HashFileSource;
-import com.dancorder.Archiverify.UpdateHashesAction;
-import com.dancorder.Archiverify.WarningAction;
-
-
 class HashCheckingVisitorTest extends spock.lang.Specification {
 
 	private static final testHash = "testHash"

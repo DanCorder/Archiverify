@@ -4,9 +4,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.FileHashGenerator;
-import com.dancorder.Archiverify.FileOverwriteAction;
-
 public class FileOverwriteActionTest extends spock.lang.Specification {
 	private static final tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private static final generatedHash = "generatedHash"

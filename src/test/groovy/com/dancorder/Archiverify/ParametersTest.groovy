@@ -1,6 +1,5 @@
 package com.dancorder.Archiverify
 
-import com.dancorder.Archiverify.Parameters;
 
 class ParametersTest extends spock.lang.Specification {
 

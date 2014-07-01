@@ -3,9 +3,6 @@ package com.dancorder.Archiverify.ParallelFileTreeWalker;
 import java.nio.file.Files
 import java.nio.file.Path
 
-import com.dancorder.Archiverify.ParallelFileTreeWalker.ParallelFileTreeVisitor;
-import com.dancorder.Archiverify.ParallelFileTreeWalker.ParallelFileTreeWalker;
-
 public class ParallelFileTreeWalkerConstructorTest extends spock.lang.Specification {
 
 	private static Path validTempRootPath1

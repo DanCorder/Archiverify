@@ -2,9 +2,6 @@ package com.dancorder.Archiverify;
 
 import java.nio.file.Paths
 
-import com.dancorder.Archiverify.SyncWarningAction;
-
-
 public class SyncWarningActionTest extends spock.lang.Specification {
 
 	def "Warning contains all values"() {
