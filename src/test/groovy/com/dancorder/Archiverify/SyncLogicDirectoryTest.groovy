@@ -23,8 +23,8 @@ import com.dancorder.Archiverify.ParallelFileTreeWalker.FileExistence
 class SyncLogicDirectoryTest extends spock.lang.Specification {
 	
 //	The rules for the directory synching logic are simple:
-//    - If a directory exists in both roots do nothing
-//    - If a directory exists in only one root then create it in the other
+//    - If a directory exists under both roots do nothing
+//    - If a directory exists under only one root then create it under the other
 
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private final static absolutePath1 = tempDir.resolve("testRoot1").resolve("dir1")
