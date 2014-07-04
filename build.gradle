@@ -81,7 +81,7 @@ def getVersionTag() {
     def stdout = new ByteArrayOutputStream()
 
     exec {
-        commandLine 'git', 'describe', '--match', 'v*.*.*'
+        commandLine 'git', 'describe', '--tag', '--match', 'v*.*.*'
         standardOutput = stdout
     }
 
