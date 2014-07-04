@@ -66,12 +66,10 @@ jar {
 }
 
 def getVersionTag() {
-    def os = System.getProperty('os.name').toLowerCase()
-    def gitCommand = os.contains('windows') ? 'git.cmd' : 'git'
     def stdout = new ByteArrayOutputStream()
 
     exec {
-        commandLine gitCommand, 'describe', '--match', 'v*.*.*'
+        commandLine 'git', 'describe', '--match', 'v*.*.*'
         standardOutput = stdout
     }
 
