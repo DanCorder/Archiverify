@@ -1,8 +1,5 @@
 *.class
-.classpath
 .gradle
 .groovy
-.project
-.settings/org.eclipse.jdt.core.prefs
+.settings/*
 build
-gradle-app.setting
