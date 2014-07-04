@@ -23,7 +23,7 @@ import java.util.Scanner;
 
 import com.dancorder.Archiverify.ParallelFileTreeWalker.ParallelFileTreeWalker;
 
-class Archiverify {
+public class Archiverify {
 
 	public static void main(String[] args) throws Exception {
 

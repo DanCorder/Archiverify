@@ -16,9 +16,19 @@
 
 apply plugin: 'groovy'
 apply plugin: 'application'
+apply plugin: 'gradle-one-jar'
 
-mainClassName = 'com.dancorder.Archiverify.Archiverfiy'
+mainClassName = 'com.dancorder.Archiverify.Archiverify'
 version = getVersionTag()
+archivesBaseName = 'Archiverify-no-dependencies'
+
+buildscript {
+	repositories {
+		flatDir { dirs 'gradlePlugins' }
+		mavenCentral()
+	}
+	dependencies { classpath 'com.github.rholder:gradle-one-jar:1.0.4' }
+}
 
 // Use local copies of dependencies first, then get from Maven if needed
 repositories {
@@ -53,11 +63,13 @@ task copyToTestLib(type: Copy) {
 jar.dependsOn copyToLib
 test.dependsOn copyToTestLib
 
+task buildOneJar(type: OneJar) {
+	mainClass = mainClassName
+	additionalDir = file('oneJarConfig')
+	archiveName = 'Archiverify-' + getVersionTag() + '.jar'
+}
+
 jar {
-    // Pull all dependencies into one jar
-    doFirst {
-        from (configurations.runtime.resolve().collect { it.isDirectory() ? it : zipTree(it) })
-    }
     manifest {
         attributes(
             'Main-Class': mainClassName,
