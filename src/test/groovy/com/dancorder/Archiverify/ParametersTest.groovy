@@ -79,6 +79,8 @@ class ParametersTest extends spock.lang.Specification {
 		underTest.getIsSingleDirectoryMode() == false
 		underTest.getPath1().toString() == rootPath
 		underTest.getPath2().toString() == rootPath
+		underTest.getReadFile().toString() == ".hashes"
+		underTest.getWriteFile().toString() == ".hashes"
 	}
 	
 	def "test automatically execute actions"() {
@@ -102,12 +104,76 @@ class ParametersTest extends spock.lang.Specification {
 		underTest.getPath1().toString() == rootPath
 	}
 	
-	def "single directory mode with one two paths"() {
+	def "single directory mode with two paths"() {
 		when:
 		def underTest = new Parameters( [ "-s", rootPath, rootPath ] as String[] )
 		
 		then:
 		parametersAreInvalid(underTest)
+	}
+	
+	def "alternate file names"() {
+		when:
+		def underTest = new Parameters( [ "-f", "testFileName", rootPath, rootPath ] as String[] )
+		
+		then:
+		underTest.isValid()
+		underTest.getReadFile().toString() == "testFileName"
+		underTest.getWriteFile().toString() == "testFileName"
+	}
+	
+	def "alternate file name blank is invalid"() {
+		when:
+		def underTest = new Parameters( [ "-f", "", rootPath, rootPath ] as String[] )
+		
+		then:
+		parametersAreInvalid(underTest)
+	}
+	
+	def "alternate read file names"() {
+		when:
+		def underTest = new Parameters( [ "-fr", "testFileName", rootPath, rootPath ] as String[] )
+		
+		then:
+		underTest.isValid()
+		underTest.getReadFile().toString() == "testFileName"
+		underTest.getWriteFile().toString() == ".hashes"
+	}
+	
+	def "alternate read file name blank is invalid"() {
+		when:
+		def underTest = new Parameters( [ "-fr", "", rootPath, rootPath ] as String[] )
+		
+		then:
+		parametersAreInvalid(underTest)
+	}
+	
+	def "alternate write file names"() {
+		when:
+		def underTest = new Parameters( [ "-fw", "testFileName", rootPath, rootPath ] as String[] )
+		
+		then:
+		underTest.isValid()
+		underTest.getReadFile().toString() == ".hashes"
+		underTest.getWriteFile().toString() == "testFileName"
+	}
+	
+	def "alternate write file name blank is invalid"() {
+		when:
+		def underTest = new Parameters( [ "-w", "", rootPath, rootPath ] as String[] )
+		
+		then:
+		parametersAreInvalid(underTest)
+	}
+	
+	def "alternate read and write file names take priority"() {
+		when:
+		def underTest = new Parameters( [ "-f", "badFileName", "-fr", "testReadFileName", "-fw", "testWriteFileName", rootPath, rootPath ] as String[] )
+		
+		then:
+		underTest.isValid()
+		underTest.getReadFile().toString() == "testReadFileName"
+		underTest.getWriteFile().toString() == "testWriteFileName"
 	}
 	
 	private void parametersAreInvalid(params) {

@@ -31,6 +31,8 @@ class Parameters {
 
 	private Path path1 = null;
 	private Path path2 = null;
+	private Path readFile = Paths.get(defaultHashFileName);
+	private Path writeFile = Paths.get(defaultHashFileName);
 	private boolean isValid = true;
 	private String errorMessage = "";
 	private Options options = null;
@@ -38,6 +40,11 @@ class Parameters {
 	
 	private static final String OPTION_EXECUTE_ACTIONS = "y";
 	private static final String OPTION_SINGLE_DIRECTORY_MODE = "s";
+	private static final String OPTION_HASH_FILENAMES = "f";
+	private static final String OPTION_HASH_READ_FILENAMES = "fr";
+	private static final String OPTION_HASH_WRITE_FILENAMES = "fw";
+	
+	private static final String defaultHashFileName = ".hashes";
 	
 	Parameters(String[] args) {
 		try {
@@ -71,6 +78,8 @@ class Parameters {
 			validatePath(path1);
 			validatePath(path2);
 		}
+		
+		validateFileNames();
 	}
 
 	void printUsage() {
@@ -95,6 +104,26 @@ class Parameters {
 		return path2;
 	}
 	
+	Path getReadFile() {
+		if (commandLine.hasOption(OPTION_HASH_READ_FILENAMES)) {
+			readFile = Paths.get(commandLine.getOptionValue(OPTION_HASH_READ_FILENAMES));
+		}
+		else if (commandLine.hasOption(OPTION_HASH_FILENAMES)) {
+			readFile = Paths.get(commandLine.getOptionValue(OPTION_HASH_FILENAMES));
+		}
+		return readFile;
+	}
+	
+	Path getWriteFile() {
+		if (commandLine.hasOption(OPTION_HASH_WRITE_FILENAMES)) {
+			writeFile = Paths.get(commandLine.getOptionValue(OPTION_HASH_WRITE_FILENAMES));
+		}
+		else if (commandLine.hasOption(OPTION_HASH_FILENAMES)) {
+			writeFile = Paths.get(commandLine.getOptionValue(OPTION_HASH_FILENAMES));
+		}
+		return writeFile;
+	}
+	
 	boolean getExecuteActions() {
 		return commandLine.hasOption(OPTION_EXECUTE_ACTIONS);
 	}
@@ -107,6 +136,9 @@ class Parameters {
 		Options options = new Options();
 		options.addOption(new Option(OPTION_EXECUTE_ACTIONS, false, "Automatically execute all found actions"));
 		options.addOption(new Option(OPTION_SINGLE_DIRECTORY_MODE, false, "Generate and check hashes for a single directory"));
+		options.addOption(new Option(OPTION_HASH_FILENAMES, true, "Use a differnt filename to read and write hashes"));
+		options.addOption(new Option(OPTION_HASH_READ_FILENAMES, true, "Use a differnt filename to read hashes from, hashes are written to the default filename"));
+		options.addOption(new Option(OPTION_HASH_WRITE_FILENAMES, true, "Use a differnt filename to write hashes to, hashes are read from the default filename"));
 
 		return options;
 	}
@@ -128,5 +160,18 @@ class Parameters {
 		if (!path.toFile().exists() || !path.toFile().isDirectory()) {
 			throw new Exception("Path must be an existing directory: " + path);
 		}		
+	}
+	
+	private void validateFileNames() throws Exception {
+		validateOptionIsUnsetOrNotEmpty(OPTION_HASH_FILENAMES, "Hash file name cannot be blank");
+		validateOptionIsUnsetOrNotEmpty(OPTION_HASH_READ_FILENAMES, "Hash read file name cannot be blank");
+		validateOptionIsUnsetOrNotEmpty(OPTION_HASH_WRITE_FILENAMES, "Hash write file name cannot be blank");
+	}
+	
+	private void validateOptionIsUnsetOrNotEmpty(String option, String errorMessage) throws Exception {
+		if (commandLine.hasOption(option) &&
+			"".equals(commandLine.getOptionValue(option))) {
+			throw new Exception(errorMessage);
+		}
 	}
 }
