@@ -103,7 +103,7 @@ class HashCheckingVisitor implements FileVisitor<Path> {
 
 	@Override
 	public FileVisitResult visitFile(Path filePath, BasicFileAttributes attrs) throws IOException {
-		if (HashFileSource.isHashFile(filePath)) {
+		if (factory.isHashFile(filePath)) {
 			return FileVisitResult.CONTINUE;
 		}
 		

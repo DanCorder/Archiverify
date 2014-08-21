@@ -35,6 +35,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	private final static subDirFileRelative = subDirRelative.resolve("subDirFile")
 	private final static subDir2FileRelative = subDir2Relative.resolve("subDir2File")
 	private final static subSubDirFileRelative = subSubDirRelative.resolve("subSubDirFile")
+	private final static hashFile = Paths.get(".hashes")
 	private static store1
 	private static store2
 	private static defaultFileHashStoreFactory
@@ -42,7 +43,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def setup() {
 		store1 = Mock(FileHashStore)
 		store2 = Mock(FileHashStore)
-		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
+		defaultFileHashStoreFactory = Spy(FileHashStoreFactory, constructorArgs: [hashFile, hashFile])
 		defaultFileHashStoreFactory.createFileHashStore(_) >>> [store1, store2]
 	}
 	
@@ -314,7 +315,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
 		
 		when:
-		visitor.visitFile(Paths.get(HashFileSource.HASH_FILE_NAME), FileExistence.BothPaths)
+		visitor.visitFile(hashFile, FileExistence.BothPaths)
 		
 		then:
 		0 * logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()

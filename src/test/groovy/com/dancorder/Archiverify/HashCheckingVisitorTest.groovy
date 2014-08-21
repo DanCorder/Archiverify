@@ -28,6 +28,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	private static final testSubDirFileName = "testSubDirFileName"
 	private static final testSubDirFileName2 = "testSubDirFileName2"
 	
+	private final static hashFile = Paths.get(".hashes")
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
 	private final static rootAbsolute = tempDir.resolve("testRoot")
 	private final static subDirRelative = Paths.get("subDir")
@@ -36,8 +37,8 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	private final static rootFileAbsolute2 = rootAbsolute.resolve(testRootFileName2)
 	private final static subDirFileAbsolute = subDirAbsolute.resolve(testSubDirFileName)
 	private final static subDirFileAbsolute2 = subDirAbsolute.resolve(testSubDirFileName2)
-	private final static rootHashFileAbsolute = rootAbsolute.resolve("hashes.txt")
-	private final static subDirHashFileAbsolute = subDirAbsolute.resolve("hashes.txt")
+	private final static rootHashFileAbsolute = rootAbsolute.resolve(hashFile)
+	private final static subDirHashFileAbsolute = subDirAbsolute.resolve(hashFile)
 	
 	private static store
 	private static defaultFileHashStoreFactory
@@ -51,7 +52,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		
 		store = createFakeFileHashStore(hashesInStore)
 		
-		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
+		defaultFileHashStoreFactory = Spy(FileHashStoreFactory, constructorArgs: [hashFile, hashFile])
 		defaultFileHashStoreFactory.createFileHashStore(_) >> store
 		
 		defaultHashGenerator = createMockHashGenerator(hashesToGenerate)
@@ -188,7 +189,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		actions[0] instanceof WarningAction
 	}
 	
-	def "Hashes.txt ignored"() {
+	def "Hash files ignored"() {
 		setup:
 		createScenario([:], [(filePath):testHash])
 		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)

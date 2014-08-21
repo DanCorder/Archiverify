@@ -36,13 +36,15 @@ public class Archiverify {
 		}
 		
 		List<Action> actions;
+		
+		FileHashStoreFactory fileHashStoreFactory = new FileHashStoreFactory(params.getReadFile(), params.getWriteFile());
 
 		if (params.getIsSingleDirectoryMode()) {
-			HashCheckingVisitor visitor = new HashCheckingVisitor(new FileHashStoreFactory(), new FileHashGenerator());
+			HashCheckingVisitor visitor = new HashCheckingVisitor(fileHashStoreFactory, new FileHashGenerator());
 			Files.walkFileTree(params.getPath1(), visitor);
 			actions = visitor.getActions();
 		} else {
-			SynchingVisitor visitor = new SynchingVisitor(new SyncLogic(new FileHashGenerator()), new FileHashStoreFactory(), params.getPath1(), params.getPath2());
+			SynchingVisitor visitor = new SynchingVisitor(new SyncLogic(new FileHashGenerator()), fileHashStoreFactory, params.getPath1(), params.getPath2());
 			ParallelFileTreeWalker walker = new ParallelFileTreeWalker(params.getPath1(), params.getPath2(), visitor);
 			walker.walk();
 			actions = visitor.getActions();

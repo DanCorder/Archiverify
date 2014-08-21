@@ -18,7 +18,9 @@ package com.dancorder.Archiverify;
 
 import java.nio.charset.Charset
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
+
 
 class HashFileSourceTest extends spock.lang.Specification {
 	
@@ -26,43 +28,45 @@ class HashFileSourceTest extends spock.lang.Specification {
 	private final static line2 = "Some more text"
 	
 	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
-	private final static tempHashFile = tempDir.resolve(HashFileSource.HASH_FILE_NAME)
+	
+	private final static defaultHashFile = Paths.get("hashFileSoureTest_DefaultFileName")
+	private final static alternateHashFile = Paths.get("hashFileSoureTest_AlternateFileName")
 	
 	def cleanup() {
-		Files.deleteIfExists(tempHashFile)
+		clearTempFile(defaultHashFile)
+		clearTempFile(alternateHashFile)
 	}
 	
 	def "Retrieve directory"() {
 		setup:
-		def source = new HashFileSource(tempHashFile.getParent())
+		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
 		
 		expect:
-		source.getDirectory() == tempHashFile.getParent()
-		
+		source.getDirectory() == tempDir
 	}
 	
 	def "Read file from disk"() {
 		setup:
-		writeTempFile(line1)
+		writeTempFile(line1, defaultHashFile)
 		
 		when: "it is created with a directory" 
-		def source = new HashFileSource(tempHashFile.getParent())
+		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
 		def data = source.getData();
 		
-		then: "it reads the data from hashes.txt"
+		then: "it reads the data from the hash file"
 		data.size() == 1
 		data[0] == line1
 	}
 	
 	def "Read empty file"() {
 		setup:
-		def writer = Files.createFile(tempHashFile)
+		writeTempFile("", defaultHashFile)
 		
 		when: "it is created with a directory"
-		def source = new HashFileSource(tempHashFile.getParent())
+		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
 		def data = source.getData();
 		
-		then: "it reads the data from hashes.txt"
+		then: "it reads the data from the hash file"
 		data.size() == 0
 	}
 	
@@ -70,7 +74,7 @@ class HashFileSourceTest extends spock.lang.Specification {
 		setup:
 		
 		when: "it is created with a directory"
-		def source = new HashFileSource(tempHashFile.getParent())
+		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
 		def data = source.getData();
 		
 		then: "data is empty"
@@ -79,13 +83,13 @@ class HashFileSourceTest extends spock.lang.Specification {
 	
 	def "Check various line endings"() {
 		setup:
-		writeTempFile(line1 + lineEnding + line2 + lineEnding)
+		writeTempFile(line1 + lineEnding + line2 + lineEnding, defaultHashFile)
 
 		when: "it reads a file with certain line endings" 
-		def source = new HashFileSource(tempHashFile.getParent())
+		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
 		def data = source.getData();
 		
-		then: "it reads multiple lines from hashes.txt"
+		then: "it reads multiple lines from the hash file"
 		data.size() == 2
 		data[0] == line1
 		data[1] == line2
@@ -99,46 +103,90 @@ class HashFileSourceTest extends spock.lang.Specification {
 	
 	def "Write to disk"() {
 		setup:
-		def source = new HashFileSource(tempHashFile.getParent())
+		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
 		
 		when: "data is passed in"
 		source.writeData([line1])
 		
-		then: "that writer writes to hashes.txt"
-		def fileContent = Files.readAllLines(tempHashFile, Charset.defaultCharset)
+		then: "that writer writes to the hash file"
+		tempFileExists(defaultHashFile)
+		def fileContent = readTempFile(defaultHashFile)
 		fileContent.size() == 1
 		fileContent[0] == line1
 	}
 
 	def "Replace existing file"() {
 		setup:
-		writeTempFile(line1 + '\n' + line2)
-		def source = new HashFileSource(tempHashFile.getParent())
+		writeTempFile(line1 + '\n' + line2, defaultHashFile)
+		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
 
 		when: "data is passed in"
 		source.writeData([line2])
 
-		then: "that writer writes to hashes.txt"
-		def fileContent = Files.readAllLines(tempHashFile, Charset.defaultCharset)
+		then: "that writer writes to the hash file"
+		tempFileExists(defaultHashFile)
+		def fileContent = readTempFile(defaultHashFile)
 		fileContent.size() == 1
 		fileContent[0] == line2
 	}
 	
-	def "Delete file when no hashes present"() {
+	def "Delete read and write files when no hashes present"() {
 		setup:
-		writeTempFile(line1)
-		def source = new HashFileSource(tempHashFile.getParent())
+		writeTempFile(line1, defaultHashFile)
+		writeTempFile(line1, alternateHashFile)
+		def source = new HashFileSource(defaultHashFile, alternateHashFile, tempDir)
 		
 		when: "no data is written"
 		source.writeData([])
 		
 		then: "the file is removed"
-		!Files.exists(tempHashFile)
+		!tempFileExists(defaultHashFile)
+		!tempFileExists(alternateHashFile)
 	}
-
-	private void writeTempFile(String data) throws IOException {
-		def writer = Files.newBufferedWriter(tempHashFile, Charset.defaultCharset())
+	
+	def "Delete read file when write filename is different"() {
+		setup:
+		writeTempFile(line1, defaultHashFile)
+		clearTempFile(alternateHashFile)
+		def source = new HashFileSource(defaultHashFile, alternateHashFile, tempDir)
+		
+		when: "data is written"
+		source.writeData([line2])
+		
+		then: "the read file is removed and the write file is written"
+		!tempFileExists(defaultHashFile)
+		tempFileExists(alternateHashFile)
+	}
+	
+	def "No error when read and write filenames are different and read file doesn't exist"() {
+		setup:
+		clearTempFile(defaultHashFile)
+		clearTempFile(alternateHashFile)
+		def source = new HashFileSource(defaultHashFile, alternateHashFile, tempDir)
+		
+		when: "data is written"
+		source.writeData([line2])
+		
+		then: "the read file is removed and the write file is written"
+		!tempFileExists(defaultHashFile)
+		tempFileExists(alternateHashFile)
+	}
+	
+	private void writeTempFile(String data, Path fileName) throws IOException {
+		def writer = Files.newBufferedWriter(tempDir.resolve(fileName), Charset.defaultCharset())
 		writer.write(data)
 		writer.close()
+	}
+	
+	private List<String> readTempFile(Path fileName) {
+		return Files.readAllLines(tempDir.resolve(fileName), Charset.defaultCharset)
+	}
+	
+	private void clearTempFile(Path fileName) {
+		Files.deleteIfExists(tempDir.resolve(fileName))
+	}
+
+	private boolean tempFileExists(Path fileName) {
+		return Files.exists(tempDir.resolve(fileName))
 	}
 }

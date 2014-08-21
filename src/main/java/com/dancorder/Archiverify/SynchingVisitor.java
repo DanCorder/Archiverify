@@ -112,7 +112,7 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	public void visitFile(Path relativeFilePath, FileExistence existence) {
 		try
 		{
-			if (isNotInErrorPath(relativeFilePath) && !HashFileSource.isHashFile(relativeFilePath))
+			if (isNotInErrorPath(relativeFilePath) && !fileHashStoreFactory.isHashFile(relativeFilePath))
 			{
 				Path file1 = root1.resolve(relativeFilePath);
 				Path file2 = root2.resolve(relativeFilePath);

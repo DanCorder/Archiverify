@@ -28,15 +28,14 @@ import java.util.List;
 
 class HashFileSource {
 	
-	static boolean isHashFile(Path filePath) {
-		return HASH_FILE_NAME.equals(filePath.getFileName().toString());
-	}
-	
-	private static final String HASH_FILE_NAME = "hashes.txt";
 	private final Path directory;
+	private final Path readFile;
+	private final Path writeFile;
 	
-	HashFileSource(Path directory) {
+	HashFileSource(Path readFileName, Path writeFileName, Path directory) {
 		this.directory = directory;
+		this.readFile = directory.resolve(readFileName);
+		this.writeFile = directory.resolve(writeFileName);
 	}
 	
 	Path getDirectory() {
@@ -44,8 +43,8 @@ class HashFileSource {
 	}
 	
 	List<String> getData() throws IOException {
-		if (Files.exists(getFilePath())) {
-			return Files.readAllLines(getFilePath(), getCharset());
+		if (Files.exists(readFile)) {
+			return Files.readAllLines(readFile, getCharset());
 		}
 		else {
 			return new ArrayList<String>();
@@ -58,12 +57,16 @@ class HashFileSource {
 			writeDataToFile(data);
 		}
 		else {
-			deleteHashFile();
+			deleteHashFile(writeFile);
+		}
+		
+		if (!writeFile.equals(readFile)) {
+			deleteHashFile(readFile);
 		}
 	}
 	
-	private void deleteHashFile() throws IOException {
-		Files.deleteIfExists(getFilePath());
+	private void deleteHashFile(Path file) throws IOException {
+		Files.deleteIfExists(file);
 	}
 
 	private void writeDataToFile(List<String> data) throws IOException {
@@ -78,7 +81,7 @@ class HashFileSource {
 
 	private Writer getBufferedWriter() throws IOException {
 		return Files.newBufferedWriter(
-				getFilePath(),
+				writeFile,
 				getCharset(),
 				StandardOpenOption.CREATE,
 				StandardOpenOption.TRUNCATE_EXISTING,
@@ -87,9 +90,5 @@ class HashFileSource {
 	
 	private Charset getCharset() {
 		return Charset.defaultCharset();
-	}
-
-	private Path getFilePath() {
-		return directory.resolve(HASH_FILE_NAME);
 	}
 }

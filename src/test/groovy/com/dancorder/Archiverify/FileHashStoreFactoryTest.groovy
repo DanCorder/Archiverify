@@ -21,15 +21,27 @@ import java.nio.file.Paths
 class FileHashStoreFactoryTest extends spock.lang.Specification {
 
 	private final static dir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("temp1")
+	private final static readFile = Paths.get("readFile")
+	private final static writeFile = Paths.get("writeFile")
 
 	def "Create a FileHashStore"() {
 		setup:
-		def factory = new FileHashStoreFactory()
+		def factory = new FileHashStoreFactory(readFile, writeFile)
 		
 		when:
 		def store = factory.createFileHashStore(dir)
 		
 		then:
 		store.getDirectory() == dir
+	}
+	
+	def "Hash files recognised"() {
+		setup:
+		def factory = new FileHashStoreFactory(readFile, writeFile)
+		
+		expect:
+		factory.isHashFile(dir.resolve("readFile"))
+		factory.isHashFile(dir.resolve("writeFile"))
+		!factory.isHashFile(dir.resolve("otherFile"))
 	}
 }

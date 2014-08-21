@@ -19,7 +19,20 @@ package com.dancorder.Archiverify;
 import java.nio.file.Path;
 
 class FileHashStoreFactory {
-	FileHashStore createFileHashStore(Path dir1) throws Exception {
-		return new FileHashStore(new HashFileSource(dir1));
+	private final Path readFile;
+	private final Path writeFile;
+	
+	FileHashStoreFactory(Path readFile, Path writeFile) {
+		this.readFile = readFile;
+		this.writeFile = writeFile;
+	}
+	
+	FileHashStore createFileHashStore(Path directory) throws Exception {
+		return new FileHashStore(new HashFileSource(readFile, writeFile, directory));
+	}
+	
+	boolean isHashFile(Path filePath) {
+		Path fileName = filePath.getFileName();
+		return readFile.equals(fileName) || writeFile.equals(fileName);
 	}
 }
