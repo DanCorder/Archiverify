@@ -1,5 +1,5 @@
 <header>
-    <a class="logo" href="/index.html">Archiverify</a>
+    <a class="logo" href="{{ "/index.html" | prepend: site.baseurl }}">Archiverify</a>
     <nav>
 
         <a {% if page.section == 'home' %}class="selected"{% endif %} href="{{ "/index.html" | prepend: site.baseurl }}">Home</a>
