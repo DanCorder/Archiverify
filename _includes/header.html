@@ -1,0 +1,10 @@
+<header>
+    <a class="logo" href="/index.html">Archiverify</a>
+    <nav>
+
+        <a {% if page.section == 'home' %}class="selected"{% endif %} href="{{ "/index.html" | prepend: site.baseurl }}">Home</a>
+        <a {% if page.section == 'documentation' %}class="selected"{% endif %} href="{{ "/documentation.html" | prepend: site.baseurl }}">Documentation</a>
+        <a {% if page.section == 'release_notes' %}class="selected"{% endif %} href="{{ "/release_notes.html" | prepend: site.baseurl }}">Release Notes</a>
+        <a class="download" href="https://github.com/DanCorder/Archiverify/releases/download/v1.0.0/Archiverify-v1.0.0.jar">Download</a>
+    </nav>
+</header>
