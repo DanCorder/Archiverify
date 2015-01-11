@@ -74,6 +74,28 @@ task buildOneJar(type: OneJar) {
 	dependsOn test
 }
 
+sourceSets {
+    integrationTest {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+task integrationTest(type: Test) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    dependsOn buildOneJar
+}
+
+task buildRelease {
+    dependsOn integrationTest
+}
+
 jar {
     manifest {
         attributes(

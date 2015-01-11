@@ -5,7 +5,7 @@ Archiverify is a command line Java application that is meant to be used to:
 It also contains other related features that can be discovered from the usage message
 
 To build the code and run the tests:
-- From the root folder (where this file is) run "gradlew buildOneJar" on Windows or "./gradlew buildOneJar" on Mac/Linux
+- From the root folder (where this file is) run "gradlew buildRelease" on Windows or "./gradlew buildRelease" on Mac/Linux
   - If you are on Windows and get an error about running git then you need to update git to a version that includes a windows git.exe (rather than git.cmd). e.g. msysgit v1.8.0 or later. Alternatively you can look at getVersionTag() in build.gradle in commit cc2dd7224652a6961f0423339fb3b50f3e71f2fc which works with old versions of git.
 - The jar file is built to build/libs/
 
