@@ -1,5 +1,5 @@
 //    Archiverify is an archive synching and verification tool
-//    Copyright (C) 2014  Daniel Corder (contact: archiverify@dancorder.com)
+//    Copyright (C) 2015  Daniel Corder (contact: archiverify@dancorder.com)
 //
 //    This program is free software: you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -19,14 +19,12 @@ package com.dancorder.Archiverify.IntegrationTests;
 
 public class ParameterTests extends spock.lang.Specification {
 
-    // TODO: This is a dummy test to demonstrate integration test working in the build.
-	def "Invalid parameters show usage message"() {
-		when: "An no parameters are passed"
-		// TODO: Fill in this test properly
-		// RunApplication
-		def x = 1
+	def "When run with no parameters usage message is shown"() {
+
+		when: "No parameters are passed"
+		String output = IntegrationTestHelper.runArchiverify()
 
 		then: "Usage instructions are printed"
-		x == 1
+		output.contains("usage: Archiverify")
 	}
 }
