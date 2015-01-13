@@ -56,18 +56,25 @@ class Run {
 		return attributes.lastModifiedTime()
 	}
 	
+	// Return something like /Users/dan/Development/Archiverify/build/libs/
 	private static Path getBuildOutputDirectory() {
-		// Something like /Users/dan/Development/Archiverify/build/libs/
 		getArchiverifyDirectory().resolve("build").resolve("libs")
 	}
 		
+	// Return something like /Users/dan/Development/Archiverify/
 	private static Path getArchiverifyDirectory() {
-		// Something like /Users/dan/Development/Archiverify/
-		getClassLocation().getParent().getParent().getParent().getParent().getParent().getParent().getParent();
-	}
+		def sixParentsUp = getClassLocation().getParent().getParent().getParent().getParent().getParent().getParent().getParent()
 		
+		if (Files.exists(sixParentsUp.resolve("build"))) {
+			return sixParentsUp
+		}
+		
+		return sixParentsUp.getParent().getParent()
+	}
+	
+	// Returns something like this running under Eclipse /Users/dan/Development/Archiverify/bin/com/dancorder/Archiverify/IntegrationTests/Helpers/Run.class
+	// Returns something like this running under Gradle  /Users/dan/Development/Archiverify/build/classes/integrationTest/com/dancorder/Archiverify/IntegrationTests/Helpers/Run.class
 	private static Path getClassLocation() {
-		// Something like /Users/dan/Development/Archiverify/bin/com/dancorder/Archiverify/IntegrationTests/Helpers/Run.class
 		Paths.get(Run.class.getResource("Run.class").getPath()).toAbsolutePath()
 	}
 }
