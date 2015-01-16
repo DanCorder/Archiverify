@@ -14,22 +14,48 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package com.dancorder.Archiverify.IntegrationTests.Helpers
+package com.dancorder.Archiverify.testHelpers
 
 import java.nio.file.*
 import java.nio.file.attribute.*
 
-class Run {
-	public static RunResult archiverify() {
-		def command = "java -jar " + getJarFile().toString()
-		
-		def process = Runtime.getRuntime().exec(command)
-		process.waitFor()
-		
-		return new RunResult(process)
+
+class FileSystem {
+	public static Path createRootDirectory() {
+		return Files.createTempDirectory(null)
 	}
 	
-	private static Path getJarFile() {
+	public static Path createRelativeRootDirectory(Path root) {
+		return Files.createTempDirectory(root, null)
+	}
+	
+	public static Path createFile(Path directory, String fileName) throws IOException {
+		return Files.createFile(directory.resolve(fileName))
+	}
+	
+	public static Path createSubDirectory(Path directory, String subDirectoryName) throws IOException {
+		return Files.createDirectory(directory.resolve(subDirectoryName))
+	}
+	
+	public static void cleanUpDirectory(Path directory) throws IOException {
+		if (!deleteRecursive(directory.toFile())) {
+			throw new IOException("Failed to clean up directory " + directory.toString())
+		}
+	}
+	
+	private static boolean deleteRecursive(File path) throws FileNotFoundException{
+		if (!path.exists()) return true
+		
+		boolean ret = true
+		if (path.isDirectory()) {
+			for (File f : path.listFiles()) {
+				ret = ret && deleteRecursive(f)
+			}
+		}
+		return ret && path.delete()
+	}
+	
+	static Path getJarFile() {
 		Path newestJarFile = null;
 		FileTime newestLastModified = null;
 		
@@ -57,24 +83,25 @@ class Run {
 	}
 	
 	// Return something like /Users/dan/Development/Archiverify/build/libs/
-	private static Path getBuildOutputDirectory() {
+	static Path getBuildOutputDirectory() {
 		getArchiverifyDirectory().resolve("build").resolve("libs")
 	}
 		
 	// Return something like /Users/dan/Development/Archiverify/
 	private static Path getArchiverifyDirectory() {
-		def sixParentsUp = getClassLocation().getParent().getParent().getParent().getParent().getParent().getParent().getParent()
+		def fiveParentsUp = getClassLocation().getParent().getParent().getParent().getParent().getParent().getParent()
 		
-		if (Files.exists(sixParentsUp.resolve("build"))) {
-			return sixParentsUp
+		if (Files.exists(fiveParentsUp.resolve("build"))) {
+			return fiveParentsUp
 		}
 		
-		return sixParentsUp.getParent().getParent()
+		return fiveParentsUp.getParent().getParent()
 	}
 	
-	// Returns something like this running under Eclipse /Users/dan/Development/Archiverify/bin/com/dancorder/Archiverify/IntegrationTests/Helpers/Run.class
-	// Returns something like this running under Gradle  /Users/dan/Development/Archiverify/build/classes/integrationTest/com/dancorder/Archiverify/IntegrationTests/Helpers/Run.class
+	// Returns something like this running under Eclipse /Users/dan/Development/Archiverify/bin/com/dancorder/Archiverify/testHelpers/Run.class
+	// Returns something like this running under Gradle  /Users/dan/Development/Archiverify/build/classes/integrationTest/com/dancorder/Archiverify/testHelpers/Run.class
 	private static Path getClassLocation() {
-		Paths.get(Run.class.getResource("Run.class").getPath()).toAbsolutePath()
+		def classpath = FileSystem.class.getResource("FileSystem.class").getPath()
+		Paths.get(classpath).toAbsolutePath()
 	}
 }

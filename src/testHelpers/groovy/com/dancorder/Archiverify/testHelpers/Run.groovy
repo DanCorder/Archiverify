@@ -14,33 +14,19 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package com.dancorder.Archiverify.IntegrationTests.Helpers
+package com.dancorder.Archiverify.testHelpers
 
-import java.io.InputStream;
 
-class RunResult {
-	RunResult(Process process) {
-		stdout = inputStreamToString(process.inputStream)
-		stderr = inputStreamToString(process.errorStream)
-	}
-	
-	public String stdout
-	public String stderr
-	
-	private static String inputStreamToString(InputStream stream) {
-		StringBuilder builder = new StringBuilder();
-		String line;
+class Run {
+	public static RunResult archiverify(String... params) {
+		def command = [ "java", "-jar", FileSystem.getJarFile().toString() ]
+		params.each() { command << it }
 		
-		def reader = new BufferedReader(new InputStreamReader(stream))
-		try {
-			while ((line = reader.readLine()) != null) {
-				builder.append(line);
-				builder.append(System.getProperty("line.separator"))
-			}
-		} finally {
-			reader.close()
-		}
+		def commandArray = command.toArray(new String[command.size()]);
 		
-		return builder.toString()
+		def process = Runtime.getRuntime().exec(commandArray, null, FileSystem.getBuildOutputDirectory().toFile())
+		process.waitFor()
+		
+		return new RunResult(process)
 	}
 }

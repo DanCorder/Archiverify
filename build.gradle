@@ -75,11 +75,18 @@ task buildOneJar(type: OneJar) {
 }
 
 sourceSets {
+    test {
+        groovy {
+            srcDirs += 'src/testHelpers/groovy'
+        }
+    }
     integrationTest {
-        compileClasspath += main.output + test.output
-        runtimeClasspath += main.output + test.output
+        groovy {
+            srcDirs += 'src/testHelpers/groovy'
+        }
     }
 }
+
 
 configurations {
     integrationTestCompile.extendsFrom testCompile

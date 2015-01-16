@@ -14,18 +14,33 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package com.dancorder.Archiverify.IntegrationTests;
+package com.dancorder.Archiverify.testHelpers
 
-import com.dancorder.Archiverify.testHelpers.*
+import java.io.InputStream;
 
-public class ParameterTests extends spock.lang.Specification {
-
-	def "When run with no parameters usage message is shown"() {
-
-		when: "No parameters are passed"
-		def result = Run.archiverify()
-
-		then: "Usage instructions are printed"
-		result.stdout.contains("usage: Archiverify")
+class RunResult {
+	RunResult(Process process) {
+		stdout = inputStreamToString(process.inputStream)
+		stderr = inputStreamToString(process.errorStream)
+	}
+	
+	public String stdout
+	public String stderr
+	
+	private static String inputStreamToString(InputStream stream) {
+		StringBuilder builder = new StringBuilder();
+		String line;
+		
+		def reader = new BufferedReader(new InputStreamReader(stream))
+		try {
+			while ((line = reader.readLine()) != null) {
+				builder.append(line);
+				builder.append(System.getProperty("line.separator"))
+			}
+		} finally {
+			reader.close()
+		}
+		
+		return builder.toString()
 	}
 }
