@@ -18,9 +18,10 @@ package com.dancorder.Archiverify;
 
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.dancorder.Archiverify.testHelpers.*
 
 public class CreateDirectoryActionTest extends spock.lang.Specification {
-	private static final tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
+	private static final testDir = FileSystem.createRootDirectory()
 
 	def "Null path"() {
 		when: "A null parameter is passed"
@@ -43,27 +44,25 @@ public class CreateDirectoryActionTest extends spock.lang.Specification {
 	
 	def "Create a directory"() {
 		setup:
-		def directoryPath = tempDir.resolve("testDirectory")
-		def cda = new CreateDirectoryAction(directoryPath)
+		def cda = new CreateDirectoryAction(testDir)
 
-		when: "doACtion is called"
+		when: "doAction is called"
 		cda.doAction()
 
 		then: "A new directory is created"
-		Files.exists(directoryPath)
+		Files.exists(testDir)
 
 		cleanup:
-		if (Files.exists(directoryPath)) {
-			Files.delete(directoryPath)
+		if (Files.exists(testDir)) {
+			Files.delete(testDir)
 		}
 	}
 	
 	def "String value"() {
 		setup:
-		def directoryPath = tempDir.resolve("testDirectory")
-		def cda = new CreateDirectoryAction(directoryPath)
+		def cda = new CreateDirectoryAction(testDir)
 
 		expect:
-		cda.toString() == "Create directory: " + directoryPath.toString()
+		cda.toString() == "Create directory: " + testDir.toString()
 	}
 }
