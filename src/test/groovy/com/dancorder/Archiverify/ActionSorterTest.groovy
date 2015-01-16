@@ -53,8 +53,8 @@ public class ActionSorterTest extends spock.lang.Specification {
 		output[1] instanceof UpdateHashesAction
 
 		where:
-		action1                           | action2
-		new WarningAction("test")         | new UpdateHashesAction(Mock(FileHashStore))
+		action1                                     | action2
+		new WarningAction("test")                   | new UpdateHashesAction(Mock(FileHashStore))
 		new UpdateHashesAction(Mock(FileHashStore)) | new WarningAction("test")
 	}
 }
