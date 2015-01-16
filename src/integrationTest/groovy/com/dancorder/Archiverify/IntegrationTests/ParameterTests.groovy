@@ -17,9 +17,25 @@
 package com.dancorder.Archiverify.IntegrationTests;
 
 import com.dancorder.Archiverify.testHelpers.*
+import java.nio.file.Path
 
 public class ParameterTests extends spock.lang.Specification {
-
+	
+	private static Path path1Root
+	private static Path path2Root
+	
+	def setup () {
+		path1Root = FileSystem.createRootDirectory()
+		path2Root = FileSystem.createRootDirectory()
+	}
+	
+	def cleanup() {
+		FileSystem.cleanUpDirectory(path1Root)
+		FileSystem.cleanUpDirectory(path2Root)
+		path1Root = null
+		path2Root = null
+	}
+	
 	def "When run with no parameters usage message is shown"() {
 
 		when: "No parameters are passed"
@@ -27,5 +43,14 @@ public class ParameterTests extends spock.lang.Specification {
 
 		then: "Usage instructions are printed"
 		result.stdout.contains("usage: Archiverify")
+	}
+	
+	def "When run with no files no actions are found"() {
+		
+		when: "Archiverify is run with empty roots"
+		def result = Run.archiverify(path1Root.toString(), path2Root.toString())
+		
+		then: "No actions are found"
+		result.stdout.contains("Nothing to do")
 	}
 }
