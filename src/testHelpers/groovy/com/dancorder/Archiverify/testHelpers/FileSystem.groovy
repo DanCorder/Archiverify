@@ -24,6 +24,10 @@ class FileSystem {
 	public static Path createTempFile() {
 		return Files.createTempFile(null, null)
 	}
+
+	public static Path createTempFile(String data) {
+		createDataFile(createTempFile(), data)
+	}
 	
 	public static void cleanUpFile(Path file) {
 		Files.deleteIfExists(file)

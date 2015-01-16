@@ -16,39 +16,30 @@
 
 package com.dancorder.Archiverify;
 
-import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.dancorder.Archiverify.testHelpers.*
 
 class FileHashGeneratorTest extends spock.lang.Specification {
 
-	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
-	private final static tempInputFile = tempDir.resolve("hashInput.txt")
-
-	def cleanup() {
-		Files.deleteIfExists(tempInputFile)
-	}
-
 	def "hash generation"() {
 		setup: "correct hash value calculated by http://onlinemd5.com/"
-		writeTempFile("testData")
+		def file = FileSystem.createTempFile("testData")
 		def generator = new FileHashGenerator()
 
 		expect: "check the generator creates the correct hash"
-		generator.calculateMd5(tempInputFile) == "3a760fae784d30a1b50e304e97a17355"
+		generator.calculateMd5(file) == "3a760fae784d30a1b50e304e97a17355"
+		
+		cleanup:
+		FileSystem.cleanUpFile(file)
 	}
 	
 	def "hash generation for non-existant file"() {
 		setup:
+		def nonExistantFile = FileSystem.getTempDirectory().resolve("hashInput.txt")
 		def generator = new FileHashGenerator()
 
-		expect: "check the generator creates the correct hash"
-		generator.calculateMd5(tempInputFile) == null
-	}
-
-	private void writeTempFile(String data) throws IOException {
-		def writer = Files.newBufferedWriter(tempInputFile, Charset.defaultCharset())
-		writer.write(data)
-		writer.close()
+		expect: "check the generator returns null"
+		generator.calculateMd5(nonExistantFile) == null
 	}
 }
