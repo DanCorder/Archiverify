@@ -19,16 +19,18 @@ package com.dancorder.Archiverify;
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import com.dancorder.Archiverify.testHelpers.*
 
 public class FileCopyActionTest extends spock.lang.Specification {
-	private static final tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
+	private static final tempDir = FileSystem.getTempDirectory()
 	private static final relativePath = Paths.get("testFile")
+	private static final toPath = tempDir.resolve("toFile")
 	private static final generatedHash = "generatedHash"
 	private static FileHashGenerator hashGenerator;
 	private static Path tempFile
 
 	def setup() {
-		tempFile = Files.createTempFile(null, null);
+		tempFile = FileSystem.createTempFile()
 		hashGenerator = Mock(FileHashGenerator)
 		hashGenerator.calculateMd5(_) >> new String(generatedHash)
 	}
@@ -69,62 +71,53 @@ public class FileCopyActionTest extends spock.lang.Specification {
 
 	def "Copy a file that doesn't exist"() {
 		setup:
-		def to = tempDir.resolve("toFile")
-		def fca = new FileCopyAction(tempFile, to, new String(generatedHash), hashGenerator)
+		def fca = new FileCopyAction(tempFile, toPath, new String(generatedHash), hashGenerator)
 
 		when: "doACtion is called"
 		fca.doAction();
 
 		then: "A new file is created"
-		Files.exists(to)
+		Files.exists(toPath)
 
 		cleanup:
-		if (Files.exists(to)) {
-			Files.delete(to)
-		}
+		FileSystem.cleanUpFile(toPath)
 	}
 	
 	def "Copy a file that does exist"() {
 		setup:
-		def tempFile2 = Files.createTempFile(null, null);
+		def tempFile2 = FileSystem.createTempFile();
 		def fca = new FileCopyAction(tempFile, tempFile2, new String(generatedHash), hashGenerator)
 
 		when: "doACtion is called"
 		fca.doAction();
 
-		then: "A new file is created"
+		then: "The file still exists"
 		Files.exists(tempFile2)
 
 		cleanup:
-		if (Files.exists(tempFile2)) {
-			Files.delete(tempFile2)
-		}
+		FileSystem.cleanUpFile(tempFile2)
 	}
 	
 	def "Copied file doesn't match throws exception"() {
 		setup:
-		def to = tempDir.resolve("toFile")
-		def fca = new FileCopyAction(tempFile, to, new String(generatedHash), hashGenerator)
+		def fca = new FileCopyAction(tempFile, toPath, new String(generatedHash), hashGenerator)
 		
 		when:
 		fca.doAction()
 		
 		then: "expect an exception"
-		hashGenerator.calculateMd5(to) >> "badHash"
+		hashGenerator.calculateMd5(toPath) >> "badHash"
 		thrown(Exception)
 		
 		cleanup:
-		if (Files.exists(to)) {
-			Files.delete(to)
-		}
+		FileSystem.cleanUpFile(toPath)
 	}
 
 	def "String value"() {
 		setup:
-		def to = tempDir.resolve("toFile")
-		def fca = new FileCopyAction(tempFile, to, new String(generatedHash), hashGenerator)
+		def fca = new FileCopyAction(tempFile, toPath, new String(generatedHash), hashGenerator)
 
 		expect:
-		fca.toString() == String.format("Copy %s to %s with hash %s", tempFile, to, generatedHash)
+		fca.toString() == String.format("Copy %s to %s with hash %s", tempFile, toPath, generatedHash)
 	}
 }

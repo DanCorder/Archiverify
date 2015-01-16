@@ -21,6 +21,18 @@ import java.nio.file.attribute.*
 
 
 class FileSystem {
+	public static Path createTempFile() {
+		return Files.createTempFile(null, null)
+	}
+	
+	public static void cleanUpFile(Path file) {
+		Files.deleteIfExists(file)
+	}
+	
+	public static Path getTempDirectory() {
+		return Paths.get(System.getProperty("java.io.tmpdir"))
+	}
+	
 	public static Path createRootDirectory() {
 		return Files.createTempDirectory(null)
 	}
