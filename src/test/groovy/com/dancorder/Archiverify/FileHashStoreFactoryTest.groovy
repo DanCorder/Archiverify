@@ -17,10 +17,11 @@
 package com.dancorder.Archiverify;
 
 import java.nio.file.Paths
+import com.dancorder.Archiverify.testHelpers.*
 
 class FileHashStoreFactoryTest extends spock.lang.Specification {
 
-	private final static dir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("temp1")
+	private final static dir = FileSystem.getTempDirectory().resolve("temp1")
 	private final static readFile = Paths.get("readFile")
 	private final static writeFile = Paths.get("writeFile")
 
