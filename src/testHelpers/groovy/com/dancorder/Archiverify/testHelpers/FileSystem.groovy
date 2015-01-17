@@ -16,8 +16,10 @@
 
 package com.dancorder.Archiverify.testHelpers
 
+import java.nio.charset.Charset
 import java.nio.file.*
 import java.nio.file.attribute.*
+import java.util.List;
 
 
 class FileSystem {
