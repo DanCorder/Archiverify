@@ -58,15 +58,15 @@ class FileSystem {
 		return Files.createTempDirectory(root, null)
 	}
 	
-	public static Path createFile(Path directory, String fileName) throws IOException {
+	public static Path createFile(Path directory, String fileName) {
 		return Files.createFile(directory.resolve(fileName))
 	}
 	
 	public static Path createSubDirectory(Path directory, String subDirectoryName) throws IOException {
 		return Files.createDirectory(directory.resolve(subDirectoryName))
 	}
-	
-	public static void cleanUpDirectory(Path directory) throws IOException {
+
+	public static void cleanUpDirectory(Path directory) {
 		if (!deleteRecursive(directory.toFile())) {
 			throw new IOException("Failed to clean up directory " + directory.toString())
 		}
