@@ -20,26 +20,29 @@ import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-
+import com.dancorder.Archiverify.testHelpers.*
 
 class HashFileSourceTest extends spock.lang.Specification {
 	
 	private final static line1 = "Some test text"
 	private final static line2 = "Some more text"
 	
-	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
+	private final static tempDir = FileSystem.getTempDirectory()
 	
-	private final static defaultHashFile = Paths.get("hashFileSoureTest_DefaultFileName")
-	private final static alternateHashFile = Paths.get("hashFileSoureTest_AlternateFileName")
+	private final static defaultHashFileName = Paths.get("hashFileSoureTest_DefaultFileName")
+	private final static alternateHashFileName = Paths.get("hashFileSoureTest_AlternateFileName")
+	
+	private final static defaultHashFileFullPath = tempDir.resolve(defaultHashFileName)
+	private final static alternateHashFileFullPath = tempDir.resolve(alternateHashFileName)
 	
 	def cleanup() {
-		clearTempFile(defaultHashFile)
-		clearTempFile(alternateHashFile)
+		FileSystem.cleanUpFile(defaultHashFileFullPath)
+		FileSystem.cleanUpFile(alternateHashFileFullPath)
 	}
 	
 	def "Retrieve directory"() {
 		setup:
-		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
+		def source = new HashFileSource(defaultHashFileName, defaultHashFileName, tempDir)
 		
 		expect:
 		source.getDirectory() == tempDir
@@ -47,10 +50,10 @@ class HashFileSourceTest extends spock.lang.Specification {
 	
 	def "Read file from disk"() {
 		setup:
-		writeTempFile(line1, defaultHashFile)
+		FileSystem.createDataFile(defaultHashFileFullPath, line1)
 		
 		when: "it is created with a directory" 
-		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
+		def source = new HashFileSource(defaultHashFileName, defaultHashFileName, tempDir)
 		def data = source.getData();
 		
 		then: "it reads the data from the hash file"
@@ -60,10 +63,10 @@ class HashFileSourceTest extends spock.lang.Specification {
 	
 	def "Read empty file"() {
 		setup:
-		writeTempFile("", defaultHashFile)
+		FileSystem.createDataFile(defaultHashFileFullPath, "")
 		
 		when: "it is created with a directory"
-		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
+		def source = new HashFileSource(defaultHashFileName, defaultHashFileName, tempDir)
 		def data = source.getData();
 		
 		then: "it reads the data from the hash file"
@@ -74,7 +77,7 @@ class HashFileSourceTest extends spock.lang.Specification {
 		setup:
 		
 		when: "it is created with a directory"
-		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
+		def source = new HashFileSource(defaultHashFileName, defaultHashFileName, tempDir)
 		def data = source.getData();
 		
 		then: "data is empty"
@@ -83,10 +86,10 @@ class HashFileSourceTest extends spock.lang.Specification {
 	
 	def "Check various line endings"() {
 		setup:
-		writeTempFile(line1 + lineEnding + line2 + lineEnding, defaultHashFile)
+		FileSystem.createDataFile(defaultHashFileFullPath, line1 + lineEnding + line2 + lineEnding)
 
 		when: "it reads a file with certain line endings" 
-		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
+		def source = new HashFileSource(defaultHashFileName, defaultHashFileName, tempDir)
 		def data = source.getData();
 		
 		then: "it reads multiple lines from the hash file"
@@ -103,90 +106,72 @@ class HashFileSourceTest extends spock.lang.Specification {
 	
 	def "Write to disk"() {
 		setup:
-		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
+		def source = new HashFileSource(defaultHashFileName, defaultHashFileName, tempDir)
 		
 		when: "data is passed in"
 		source.writeData([line1])
 		
 		then: "that writer writes to the hash file"
-		tempFileExists(defaultHashFile)
-		def fileContent = readTempFile(defaultHashFile)
+		Files.exists(defaultHashFileFullPath)
+		def fileContent = FileSystem.readFile(defaultHashFileFullPath)
 		fileContent.size() == 1
 		fileContent[0] == line1
 	}
 
 	def "Replace existing file"() {
 		setup:
-		writeTempFile(line1 + '\n' + line2, defaultHashFile)
-		def source = new HashFileSource(defaultHashFile, defaultHashFile, tempDir)
+		FileSystem.createDataFile(defaultHashFileFullPath, line1 + '\n' + line2)
+		def source = new HashFileSource(defaultHashFileName, defaultHashFileName, tempDir)
 
 		when: "data is passed in"
 		source.writeData([line2])
 
 		then: "that writer writes to the hash file"
-		tempFileExists(defaultHashFile)
-		def fileContent = readTempFile(defaultHashFile)
+		Files.exists(defaultHashFileFullPath)
+		def fileContent = FileSystem.readFile(defaultHashFileFullPath)
 		fileContent.size() == 1
 		fileContent[0] == line2
 	}
 	
 	def "Delete read and write files when no hashes present"() {
 		setup:
-		writeTempFile(line1, defaultHashFile)
-		writeTempFile(line1, alternateHashFile)
-		def source = new HashFileSource(defaultHashFile, alternateHashFile, tempDir)
+		FileSystem.createDataFile(defaultHashFileFullPath, line1)
+		FileSystem.createDataFile(alternateHashFileFullPath, line1)
+		def source = new HashFileSource(defaultHashFileName, alternateHashFileName, tempDir)
 		
 		when: "no data is written"
 		source.writeData([])
 		
 		then: "the file is removed"
-		!tempFileExists(defaultHashFile)
-		!tempFileExists(alternateHashFile)
+		!Files.exists(defaultHashFileFullPath)
+		!Files.exists(alternateHashFileFullPath)
 	}
 	
 	def "Delete read file when write filename is different"() {
 		setup:
-		writeTempFile(line1, defaultHashFile)
-		clearTempFile(alternateHashFile)
-		def source = new HashFileSource(defaultHashFile, alternateHashFile, tempDir)
+		FileSystem.createDataFile(defaultHashFileFullPath, line1)
+		FileSystem.cleanUpFile(alternateHashFileFullPath)
+		def source = new HashFileSource(defaultHashFileName, alternateHashFileName, tempDir)
 		
 		when: "data is written"
 		source.writeData([line2])
 		
 		then: "the read file is removed and the write file is written"
-		!tempFileExists(defaultHashFile)
-		tempFileExists(alternateHashFile)
+		!Files.exists(defaultHashFileFullPath)
+		Files.exists(alternateHashFileFullPath)
 	}
 	
 	def "No error when read and write filenames are different and read file doesn't exist"() {
 		setup:
-		clearTempFile(defaultHashFile)
-		clearTempFile(alternateHashFile)
-		def source = new HashFileSource(defaultHashFile, alternateHashFile, tempDir)
+		FileSystem.cleanUpFile(defaultHashFileFullPath)
+		FileSystem.cleanUpFile(alternateHashFileFullPath)
+		def source = new HashFileSource(defaultHashFileName, alternateHashFileName, tempDir)
 		
 		when: "data is written"
 		source.writeData([line2])
 		
 		then: "the read file is removed and the write file is written"
-		!tempFileExists(defaultHashFile)
-		tempFileExists(alternateHashFile)
-	}
-	
-	private void writeTempFile(String data, Path fileName) throws IOException {
-		def writer = Files.newBufferedWriter(tempDir.resolve(fileName), Charset.defaultCharset())
-		writer.write(data)
-		writer.close()
-	}
-	
-	private List<String> readTempFile(Path fileName) {
-		return Files.readAllLines(tempDir.resolve(fileName), Charset.defaultCharset)
-	}
-	
-	private void clearTempFile(Path fileName) {
-		Files.deleteIfExists(tempDir.resolve(fileName))
-	}
-
-	private boolean tempFileExists(Path fileName) {
-		return Files.exists(tempDir.resolve(fileName))
+		!Files.exists(defaultHashFileFullPath)
+		Files.exists(alternateHashFileFullPath)
 	}
 }

@@ -29,6 +29,17 @@ class FileSystem {
 		createDataFile(createTempFile(), data)
 	}
 	
+	public static Path createDataFile(Path file, String data) {
+		def writer = Files.newBufferedWriter(file, Charset.defaultCharset())
+		writer.write(data)
+		writer.close()
+		return file
+	}
+	
+	public static List<String> readFile(Path file) {
+		return Files.readAllLines(file, Charset.defaultCharset)
+	}
+	
 	public static void cleanUpFile(Path file) {
 		Files.deleteIfExists(file)
 	}
