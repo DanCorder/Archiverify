@@ -80,7 +80,7 @@ sourceSets {
             srcDirs += 'src/testHelpers/groovy'
         }
     }
-    integrationTest {
+    systemTest {
         groovy {
             srcDirs += 'src/testHelpers/groovy'
         }
@@ -89,18 +89,18 @@ sourceSets {
 
 
 configurations {
-    integrationTestCompile.extendsFrom testCompile
-    integrationTestRuntime.extendsFrom testRuntime
+    systemTestCompile.extendsFrom testCompile
+    systemTestRuntime.extendsFrom testRuntime
 }
 
-task integrationTest(type: Test) {
-    testClassesDir = sourceSets.integrationTest.output.classesDir
-    classpath = sourceSets.integrationTest.runtimeClasspath
+task systemTest(type: Test) {
+    testClassesDir = sourceSets.systemTest.output.classesDir
+    classpath = sourceSets.systemTest.runtimeClasspath
     dependsOn buildOneJar
 }
 
 task buildRelease {
-    dependsOn integrationTest
+    dependsOn systemTest
 }
 
 jar {
