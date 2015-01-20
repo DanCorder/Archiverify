@@ -73,7 +73,7 @@ class ParametersTest extends spock.lang.Specification {
 	}
 	
 	def "relative paths are converted to absolute"() {
-		given: ""
+		given: "A relative directory path"
 		def rootDir = FileSystem.getArchiverifyDirectory()
 		def tempDir = FileSystem.createDirectoryIn(rootDir)
 		def tempDirRelative = rootDir.relativize(tempDir).toString()
@@ -81,7 +81,7 @@ class ParametersTest extends spock.lang.Specification {
 		when: "Relative paths are supplied"
 		def underTest = new Parameters( [ tempDirRelative, tempDirRelative ] as String[] )
 		
-		then:
+		then: "Paths are converted to absolute paths"
 		underTest.isValid()
 		underTest.getPath1().isAbsolute()
 		underTest.getPath2().isAbsolute()
