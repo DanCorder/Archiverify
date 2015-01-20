@@ -19,7 +19,7 @@ package com.dancorder.Archiverify;
 import java.security.Permission
 
 public class ArchiverfiyTest extends spock.lang.Specification {
-	
+	//qq:DCC better as a system test?
 	def setupSpec() {
 		// Tests will throw an ExitException if System.exit() is called rather than exiting the test runner.
 		System.setSecurityManager(new NoExitSecurityManager());

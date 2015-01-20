@@ -16,23 +16,27 @@
 
 package com.dancorder.Archiverify
 
-import java.nio.file.*
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.FileVisitResult
+import com.dancorder.Archiverify.testHelpers.FileSystem
 
 class HashCheckingVisitorTest extends spock.lang.Specification {
 
 	private static final testHash = "testHash"
 	private static final testHash2 = "testHash2"
 	private static final badHash = "badHash"
+	private static final rootDirName = "testRoot"
+	private static final subDirName = "subDir"
 	private static final testRootFileName = "testRootFileName"
 	private static final testRootFileName2 = "testRootFileName2"
 	private static final testSubDirFileName = "testSubDirFileName"
 	private static final testSubDirFileName2 = "testSubDirFileName2"
 	
 	private final static hashFile = Paths.get(".hashes")
-	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
-	private final static rootAbsolute = tempDir.resolve("testRoot")
-	private final static subDirRelative = Paths.get("subDir")
-	private final static subDirAbsolute = rootAbsolute.resolve(subDirRelative)
+	private final static tempDir = FileSystem.getTempDirectory()
+	private final static rootAbsolute = tempDir.resolve(rootDirName)
+	private final static subDirAbsolute = rootAbsolute.resolve(subDirName)
 	private final static rootFileAbsolute = rootAbsolute.resolve(testRootFileName)
 	private final static rootFileAbsolute2 = rootAbsolute.resolve(testRootFileName2)
 	private final static subDirFileAbsolute = subDirAbsolute.resolve(testSubDirFileName)
