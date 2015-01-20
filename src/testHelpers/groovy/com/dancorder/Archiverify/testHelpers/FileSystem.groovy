@@ -63,11 +63,15 @@ class FileSystem {
 		return Files.createFile(directory.resolve(fileName))
 	}
 	
-	public static Path createSubDirectoryIn(Path directory, String subDirectoryName) {
+	public static Path createDirectoryIn(Path directory) {
+		return Files.createTempDirectory(directory, null)
+	}
+
+	public static Path createDirectoryIn(Path directory, String subDirectoryName) {
 		return Files.createDirectory(directory.resolve(subDirectoryName))
 	}
-	
-	public static Path createSubDirectoryIn(Path directory, Path subDirectoryPath) {
+
+	public static Path createDirectoryIn(Path directory, Path subDirectoryPath) {
 		return Files.createDirectory(directory.resolve(subDirectoryPath))
 	}
 
@@ -117,12 +121,12 @@ class FileSystem {
 	}
 	
 	// Return something like /Users/dan/Development/Archiverify/build/libs/
-	static Path getBuildOutputDirectory() {
+	private static Path getBuildOutputDirectory() {
 		getArchiverifyDirectory().resolve("build").resolve("libs")
 	}
 		
 	// Return something like /Users/dan/Development/Archiverify/
-	private static Path getArchiverifyDirectory() {
+	public static Path getArchiverifyDirectory() {
 		def fiveParentsUp = getClassLocation().getParent().getParent().getParent().getParent().getParent().getParent()
 		
 		if (Files.exists(fiveParentsUp.resolve("build"))) {
@@ -132,9 +136,9 @@ class FileSystem {
 		return fiveParentsUp.getParent().getParent()
 	}
 	
-	// Returns something like this running under Eclipse /Users/dan/Development/Archiverify/bin/com/dancorder/Archiverify/testHelpers/Run.class
-	// Returns something like this running under Gradle  /Users/dan/Development/Archiverify/build/classes/integrationTest/com/dancorder/Archiverify/testHelpers/Run.class
-	private static Path getClassLocation() {
+	// Returns something like this running under Eclipse /Users/dan/Development/Archiverify/bin/com/dancorder/Archiverify/testHelpers/FileSystem.class
+	// Returns something like this running under Gradle  /Users/dan/Development/Archiverify/build/classes/integrationTest/com/dancorder/Archiverify/testHelpers/FileSystem.class
+	public static Path getClassLocation() {
 		def classpath = FileSystem.class.getResource("FileSystem.class").getPath()
 		Paths.get(classpath).toAbsolutePath()
 	}

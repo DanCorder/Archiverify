@@ -69,6 +69,7 @@ class Parameters {
 			}
 			
 			validatePath(path1);
+			path1 = normalisePath(path1);
 		}
 		else {
 			if (path1 == null || path2 == null) {
@@ -77,6 +78,8 @@ class Parameters {
 			
 			validatePath(path1);
 			validatePath(path2);
+			path1 = normalisePath(path1);
+			path2 = normalisePath(path2);
 		}
 		
 		validateFileNames();
@@ -162,6 +165,10 @@ class Parameters {
 		}		
 	}
 	
+	private Path normalisePath(Path path) {
+		return path.toAbsolutePath();
+	}
+
 	private void validateFileNames() throws Exception {
 		validateOptionIsUnsetOrNotEmpty(OPTION_HASH_FILENAMES, "Hash file name cannot be blank");
 		validateOptionIsUnsetOrNotEmpty(OPTION_HASH_READ_FILENAMES, "Hash read file name cannot be blank");

@@ -16,11 +16,13 @@
 
 package com.dancorder.Archiverify
 
+import com.dancorder.Archiverify.ParallelFileTreeWalker.ParallelFileTreeWalker.PathProcessor;
 import com.dancorder.Archiverify.testHelpers.*
 
 class ParametersTest extends spock.lang.Specification {
 
-	private final static rootPath = FileSystem.getTempDirectory()// File.listRoots()[0].getAbsolutePath()
+	private final static rootPath = FileSystem.getTempDirectory().toString()
+	private final static relativeRootPath = "relativePath"
 	
 	def "null parameter"() {
 		when: "A null constructor parameter"
@@ -70,6 +72,24 @@ class ParametersTest extends spock.lang.Specification {
 		parametersAreInvalid(underTest)
 	}
 	
+	def "relative paths are converted to absolute"() {
+		given: ""
+		def rootDir = FileSystem.getArchiverifyDirectory()
+		def tempDir = FileSystem.createDirectoryIn(rootDir)
+		def tempDirRelative = rootDir.relativize(tempDir).toString()
+		
+		when: "Relative paths are supplied"
+		def underTest = new Parameters( [ tempDirRelative, tempDirRelative ] as String[] )
+		
+		then:
+		underTest.isValid()
+		underTest.getPath1().isAbsolute()
+		underTest.getPath2().isAbsolute()
+		
+		cleanup:
+		FileSystem.cleanUpDirectory(tempDir)
+	}
+	
 	def "valid paths, no params"() {
 		when: "Valid paths are supplied"
 		def underTest = new Parameters( [ rootPath, rootPath ] as String[] )
@@ -78,8 +98,8 @@ class ParametersTest extends spock.lang.Specification {
 		underTest.isValid()
 		underTest.getExecuteActions() == false
 		underTest.getIsSingleDirectoryMode() == false
-		underTest.getPath1() == rootPath
-		underTest.getPath2() == rootPath
+		underTest.getPath1().toString() == rootPath
+		underTest.getPath2().toString() == rootPath
 		underTest.getReadFile().toString() == ".hashes"
 		underTest.getWriteFile().toString() == ".hashes"
 	}
@@ -91,8 +111,8 @@ class ParametersTest extends spock.lang.Specification {
 		then:
 		underTest.isValid()
 		underTest.getExecuteActions() == true
-		underTest.getPath1() == rootPath
-		underTest.getPath2() == rootPath
+		underTest.getPath1().toString() == rootPath
+		underTest.getPath2().toString() == rootPath
 	}
 	
 	def "single directory mode with one path"() {
@@ -102,7 +122,7 @@ class ParametersTest extends spock.lang.Specification {
 		then:
 		underTest.isValid()
 		underTest.getIsSingleDirectoryMode() == true
-		underTest.getPath1() == rootPath
+		underTest.getPath1().toString() == rootPath
 	}
 	
 	def "single directory mode with two paths"() {
