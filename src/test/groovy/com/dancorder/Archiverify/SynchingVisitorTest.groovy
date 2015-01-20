@@ -19,10 +19,11 @@ package com.dancorder.Archiverify
 import java.nio.file.Paths
 
 import com.dancorder.Archiverify.ParallelFileTreeWalker.FileExistence
+import com.dancorder.Archiverify.testHelpers.*
 
 class SynchingVisitorTest extends spock.lang.Specification {
 
-	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
+	private final static tempDir = FileSystem.getTempDirectory()
 	private final static root1Absolute = tempDir.resolve("testRoot1")
 	private final static root2Absolute = tempDir.resolve("testRoot2")
 	private final static rootDirRelative = Paths.get("")
