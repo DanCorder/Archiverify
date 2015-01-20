@@ -19,6 +19,7 @@ package com.dancorder.Archiverify
 import java.nio.file.Paths
 
 import com.dancorder.Archiverify.ParallelFileTreeWalker.FileExistence
+import com.dancorder.Archiverify.testHelpers.*
 
 class SyncLogicDirectoryTest extends spock.lang.Specification {
 	
@@ -26,7 +27,7 @@ class SyncLogicDirectoryTest extends spock.lang.Specification {
 //    - If a directory exists under both roots do nothing
 //    - If a directory exists under only one root then create it under the other
 
-	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
+	private final static tempDir = FileSystem.getTempDirectory()
 	private final static absolutePath1 = tempDir.resolve("testRoot1").resolve("dir1")
 	private final static absolutePath2 = tempDir.resolve("testRoot2").resolve("dir1")
 	
