@@ -19,6 +19,8 @@ package com.dancorder.Archiverify
 import java.nio.file.Path
 import java.nio.file.Paths
 
+import com.dancorder.Archiverify.testHelpers.*
+
 class SyncLogicTest extends spock.lang.Specification {
 	
 //	The rules for the synching logic are tabulated below
@@ -90,7 +92,7 @@ class SyncLogicTest extends spock.lang.Specification {
 //	A     | NULL  | NULL  | B     | see above - NABN
 //	A     | NULL  | NULL  | NULL  | Create hash and copy file
 
-	private final static tempDir = Paths.get(System.getProperty("java.io.tmpdir"))
+	private final static tempDir = FileSystem.getTempDirectory()
 	private final static root1 = tempDir.resolve("testRoot1")
 	private final static root2 = tempDir.resolve("testRoot2")
 	
