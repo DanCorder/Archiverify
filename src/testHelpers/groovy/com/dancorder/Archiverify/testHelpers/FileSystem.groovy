@@ -55,23 +55,19 @@ class FileSystem {
 		return Files.createTempDirectory(null)
 	}
 	
-	public static Path createRelativeRootDirectory(Path root) {
-		return Files.createTempDirectory(root, null)
-	}
-	
-	public static Path createFile(Path directory, String fileName) {
+	public static Path createFileIn(Path directory, String fileName) {
 		return Files.createFile(directory.resolve(fileName))
 	}
 	
-	public static Path createFile(Path directory, Path fileName) {
+	public static Path createFileIn(Path directory, Path fileName) {
 		return Files.createFile(directory.resolve(fileName))
 	}
 	
-	public static Path createSubDirectory(Path directory, String subDirectoryName) {
+	public static Path createSubDirectoryIn(Path directory, String subDirectoryName) {
 		return Files.createDirectory(directory.resolve(subDirectoryName))
 	}
 	
-	public static Path createSubDirectory(Path directory, Path subDirectoryPath) {
+	public static Path createSubDirectoryIn(Path directory, Path subDirectoryPath) {
 		return Files.createDirectory(directory.resolve(subDirectoryPath))
 	}
 
