@@ -19,6 +19,8 @@ package com.dancorder.Archiverify.ParallelFileTreeWalker;
 import java.nio.file.Files
 import java.nio.file.Path
 
+import com.dancorder.Archiverify.testHelpers.*
+
 public class ParallelFileTreeWalkerConstructorTest extends spock.lang.Specification {
 
 	private static Path validTempRootPath1
@@ -28,28 +30,20 @@ public class ParallelFileTreeWalkerConstructorTest extends spock.lang.Specificat
 	private static visitor
 
 	def setupSpec() {
-		validTempRootPath1 = createRootDirectory()
-		validTempRootPath2 = createRootDirectory()
-		invalidTempRootPath1 = createRootDirectory()
-		invalidTempRootPath2 = createRootDirectory()
-		cleanUpDirectory(invalidTempRootPath1)
-		cleanUpDirectory(invalidTempRootPath2)
+		validTempRootPath1 = FileSystem.createRootDirectory()
+		validTempRootPath2 = FileSystem.createRootDirectory()
+		invalidTempRootPath1 = FileSystem.createRootDirectory()
+		invalidTempRootPath2 = FileSystem.createRootDirectory()
+		FileSystem.cleanUpDirectory(invalidTempRootPath1)
+		FileSystem.cleanUpDirectory(invalidTempRootPath2)
 		visitor = Mock(ParallelFileTreeVisitor)
 	}
 
 	def cleanupSpec() {
-		cleanUpDirectory(validTempRootPath1)
-		cleanUpDirectory(validTempRootPath2)
-		cleanUpDirectory(invalidTempRootPath1)
-		cleanUpDirectory(invalidTempRootPath2)
-	}
-
-	private Path createRootDirectory() throws IOException {
-		return Files.createTempDirectory(null);
-	}
-
-	private void cleanUpDirectory(Path directory) throws IOException {
-		Files.deleteIfExists(directory)
+		FileSystem.cleanUpDirectory(validTempRootPath1)
+		FileSystem.cleanUpDirectory(validTempRootPath2)
+		FileSystem.cleanUpDirectory(invalidTempRootPath1)
+		FileSystem.cleanUpDirectory(invalidTempRootPath2)
 	}
 
 	def "Invalid constructor parameters"() {
