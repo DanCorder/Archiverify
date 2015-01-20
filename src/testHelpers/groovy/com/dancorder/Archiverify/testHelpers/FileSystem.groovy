@@ -16,6 +16,7 @@
 
 package com.dancorder.Archiverify.testHelpers
 
+import java.io.IOException;
 import java.nio.charset.Charset
 import java.nio.file.*
 import java.nio.file.attribute.*
@@ -62,8 +63,16 @@ class FileSystem {
 		return Files.createFile(directory.resolve(fileName))
 	}
 	
-	public static Path createSubDirectory(Path directory, String subDirectoryName) throws IOException {
+	public static Path createFile(Path directory, Path fileName) {
+		return Files.createFile(directory.resolve(fileName))
+	}
+	
+	public static Path createSubDirectory(Path directory, String subDirectoryName) {
 		return Files.createDirectory(directory.resolve(subDirectoryName))
+	}
+	
+	public static Path createSubDirectory(Path directory, Path subDirectoryPath) {
+		return Files.createDirectory(directory.resolve(subDirectoryPath))
 	}
 
 	public static void cleanUpDirectory(Path directory) {
@@ -72,7 +81,7 @@ class FileSystem {
 		}
 	}
 	
-	private static boolean deleteRecursive(File path) throws FileNotFoundException{
+	private static boolean deleteRecursive(File path) {
 		if (!path.exists()) return true
 		
 		boolean ret = true

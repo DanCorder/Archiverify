@@ -20,6 +20,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
+import com.dancorder.Archiverify.testHelpers.*
+
 public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	
 	private static path1Root
@@ -28,15 +30,15 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	private static walker
 	
 	def setup () {
-		path1Root = createRootDirectory()
-		path2Root = createRootDirectory()
+		path1Root = FileSystem.createRootDirectory()
+		path2Root = FileSystem.createRootDirectory()
 		visitor = Mock(ParallelFileTreeVisitor)
 		walker = new ParallelFileTreeWalker(path1Root, path2Root, visitor)
 	}
 	
 	def cleanup() {
-		cleanUpDirectory(path1Root)
-		cleanUpDirectory(path2Root)
+		FileSystem.cleanUpDirectory(path1Root)
+		FileSystem.cleanUpDirectory(path2Root)
 		path1Root = null
 		path2Root = null
 		visitor = null
@@ -56,8 +58,8 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	def "single file in both roots"() {
 		setup:
 		def final filePath = Paths.get("testFile")
-		createFile(path1Root, filePath)
-		createFile(path2Root, filePath)
+		FileSystem.createFile(path1Root, filePath)
+		FileSystem.createFile(path2Root, filePath)
 		
 		when:
 		walker.walk()
@@ -71,7 +73,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	def "single file in path 1 root"() {
 		setup:
 		def final filePath = Paths.get("testFile")
-		createFile(path1Root, filePath)
+		FileSystem.createFile(path1Root, filePath)
 		
 		when:
 		walker.walk()
@@ -85,7 +87,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	def "single file in path 2 root"() {
 		setup:
 		def final filePath = Paths.get("testFile")
-		createFile(path2Root, filePath)
+		FileSystem.createFile(path2Root, filePath)
 		
 		when:
 		walker.walk()
@@ -100,10 +102,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		setup:
 		def final file1Path = Paths.get("testFile1")
 		def final file2Path = Paths.get("testFile2")
-		createFile(path1Root, file1Path)
-		createFile(path1Root, file2Path)
-		createFile(path2Root, file1Path)
-		createFile(path2Root, file2Path)
+		FileSystem.createFile(path1Root, file1Path)
+		FileSystem.createFile(path1Root, file2Path)
+		FileSystem.createFile(path2Root, file1Path)
+		FileSystem.createFile(path2Root, file2Path)
 		
 		when:
 		walker.walk()
@@ -121,12 +123,12 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final file2Path = Paths.get("testFile2")
 		def final file3Path = Paths.get("testFile3")
 		def final file4Path = Paths.get("testFile4")
-		createFile(path1Root, file1Path)
-		createFile(path2Root, file1Path)
-		createFile(path1Root, file2Path)
-		createFile(path1Root, file3Path)
-		createFile(path2Root, file3Path)
-		createFile(path2Root, file4Path)
+		FileSystem.createFile(path1Root, file1Path)
+		FileSystem.createFile(path2Root, file1Path)
+		FileSystem.createFile(path1Root, file2Path)
+		FileSystem.createFile(path1Root, file3Path)
+		FileSystem.createFile(path2Root, file3Path)
+		FileSystem.createFile(path2Root, file4Path)
 		
 		when:
 		walker.walk()
@@ -146,10 +148,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final directory2Path = Paths.get("bbbb")
 		def final file1Path = Paths.get("cccc")
 		def final directory3Path = Paths.get("dddd")
-		createDirectory(path1Root, directory1Path)
-		createFile(path1Root, file1Path)
-		createDirectory(path1Root, directory2Path)
-		createDirectory(path1Root, directory3Path)
+		FileSystem.createSubDirectory(path1Root, directory1Path)
+		FileSystem.createFile(path1Root, file1Path)
+		FileSystem.createSubDirectory(path1Root, directory2Path)
+		FileSystem.createSubDirectory(path1Root, directory3Path)
 		
 		when:
 		walker.walk()
@@ -169,8 +171,8 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	def "sub directory both paths"() {
 		setup:
 		def final directoryPath = Paths.get("subDirectory1")
-		createDirectory(path1Root, directoryPath)
-		createDirectory(path2Root, directoryPath)
+		FileSystem.createSubDirectory(path1Root, directoryPath)
+		FileSystem.createSubDirectory(path2Root, directoryPath)
 		
 		when:
 		walker.walk()
@@ -185,7 +187,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	def "sub directory path 1 only"() {
 		setup:
 		def final directoryPath = Paths.get("subDirectory1")
-		createDirectory(path1Root, directoryPath)
+		FileSystem.createSubDirectory(path1Root, directoryPath)
 		
 		when:
 		walker.walk()
@@ -200,7 +202,7 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 	def "sub directory path 2 only"() {
 		setup:
 		def final directoryPath = Paths.get("subDirectory1")
-		createDirectory(path2Root, directoryPath)
+		FileSystem.createSubDirectory(path2Root, directoryPath)
 		
 		when:
 		walker.walk()
@@ -218,10 +220,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final level2Path = level1Path.resolve("subDirectory2")
 		def final level3Path = level2Path.resolve("subDirectory3")
 		def final level4Path = level3Path.resolve("subDirectory4")
-		createDirectory(path1Root, level1Path)
-		createDirectory(path1Root, level2Path)
-		createDirectory(path1Root, level3Path)
-		createDirectory(path1Root, level4Path)
+		FileSystem.createSubDirectory(path1Root, level1Path)
+		FileSystem.createSubDirectory(path1Root, level2Path)
+		FileSystem.createSubDirectory(path1Root, level3Path)
+		FileSystem.createSubDirectory(path1Root, level4Path)
 		
 		when:
 		walker.walk()
@@ -245,10 +247,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final level2Path = level1Path.resolve("subDirectory2")
 		def final level3Path = level2Path.resolve("subDirectory3")
 		def final level4Path = level3Path.resolve("subDirectory4")
-		createDirectory(path2Root, level1Path)
-		createDirectory(path2Root, level2Path)
-		createDirectory(path2Root, level3Path)
-		createDirectory(path2Root, level4Path)
+		FileSystem.createSubDirectory(path2Root, level1Path)
+		FileSystem.createSubDirectory(path2Root, level2Path)
+		FileSystem.createSubDirectory(path2Root, level3Path)
+		FileSystem.createSubDirectory(path2Root, level4Path)
 		
 		when:
 		walker.walk()
@@ -272,14 +274,14 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final level2Path = level1Path.resolve("subDirectory2")
 		def final level3Path = level2Path.resolve("subDirectory3")
 		def final level4Path = level3Path.resolve("subDirectory4")
-		createDirectory(path1Root, level1Path)
-		createDirectory(path1Root, level2Path)
-		createDirectory(path1Root, level3Path)
-		createDirectory(path1Root, level4Path)
-		createDirectory(path2Root, level1Path)
-		createDirectory(path2Root, level2Path)
-		createDirectory(path2Root, level3Path)
-		createDirectory(path2Root, level4Path)
+		FileSystem.createSubDirectory(path1Root, level1Path)
+		FileSystem.createSubDirectory(path1Root, level2Path)
+		FileSystem.createSubDirectory(path1Root, level3Path)
+		FileSystem.createSubDirectory(path1Root, level4Path)
+		FileSystem.createSubDirectory(path2Root, level1Path)
+		FileSystem.createSubDirectory(path2Root, level2Path)
+		FileSystem.createSubDirectory(path2Root, level3Path)
+		FileSystem.createSubDirectory(path2Root, level4Path)
 		
 		when:
 		walker.walk()
@@ -303,10 +305,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final level2Path = level1Path.resolve("subDirectory2")
 		def final level3Path = level2Path.resolve("subDirectory3")
 		def final filePath = level3Path.resolve("testFile")
-		createDirectory(path1Root, level1Path)
-		createDirectory(path1Root, level2Path)
-		createDirectory(path1Root, level3Path)
-		createFile(path1Root, filePath)
+		FileSystem.createSubDirectory(path1Root, level1Path)
+		FileSystem.createSubDirectory(path1Root, level2Path)
+		FileSystem.createSubDirectory(path1Root, level3Path)
+		FileSystem.createFile(path1Root, filePath)
 		
 		when:
 		walker.walk()
@@ -329,10 +331,10 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final level2Path = level1Path.resolve("subDirectory2")
 		def final level3Path = level2Path.resolve("subDirectory3")
 		def final filePath = level3Path.resolve("testFile")
-		createDirectory(path2Root, level1Path)
-		createDirectory(path2Root, level2Path)
-		createDirectory(path2Root, level3Path)
-		createFile(path2Root, filePath)
+		FileSystem.createSubDirectory(path2Root, level1Path)
+		FileSystem.createSubDirectory(path2Root, level2Path)
+		FileSystem.createSubDirectory(path2Root, level3Path)
+		FileSystem.createFile(path2Root, filePath)
 		
 		when:
 		walker.walk()
@@ -355,14 +357,14 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final level2Path = level1Path.resolve("subDirectory2")
 		def final level3Path = level2Path.resolve("subDirectory3")
 		def final filePath = level3Path.resolve("testFile")
-		createDirectory(path1Root, level1Path)
-		createDirectory(path1Root, level2Path)
-		createDirectory(path1Root, level3Path)
-		createFile(path1Root, filePath)
-		createDirectory(path2Root, level1Path)
-		createDirectory(path2Root, level2Path)
-		createDirectory(path2Root, level3Path)
-		createFile(path2Root, filePath)
+		FileSystem.createSubDirectory(path1Root, level1Path)
+		FileSystem.createSubDirectory(path1Root, level2Path)
+		FileSystem.createSubDirectory(path1Root, level3Path)
+		FileSystem.createFile(path1Root, filePath)
+		FileSystem.createSubDirectory(path2Root, level1Path)
+		FileSystem.createSubDirectory(path2Root, level2Path)
+		FileSystem.createSubDirectory(path2Root, level3Path)
+		FileSystem.createFile(path2Root, filePath)
 		
 		when:
 		walker.walk()
@@ -433,66 +435,66 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		def final file32Path = directory3Path.resolve("file32")
 		def final file33Path = directory3Path.resolve("file33")
 		
-		createFile(path1Root, file1Path)
-		createFile(path1Root, file2Path)
-		createDirectory(path1Root, directory2Path)
-		createDirectory(path1Root, directory21Path)
-		createFile(path1Root, file211Path)
-		createFile(path1Root, file212Path)
-		createDirectory(path1Root, directory22Path)
-		createFile(path1Root, file221Path)
-		createFile(path1Root, file222Path)
-		createFile(path1Root, file223Path)
-		createDirectory(path1Root, directory221Path)
-		createFile(path1Root, file2211Path)
-		createFile(path1Root, file2212Path)
-		createFile(path1Root, file2213Path)
-		createDirectory(path1Root, directory222Path)
-		createFile(path1Root, file2221Path)
-		createFile(path1Root, file2222Path)
-		createFile(path1Root, file2223Path)
-		createDirectory(path1Root, directory223Path)
-		createFile(path1Root, file2231Path)
-		createFile(path1Root, file2232Path)
-		createFile(path1Root, file2233Path)
-		createDirectory(path1Root, directory23Path)
-		createFile(path1Root, file231Path)
-		createFile(path1Root, file232Path)
-		createFile(path1Root, file233Path)
-		createDirectory(path1Root, directory3Path)
-		createFile(path1Root, file31Path)
-		createFile(path1Root, file32Path)
-		createFile(path1Root, file33Path)
+		FileSystem.createFile(path1Root, file1Path)
+		FileSystem.createFile(path1Root, file2Path)
+		FileSystem.createSubDirectory(path1Root, directory2Path)
+		FileSystem.createSubDirectory(path1Root, directory21Path)
+		FileSystem.createFile(path1Root, file211Path)
+		FileSystem.createFile(path1Root, file212Path)
+		FileSystem.createSubDirectory(path1Root, directory22Path)
+		FileSystem.createFile(path1Root, file221Path)
+		FileSystem.createFile(path1Root, file222Path)
+		FileSystem.createFile(path1Root, file223Path)
+		FileSystem.createSubDirectory(path1Root, directory221Path)
+		FileSystem.createFile(path1Root, file2211Path)
+		FileSystem.createFile(path1Root, file2212Path)
+		FileSystem.createFile(path1Root, file2213Path)
+		FileSystem.createSubDirectory(path1Root, directory222Path)
+		FileSystem.createFile(path1Root, file2221Path)
+		FileSystem.createFile(path1Root, file2222Path)
+		FileSystem.createFile(path1Root, file2223Path)
+		FileSystem.createSubDirectory(path1Root, directory223Path)
+		FileSystem.createFile(path1Root, file2231Path)
+		FileSystem.createFile(path1Root, file2232Path)
+		FileSystem.createFile(path1Root, file2233Path)
+		FileSystem.createSubDirectory(path1Root, directory23Path)
+		FileSystem.createFile(path1Root, file231Path)
+		FileSystem.createFile(path1Root, file232Path)
+		FileSystem.createFile(path1Root, file233Path)
+		FileSystem.createSubDirectory(path1Root, directory3Path)
+		FileSystem.createFile(path1Root, file31Path)
+		FileSystem.createFile(path1Root, file32Path)
+		FileSystem.createFile(path1Root, file33Path)
 
-		createFile(path2Root, file1Path)
-		createFile(path2Root, file3Path)
-		createDirectory(path2Root, directory1Path)
-		createFile(path2Root, file11Path)
-		createFile(path2Root, file12Path)
-		createFile(path2Root, file13Path)
-		createDirectory(path2Root, directory11Path)
-		createFile(path2Root, file111Path)
-		createFile(path2Root, file112Path)
-		createFile(path2Root, file113Path)
-		createDirectory(path2Root, directory12Path)
-		createFile(path2Root, file121Path)
-		createFile(path2Root, file122Path)
-		createFile(path2Root, file123Path)
-		createDirectory(path2Root, directory13Path)
-		createFile(path2Root, file131Path)
-		createFile(path2Root, file132Path)
-		createFile(path2Root, file133Path)
-		createDirectory(path2Root, directory2Path)
-		createFile(path2Root, file21Path)
-		createFile(path2Root, file22Path)
-		createFile(path2Root, file23Path)
-		createDirectory(path2Root, directory21Path)
-		createFile(path2Root, file211Path)
-		createFile(path2Root, file213Path)
-		createDirectory(path2Root, directory3Path)
-		createFile(path2Root, file31Path)
-		createFile(path2Root, file32Path)
-		createFile(path2Root, file33Path)
+		FileSystem.createFile(path2Root, file1Path)
+		FileSystem.createFile(path2Root, file3Path)
+		FileSystem.createSubDirectory(path2Root, directory1Path)
+		FileSystem.createFile(path2Root, file11Path)
+		FileSystem.createFile(path2Root, file12Path)
+		FileSystem.createFile(path2Root, file13Path)
+		FileSystem.createSubDirectory(path2Root, directory11Path)
+		FileSystem.createFile(path2Root, file111Path)
+		FileSystem.createFile(path2Root, file112Path)
+		FileSystem.createFile(path2Root, file113Path)
+		FileSystem.createSubDirectory(path2Root, directory12Path)
+		FileSystem.createFile(path2Root, file121Path)
+		FileSystem.createFile(path2Root, file122Path)
+		FileSystem.createFile(path2Root, file123Path)
+		FileSystem.createSubDirectory(path2Root, directory13Path)
+		FileSystem.createFile(path2Root, file131Path)
+		FileSystem.createFile(path2Root, file132Path)
+		FileSystem.createFile(path2Root, file133Path)
+		FileSystem.createSubDirectory(path2Root, directory2Path)
+		FileSystem.createFile(path2Root, file21Path)
+		FileSystem.createFile(path2Root, file22Path)
+		FileSystem.createFile(path2Root, file23Path)
+		FileSystem.createSubDirectory(path2Root, directory21Path)
+		FileSystem.createFile(path2Root, file211Path)
+		FileSystem.createFile(path2Root, file213Path)
+		FileSystem.createSubDirectory(path2Root, directory3Path)
+		FileSystem.createFile(path2Root, file31Path)
+		FileSystem.createFile(path2Root, file32Path)
+		FileSystem.createFile(path2Root, file33Path)
 		
 		when:
 		walker.walk()
@@ -564,35 +566,5 @@ public class ParallelFileTreeWalkerTest extends spock.lang.Specification {
 		then: 1 * visitor.postVisitDirectory(Paths.get(""), FileExistence.BothPaths)
 		
 		then: 0 * _._
-	}
-
-	private Path createRootDirectory() throws IOException {
-		return Files.createTempDirectory(null)
-	}
-	
-	private Path createFile(Path directory, Path fileName) throws IOException {
-		return Files.createFile(directory.resolve(fileName))
-	}
-	
-	private Path createDirectory(Path directory, Path subDirectoryName) throws IOException {
-		return Files.createDirectory(directory.resolve(subDirectoryName))
-	}
-	
-	private void cleanUpDirectory(Path directory) throws IOException {
-		if (!deleteRecursive(directory.toFile())) {
-			throw new IOException("Failed to clean up directory " + directory.toString())
-		}
-	}
-	
-	private boolean deleteRecursive(File path) throws FileNotFoundException{
-		if (!path.exists()) return true
-		
-		boolean ret = true
-		if (path.isDirectory()) {
-			for (File f : path.listFiles()) {
-				ret = ret && deleteRecursive(f)
-			}
-		}
-		return ret && path.delete()
 	}
 }
