@@ -267,6 +267,26 @@ class FileHashStoreTest extends spock.lang.Specification {
 		then:
 		!store.isDirty()
 	}
+	
+	def "Source requiring rewriting makes store dirty"() {
+		given:
+		def mockSource = getMockSource([line1])
+		mockSource.requiresRewriting() >> true
+		def store = new FileHashStore(mockSource)
+		
+		expect:
+		store.isDirty()
+	}
+	
+	def "Source not requiring rewriting doesn't make store dirty"() {
+		given:
+		def mockSource = getMockSource([line1])
+		mockSource.requiresRewriting() >> false
+		def store = new FileHashStore(mockSource)
+		
+		expect:
+		!store.isDirty()
+	}
 
 	private def HashFileSource getMockSource(List<String> data) {
 		return getMockSource(data, directory1)

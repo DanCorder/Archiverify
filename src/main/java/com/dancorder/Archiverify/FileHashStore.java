@@ -69,7 +69,7 @@ class FileHashStore {
 	}
 	
 	boolean isDirty() {
-		return isDirty;
+		return isDirty || source.requiresRewriting();
 	}
 	
 	List<Path> getFiles() {

@@ -24,6 +24,11 @@ import java.util.List;
 
 
 class FileSystem {
+	public static boolean fileExists(Path filePath) {
+		def file = new File(filePath.normalize().toString())
+		return file.exists() && !file.isDirectory()
+	}
+	
 	public static Path createTempFile() {
 		return Files.createTempFile(null, null)
 	}

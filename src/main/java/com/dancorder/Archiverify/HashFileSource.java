@@ -65,6 +65,10 @@ class HashFileSource {
 		}
 	}
 	
+	boolean requiresRewriting() {
+		return !readFile.equals(writeFile);
+	}
+	
 	private void deleteHashFile(Path file) throws IOException {
 		Files.deleteIfExists(file);
 	}

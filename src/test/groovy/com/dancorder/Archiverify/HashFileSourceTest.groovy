@@ -174,4 +174,20 @@ class HashFileSourceTest extends spock.lang.Specification {
 		!Files.exists(defaultHashFileFullPath)
 		Files.exists(alternateHashFileFullPath)
 	}
+	
+	def "Source requires re-writing when read file and write file are different"() {
+		given:
+		def source = new HashFileSource(defaultHashFileName, alternateHashFileName, tempDir)
+		
+		expect:
+		source.requiresRewriting()
+	}
+	
+	def "Source doesn't require re-writing when read file and write file are the same"() {
+		given:
+		def source = new HashFileSource(defaultHashFileName, defaultHashFileName, tempDir)
+		
+		expect:
+		!source.requiresRewriting()
+	}
 }
