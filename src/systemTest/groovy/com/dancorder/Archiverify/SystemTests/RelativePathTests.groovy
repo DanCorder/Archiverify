@@ -45,7 +45,7 @@ public class RelativePathTests extends spock.lang.Specification {
    
    def "Empty roots don't cause errors"() {
        when: "Archiverify is run with empty roots"
-       def result = Run.archiverify(path1RootRelative.toString(), path2RootRelative.toString())
+       def result = Run.archiverify(path1RootRelative.toString(), path2RootRelative.toString(), "-y")
        
        then: "No errors found"
        !result.stdout.toLowerCase().contains("error")
@@ -57,7 +57,7 @@ public class RelativePathTests extends spock.lang.Specification {
        FileSystem.createDirectoryIn(path2Root, "test")
        
        when: "Archiverify is run"
-       def result = Run.archiverify(path1RootRelative.toString(), path2RootRelative.toString())
+       def result = Run.archiverify(path1RootRelative.toString(), path2RootRelative.toString(), "-y")
 
        then: "No errors found"
        !result.stdout.toLowerCase().contains("error")

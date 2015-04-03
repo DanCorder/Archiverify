@@ -85,7 +85,6 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		result[0] instanceof WarningAction
 	}
 
-	
 	def "Actions returned correctly for compare directories call"() {
 		setup:
 		def action = Mock(Action)
