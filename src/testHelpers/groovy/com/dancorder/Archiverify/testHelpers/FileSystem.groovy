@@ -144,7 +144,7 @@ class FileSystem {
 	// Returns something like this running under Eclipse /Users/dan/Development/Archiverify/bin/com/dancorder/Archiverify/testHelpers/FileSystem.class
 	// Returns something like this running under Gradle  /Users/dan/Development/Archiverify/build/classes/integrationTest/com/dancorder/Archiverify/testHelpers/FileSystem.class
 	public static Path getClassLocation() {
-		def classpath = FileSystem.class.getResource("FileSystem.class").getPath()
+		def classpath = FileSystem.class.getResource("FileSystem.class").toURI()
 		Paths.get(classpath).toAbsolutePath()
 	}
 }
