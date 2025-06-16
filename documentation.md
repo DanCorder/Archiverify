@@ -18,7 +18,7 @@ By default Archiverify will scan your files, tell you what it is planning to do 
 You can get a list of options by running Archiverify with no parameters.
 
 {% highlight bat %}
-    Java -jar Archiverify-v2.0.0.jar
+    Java -jar Archiverify-v2.0.1.jar
 {% endhighlight %}
 
 ## First run
@@ -32,7 +32,7 @@ Imagine you have a directory "c:\originals" containing some files that you want 
 You run:
 
 {% highlight bat %}
-    Java -jar Archiverify-v2.0.0.jar c:\originals e:\backup
+    Java -jar Archiverify-v2.0.1.jar c:\originals e:\backup
 {% endhighlight %}
 
 Archiverify will run and once it has finished scanning c:\originals it will tell you that it is going to copy all the files from c:\originals to e:\backup and that it is going to write hash files to all the directories it has found. If you then tell Archiverify to proceed you will end up with:
@@ -60,7 +60,7 @@ However file2 in backup\directory1 has got corrupted somehow. So if you run Arch
 Archiverify can be run against a single directory to either generate new hashes, or to compare the files to pre-existing hashes. Archiverify will warn you if a file doesn't match a pre-existing hash.
 
 {% highlight bat %}
-    Java -jar Archiverify-v2.0.0.jar -s c:\originals
+    Java -jar Archiverify-v2.0.1.jar -s c:\originals
 {% endhighlight %}
 
 ## Hash file naming
@@ -71,6 +71,14 @@ By default Archiverify will use the name ".hashes" for the files it creates to s
 -fw \<filename\> Tells Archiverify to write hashes to files called \<filename\>
 
 -f \<filename\> Is shorthand for -fr \<filename\> -fw \<filename\>
+
+## Exclude certain file types
+Archiverify can be told to ignore files with one or more specified extensions - maybe sidecar files that you don't care about archiving.
+
+{% highlight bat %}
+    Java -jar Archiverify-v2.0.1.jar -x "xmp" -x "on1" c:\originals e:\backup
+{% endhighlight %}
+ 
 
 # Limitations
 
