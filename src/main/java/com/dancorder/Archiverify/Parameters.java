@@ -18,6 +18,7 @@ package com.dancorder.Archiverify;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -43,6 +44,7 @@ class Parameters {
 	private static final String OPTION_HASH_FILENAMES = "f";
 	private static final String OPTION_HASH_READ_FILENAMES = "fr";
 	private static final String OPTION_HASH_WRITE_FILENAMES = "fw";
+	private static final String OPTION_EXCLUDED_EXTENSION = "x";
 	
 	private static final String defaultHashFileName = ".hashes";
 	
@@ -134,6 +136,13 @@ class Parameters {
 	boolean getIsSingleDirectoryMode() {
 		return commandLine.hasOption(OPTION_SINGLE_DIRECTORY_MODE);
 	}
+
+	String[] getExcludedExtensions() {
+		if (commandLine.hasOption(OPTION_EXCLUDED_EXTENSION)) {
+			return commandLine.getOptionValues(OPTION_EXCLUDED_EXTENSION);
+		}
+		return new String[0];
+	}
 	
 	private Options getOptions() {
 		Options options = new Options();
@@ -142,6 +151,7 @@ class Parameters {
 		options.addOption(new Option(OPTION_HASH_FILENAMES, true, "Use a differnt filename to read and write hashes"));
 		options.addOption(new Option(OPTION_HASH_READ_FILENAMES, true, "Use a differnt filename to read hashes from, hashes are written to the default filename"));
 		options.addOption(new Option(OPTION_HASH_WRITE_FILENAMES, true, "Use a differnt filename to write hashes to, hashes are read from the default filename"));
+		options.addOption(new Option(OPTION_EXCLUDED_EXTENSION, true, "Ignore files with these extensions (can be specified multiple times)"));
 
 		return options;
 	}

@@ -34,6 +34,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	private static final testSubDirFileName2 = "testSubDirFileName2"
 	
 	private final static hashFile = Paths.get(".hashes")
+	private final static xmpFile = Paths.get("test.xmp")
 	private final static tempDir = FileSystem.getTempDirectory()
 	private final static rootAbsolute = tempDir.resolve(rootDirName)
 	private final static subDirAbsolute = rootAbsolute.resolve(subDirName)
@@ -43,7 +44,9 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	private final static subDirFileAbsolute2 = subDirAbsolute.resolve(testSubDirFileName2)
 	private final static rootHashFileAbsolute = rootAbsolute.resolve(hashFile)
 	private final static subDirHashFileAbsolute = subDirAbsolute.resolve(hashFile)
-	
+	private final static rootXmpFileAbsolute = rootAbsolute.resolve(xmpFile)
+	private final static subDirXmpFileAbsolute = subDirAbsolute.resolve(xmpFile)
+
 	private static store
 	private static defaultFileHashStoreFactory
 	private static defaultHashGenerator
@@ -81,7 +84,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "No actions generated when no files visited"() {
 		setup:
 		createScenario()
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		def expected = new ArrayList<Action>()
 		
 		when:
@@ -103,7 +106,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "No actions generated when matching file visited"() {
 		setup:
 		createScenario([(filePath):testHash], [(filePath):testHash])
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		def expected = new ArrayList<Action>()
 		
 		when:
@@ -127,7 +130,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "Warning action generated when non-matching files visited"() {
 		setup:
 		createScenario([(filePath):testHash], [(filePath):badHash])
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		
 		when:
 		def ret1 = underTest.preVisitDirectory(dirPath, null)
@@ -151,7 +154,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "Action generated when new files visited"() {
 		setup:
 		createScenario([:], [(filePath):testHash])
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		def expected = new ArrayList<Action>()
 		expected.add(new UpdateHashesAction(store))
 		
@@ -181,7 +184,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		createScenario()
 		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
 		defaultFileHashStoreFactory.createFileHashStore(_) >> { throw new NullPointerException("Test exception") }
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		
 		when:
 		def ret1 = underTest.preVisitDirectory(rootAbsolute, null)
@@ -196,7 +199,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "Hash files ignored"() {
 		setup:
 		createScenario([:], [(filePath):testHash])
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		
 		when:
 		def ret1 = underTest.preVisitDirectory(dirPath, null)
@@ -216,13 +219,35 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		subDirAbsolute | subDirHashFileAbsolute
 	}
 
+		def "Excluded extension files ignored"() {
+		setup:
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, ["xmp"] as String[])
+		
+		when:
+		def ret1 = underTest.preVisitDirectory(dirPath, null)
+		def ret2 = underTest.visitFile(filePath, null)
+		def ret3 = underTest.postVisitDirectory(dirPath, null)
+		def actions = underTest.getActions()
+		
+		then:
+		ret1 == FileVisitResult.CONTINUE
+		ret2 == FileVisitResult.CONTINUE
+		ret3 == FileVisitResult.CONTINUE
+		actions.size() == 0
+		
+		where:
+		dirPath        | filePath
+		rootAbsolute   | rootXmpFileAbsolute
+		subDirAbsolute | subDirXmpFileAbsolute
+	}
+
 	def "Exception in pre visit directory doesn't cause errors for files"() {
 		setup:
 		createScenario([:], [(subDirFileAbsolute):testHash])
 		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
 		defaultFileHashStoreFactory.createFileHashStore(rootAbsolute) >> { throw new NullPointerException("Test exception") }
 		defaultFileHashStoreFactory.createFileHashStore(subDirAbsolute) >> store
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		
 		when:
 		def ret1 = underTest.preVisitDirectory(rootAbsolute, null)
@@ -253,7 +278,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 		def fileHashStoreFactory = Mock(FileHashStoreFactory)
 		fileHashStoreFactory.createFileHashStore(rootAbsolute) >> rootStore
 		fileHashStoreFactory.createFileHashStore(subDirAbsolute) >> subDirStore
-		def underTest = new HashCheckingVisitor(fileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(fileHashStoreFactory, defaultHashGenerator, new String[0])
 		
 		when:
 		def ret1 = underTest.preVisitDirectory(rootAbsolute, null)
@@ -279,7 +304,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "visitFileFailed converted to warning"() {
 		setup:
 		createScenario()
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		
 		when:
 		def ret1 = underTest.visitFileFailed(rootAbsolute, null)
@@ -294,7 +319,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "Exception in post visit directory converted to warning"() {
 		setup:
 		createScenario()
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		
 		when:
 		def ret1 = underTest.postVisitDirectory(rootAbsolute, new IOException("test exception"))
@@ -309,7 +334,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "All hashes removed when no files present"() {
 		setup:
 		createScenario([(filePath1):testHash, (filePath2):testHash2], [:])
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		def expected = new ArrayList<Action>()
 		expected.add(new UpdateHashesAction(store))
 		
@@ -335,7 +360,7 @@ class HashCheckingVisitorTest extends spock.lang.Specification {
 	def "Only non visited hashes removed"() {
 		setup:
 		createScenario([(filePath1):testHash, (filePath2):testHash2], [(filePath1):testHash])
-		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator)
+		def underTest = new HashCheckingVisitor(defaultFileHashStoreFactory, defaultHashGenerator, new String[0])
 		def expected = new ArrayList<Action>()
 		expected.add(new UpdateHashesAction(store))
 		

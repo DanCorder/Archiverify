@@ -196,6 +196,25 @@ class ParametersTest extends spock.lang.Specification {
 		underTest.getReadFile().toString() == "testReadFileName"
 		underTest.getWriteFile().toString() == "testWriteFileName"
 	}
+
+	def "exclude file extension"() {
+		when:
+		def underTest = new Parameters( [ "-x", "xmp", rootPath, rootPath ] as String[] )
+		
+		then:
+		underTest.isValid()
+		underTest.getExcludedExtensions()[0] == "xmp"
+	}
+
+	def "exclude file extensions"() {
+		when:
+		def underTest = new Parameters( [ "-x", "xmp", "-x", "on1", rootPath, rootPath ] as String[] )
+		
+		then:
+		underTest.isValid()
+		underTest.getExcludedExtensions()[0] == "xmp"
+		underTest.getExcludedExtensions()[1] == "on1"
+	}
 	
 	private void parametersAreInvalid(params) {
 		assert !params.isValid()

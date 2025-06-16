@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.dancorder.Archiverify.FileHelper;
 import com.dancorder.Archiverify.ParallelFileTreeWalker.FileExistence;
 import com.dancorder.Archiverify.ParallelFileTreeWalker.ParallelFileTreeVisitor;
 
@@ -34,14 +35,16 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	private final ArrayList<Action> actions = new ArrayList<Action>();
 	private final SyncLogic syncLogic;
 	private final FileHashStoreFactory fileHashStoreFactory;
+	private final String[] excludedExtensions;
 	private Path currentRelativeDirectoryPath;
 	private Path errorPath;
 	private Dictionary<Path, Pair<FileHashStore, FileHashStore>> hashStoresByDirectory = new Hashtable<Path, Pair<FileHashStore, FileHashStore>>();
 	private Dictionary<Path, List<Path>> visitedFilesByDirectory = new Hashtable<Path, List<Path>>();
 	
-	SynchingVisitor(SyncLogic logic, FileHashStoreFactory factory, Path root1, Path root2) {
+	SynchingVisitor(SyncLogic logic, FileHashStoreFactory factory, String[] excludedExtensions, Path root1, Path root2) {
 		syncLogic = logic;
 		fileHashStoreFactory = factory;
+		this.excludedExtensions = excludedExtensions;
 		this.root1 = root1;
 		this.root2 = root2;
 	}
@@ -112,7 +115,9 @@ class SynchingVisitor implements ParallelFileTreeVisitor {
 	public void visitFile(Path relativeFilePath, FileExistence existence) {
 		try
 		{
-			if (isNotInErrorPath(relativeFilePath) && !fileHashStoreFactory.isHashFile(relativeFilePath))
+			boolean isExcluded = FileHelper.fileEndsWith(relativeFilePath, excludedExtensions);
+
+			if (isNotInErrorPath(relativeFilePath) && !fileHashStoreFactory.isHashFile(relativeFilePath) && !isExcluded)
 			{
 				Path file1 = root1.resolve(relativeFilePath);
 				Path file2 = root2.resolve(relativeFilePath);

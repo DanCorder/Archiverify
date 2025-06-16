@@ -58,7 +58,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def logic = Mock(SyncLogic)
 		logic.compareDirectories(_,_,_) >> new ArrayList()
 		logic.checkHashStores(store1, store2) >> actions
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
@@ -74,7 +74,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		setup:
 		def logic = Mock(SyncLogic)
 		logic.checkHashStores(_,_) >> { throw new NullPointerException("Test exception") }
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.postVisitDirectory(subDirRelative, FileExistence.BothPaths)
@@ -94,7 +94,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		actions.add(action2)
 		def logic = Mock(SyncLogic)
 		logic.compareDirectories(_, _, _) >> actions
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
@@ -108,7 +108,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "Parameters passed correctly to compare directories for root directory"() {
 		setup:
 		def logic = Mock(SyncLogic)
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
@@ -120,7 +120,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "Parameters passed correctly to compare directories for sub directories"() {
 		setup:
 		def logic = Mock(SyncLogic)
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(subDirRelative, existence)
@@ -139,7 +139,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		setup:
 		def logic = Mock(SyncLogic)
 		logic.compareDirectories(_,_,_) >> { throw new NullPointerException("Test exception") }
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
@@ -158,7 +158,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		defaultFileHashStoreFactory.createFileHashStore(_) >>> [store1, store2, store3, store4]
 		
 		def logic = Mock(SyncLogic)
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
@@ -189,7 +189,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def logic = Mock(SyncLogic)
 		logic.compareDirectories(_,_,_) >> new ArrayList<Action>()
 		logic.compareFiles(_,_,_,_) >> { throw new NullPointerException("Test exception") }
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
@@ -211,7 +211,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def logic = Mock(SyncLogic)
 		logic.compareDirectories(_,_,_) >> new ArrayList<Action>()
 		logic.compareFiles(_, _, _, _) >> actions
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
@@ -232,7 +232,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def fileHashStoreFactory = Mock(FileHashStoreFactory)
 		fileHashStoreFactory.createFileHashStore(root1Absolute) >> fileHashStore1
 		fileHashStoreFactory.createFileHashStore(root2Absolute) >> fileHashStore2
-		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
@@ -260,7 +260,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def fileHashStoreFactory = Mock(FileHashStoreFactory)
 		fileHashStoreFactory.createFileHashStore(root1Absolute.resolve(subDirRelative)) >> fileHashStore1
 		fileHashStoreFactory.createFileHashStore(root2Absolute.resolve(subDirRelative)) >> fileHashStore2
-		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
@@ -294,7 +294,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		fileHashStoreFactory.createFileHashStore(root2Absolute) >> fileHashStore2
 		fileHashStoreFactory.createFileHashStore(root1Absolute.resolve(subDirRelative)) >> fileHashStore3
 		fileHashStoreFactory.createFileHashStore(root2Absolute.resolve(subDirRelative)) >> fileHashStore4
-		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, fileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
@@ -312,10 +312,50 @@ class SynchingVisitorTest extends spock.lang.Specification {
 	def "Hash files not compared"() {
 		setup:
 		def logic = Mock(SyncLogic)
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.visitFile(hashFile, FileExistence.BothPaths)
+		
+		then:
+		0 * logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
+		
+		where:
+		existence               | _
+		FileExistence.BothPaths | _
+		FileExistence.Path1Only | _
+		FileExistence.Path2Only | _
+	}
+
+	def "Ignored extension not compared"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, [ "test" ] as String[], root1Absolute, root2Absolute)
+		def excludedFile = Paths.get("file.test")
+		
+		when:
+		visitor.visitFile(excludedFile, FileExistence.BothPaths)
+		
+		then:
+		0 * logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
+		
+		where:
+		existence               | _
+		FileExistence.BothPaths | _
+		FileExistence.Path1Only | _
+		FileExistence.Path2Only | _
+	}
+
+	def "Ignored extensions not compared"() {
+		setup:
+		def logic = Mock(SyncLogic)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, [ "test1", "test2" ] as String[], root1Absolute, root2Absolute)
+		def excludedFile1 = Paths.get("file.test1")
+		def excludedFile2 = Paths.get("file.test2")
+		
+		when:
+		visitor.visitFile(excludedFile1, FileExistence.BothPaths)
+		visitor.visitFile(excludedFile2, FileExistence.BothPaths)
 		
 		then:
 		0 * logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
@@ -332,7 +372,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def logic = Mock(SyncLogic)
 		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
 		logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 		
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)
@@ -355,7 +395,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		def logic = Mock(SyncLogic)
 		logic.compareDirectories(_, _, _) >> new ArrayList<Action>()
 		logic.compareFiles(_, _, _, _) >> new ArrayList<Action>()
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 				
 		when:
 		visitor.preVisitDirectory(subDirRelative, FileExistence.BothPaths)
@@ -384,7 +424,7 @@ class SynchingVisitorTest extends spock.lang.Specification {
 		defaultFileHashStoreFactory = Mock(FileHashStoreFactory)
 		defaultFileHashStoreFactory.createFileHashStore(_) >>> [store1, store2, store3, store4]
 		
-		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, root1Absolute, root2Absolute)
+		def visitor = new SynchingVisitor(logic, defaultFileHashStoreFactory, new String[0], root1Absolute, root2Absolute)
 				
 		when:
 		visitor.preVisitDirectory(rootDirRelative, FileExistence.BothPaths)

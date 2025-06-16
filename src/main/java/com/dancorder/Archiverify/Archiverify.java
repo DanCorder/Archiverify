@@ -40,11 +40,11 @@ public class Archiverify {
 		FileHashStoreFactory fileHashStoreFactory = new FileHashStoreFactory(params.getReadFile(), params.getWriteFile());
 
 		if (params.getIsSingleDirectoryMode()) {
-			HashCheckingVisitor visitor = new HashCheckingVisitor(fileHashStoreFactory, new FileHashGenerator());
+			HashCheckingVisitor visitor = new HashCheckingVisitor(fileHashStoreFactory, new FileHashGenerator(), params.getExcludedExtensions());
 			Files.walkFileTree(params.getPath1(), visitor);
 			actions = visitor.getActions();
 		} else {
-			SynchingVisitor visitor = new SynchingVisitor(new SyncLogic(new FileHashGenerator()), fileHashStoreFactory, params.getPath1(), params.getPath2());
+			SynchingVisitor visitor = new SynchingVisitor(new SyncLogic(new FileHashGenerator()), fileHashStoreFactory, params.getExcludedExtensions(), params.getPath1(), params.getPath2());
 			ParallelFileTreeWalker walker = new ParallelFileTreeWalker(params.getPath1(), params.getPath2(), visitor);
 			walker.walk();
 			actions = visitor.getActions();
